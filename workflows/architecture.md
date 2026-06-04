@@ -6,12 +6,10 @@ description: Software architecture workflow that diagnoses architecture problems
 
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **Do NOT write implementation code or task plans in this workflow.** Hand off to `/plan` after the architecture decision is made.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) to inspect the current architecture.
-  - Use memory tools (write/edit) to record architecture outputs.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes when MCP tools are available.
+- **You MUST use OpenCode's built-in tools for the workflow.**
+  - Use `grep`, `glob`, `read` for codebase exploration.
+  - Use `write` and `edit` to record architecture outputs.
+  - Use `.agents/results/` for output files.
 
 ---
 
@@ -42,9 +40,9 @@ If the problem is vague, start in Diagnostic Mode.
 
 // turbo
 Use MCP code analysis tools to understand the current architecture:
-- `get_symbols_overview` for project structure and boundaries
-- `find_symbol` and `find_referencing_symbols` for ownership and coupling
-- `search_for_pattern` for integration points, layering, and recurring pain points
+- `grep`/`glob` for project structure and boundaries
+- `grep` for ownership and coupling
+- `grep` for integration points, layering, and recurring pain points
 
 Summarize:
 - key modules/services

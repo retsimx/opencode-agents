@@ -16,7 +16,7 @@ Follow these steps in order (adjust depth by difficulty).
 ## Step 1: Analyze
 - Read the task requirements carefully
 - Identify which screens, widgets, and providers are needed
-- Check existing code with Serena: `get_symbols_overview("lib/features")`, `find_symbol("ScreenName")`
+- Check existing code: `glob("lib/features/**")`, `grep("ScreenName")`
 - Determine platform-specific requirements (iOS vs Android)
 - List assumptions; ask if unclear
 

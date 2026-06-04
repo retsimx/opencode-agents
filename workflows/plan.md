@@ -5,12 +5,10 @@ description: PM planning workflow that gathers requirements, decomposes them int
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 1 in order.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to analyze the existing codebase.
-  - Use memory tools (write/edit) to record planning results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes.
+- **You MUST use OpenCode's built-in tools for the workflow.**
+  - Use `grep`, `glob`, `read` for codebase exploration.
+  - Use `write` and `edit` to record planning results.
+  - Use `.agents/results/` for output files.
 
 ---
 
@@ -59,8 +57,7 @@ Ask the user to describe what they want to build. Clarify:
 
 // turbo
 If an existing codebase exists, use MCP code analysis tools to scan:
-- `get_symbols_overview` for project structure and architecture patterns.
-- `find_symbol` and `search_for_pattern` to identify reusable code and what needs to be built.
+- Use `grep`/`glob` to analyze the codebase:
 
 Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references. Reuse patterns from similar work.
 

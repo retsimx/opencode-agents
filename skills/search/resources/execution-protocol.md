@@ -58,12 +58,12 @@ Flags: `--only <list>`, `--skip <list>`, `--timeout <sec>`, `--locale <v>`,
 3. Include repo name, file path, and match context
 
 ### local route
-Delegate entirely to Serena MCP:
-- `find_symbol` for named code entities
-- `search_for_pattern` for arbitrary text patterns
-- `get_symbols_overview` for structural exploration
+Use grep/glob/read:
+- `grep` for named code entities
+- `grep` for arbitrary text patterns
+- `glob` or `read` for structural exploration
 
-Do NOT duplicate Serena's functionality. Simply pass through.
+Simply use the available tools.
 
 ## Step 2: Collect Results
 
@@ -78,13 +78,13 @@ Do NOT duplicate Serena's functionality. Simply pass through.
 
 1. For each result with a URL, extract the domain
 2. Resolve trust score (see `resources/trust-registry.md`):
-   a. Check Serena memory cache (`trust-registry-cache`)
+   a. Check local cache (`trust-registry-cache`)
    b. If cache miss: apply heuristic pattern matching (domain patterns → category + score)
    c. If heuristic returns unknown: call Tranco API (`siterank.redirect2.me`) for validation
 3. Attach trust level, tags, and score:
    - Resolved: use level and score
    - Unresolved: label as `unknown` with score `—`
-4. Write newly resolved scores to Serena memory cache
+4. Write newly resolved scores to local cache
 5. If `--strict` mode: filter out results below `verified` (< 0.85)
    - If 0 results remain: suggest `--wide` rerun
 6. Sort by: relevance first, trust score as tiebreaker

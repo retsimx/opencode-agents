@@ -6,12 +6,10 @@ description: Design workflow that creates design systems, DESIGN.md, and design 
 
 - **NEVER skip phases.** Execute from Phase 1 in order.
 - **Do NOT write implementation code.** This workflow produces DESIGN.md, design tokens, and design guidance, not application code.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to analyze the existing codebase.
-  - Use memory tools (write/edit) to record design results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes.
+- **You MUST use OpenCode's built-in tools for the workflow.**
+  - Use `grep`, `glob`, `read` for codebase exploration.
+  - Use `write` and `edit` to record design results.
+  - Use `.agents/results/` for output files.
 
 ---
 

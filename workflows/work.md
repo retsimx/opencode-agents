@@ -5,12 +5,10 @@ description: Coordinate multiple agents for a complex multi-domain project using
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
-- **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
+- Use OpenCode's built-in tools for all operations:
+  - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
+  - Use `.agents/results/` for all coordination and progress files
+  - Do NOT rely on MCP-specific tools or memory providers
 - **Read the coordination skill BEFORE starting.** Read `.agents/skills/coordination/SKILL.md` and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
@@ -20,9 +18,9 @@ description: Coordinate multiple agents for a complex multi-domain project using
 
 1. Read `.agents/skills/coordination/SKILL.md` and confirm Core Rules.
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
-3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
-4. Record session start using memory write tool:
-   - Create `session-work.md` in the memory base path
+3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
+4. Record session start:
+   - Write `.agents/results/session-work.md`
    - Include: session start time, user request summary.
 
 ---
@@ -33,7 +31,7 @@ Analyze the user's request and identify involved domains (frontend, backend, mob
 
 - Single domain: suggest using the specific agent directly.
 - Multiple domains: proceed to Step 2.
-- Use MCP code analysis tools (`get_symbols_overview` or `search_for_pattern`) to understand the existing codebase structure relevant to the request.
+- Use `grep` and `glob` to understand the existing codebase structure relevant to the request.
 - Report analysis results to the user.
 
 ---
@@ -47,7 +45,7 @@ Activate PM Agent to:
 2. Define API contracts.
 3. Create a prioritized task breakdown.
 4. Save plan to `.agents/results/plan-{sessionId}.json`.
-5. Use memory write tool to record plan completion.
+5. Record plan completion in `.agents/results/session-work.md`.
 
 ---
 
@@ -81,9 +79,9 @@ Spawn agents using the OpenCode Task tool:
 
 ## Step 5: Monitor Agent Progress
 
-- Use memory read tool to poll `progress-{agent}.md` files
-- Use MCP code analysis tools (`find_symbol` and `search_for_pattern`) to verify API contract alignment between agents
-- Use memory edit tool to record monitoring results
+- Use `read` to check `.agents/results/progress-{agent}.md` files
+- Use `grep` and `glob` to verify API contract alignment between agents
+- Record monitoring results in `.agents/results/session-work.md`
 
 ---
 

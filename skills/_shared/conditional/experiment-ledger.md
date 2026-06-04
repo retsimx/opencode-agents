@@ -7,10 +7,9 @@ Inspired by autoresearch's git-commit-as-experiment-log pattern.
 
 ## Ledger Location
 
-The ledger follows the **memory protocol** (see `memory-protocol.md`):
+The ledger follows the file-based coordination protocol (see `coordination-protocol.md`):
 
-- **MCP mode** (Serena): `[WRITE]("experiment-ledger.md", ...)` → `{memoryConfig.basePath}/experiment-ledger.md`
-- **File-based mode** (Claude protocol): `.agents/results/experiment-ledger.md`
+- **File-based mode**: `.agents/results/experiment-ledger.md`
 
 Both modes use the same format. The orchestrator creates the ledger; agents append via memory tools.
 
@@ -66,7 +65,7 @@ Do NOT record: trivial formatting, changes with no measurable impact, PLAN phase
 
 ### Who Records
 
-See `memory-protocol.md` → "Experiment Tracking" section for recorder assignments.
+See `coordination-protocol.md` → "Experiment Tracking" section for recorder assignments.
 
 ---
 

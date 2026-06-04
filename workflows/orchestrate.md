@@ -1,16 +1,14 @@
 ---
-description: Automated parallel agent execution that spawns subagents via OpenCode Task tool and coordinates through MCP Memory
+description: Automated parallel agent execution that spawns subagents via OpenCode Task tool and coordinates through file-based progress tracking
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
-- **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface.
+- Use OpenCode's built-in tools for all operations:
+  - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
+  - Use `.agents/results/` for all coordination and progress files
+  - Do NOT rely on MCP-specific tools or memory providers
 - **Read required documents BEFORE starting.**
 
 ---
@@ -19,7 +17,7 @@ description: Automated parallel agent execution that spawns subagents via OpenCo
 
 1. Read `.agents/skills/coordination/SKILL.md` and confirm Core Rules.
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
-3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
+3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
 
 ---
 
@@ -39,7 +37,7 @@ Look for a plan file:
 // turbo
 
 1. Generate session ID (format: `session-YYYYMMDD-HHMMSS`).
-2. Use memory write tool to create `orchestrator-session.md` and `task-board.md` in the memory base path.
+2. Write `orchestrator-session.md` and `task-board.md` to `.agents/results/`.
 3. Set session status to RUNNING.
 
 ---
@@ -50,7 +48,7 @@ Look for a plan file:
 For each priority tier (P0 first, then P1, etc.):
 
 - Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`.
-- Use memory edit tool to update `task-board.md` with agent status.
+- Use `edit` to update `.agents/results/task-board.md` with agent status.
 
 ### Dispatch via OpenCode Task tool
 
@@ -80,9 +78,9 @@ Do NOT include vendor detection, native dispatch, or fallback logic.
 
 ## Step 4: Monitor Progress
 
-Use memory read tool to poll `progress-{agent}.md` for logic updates.
+Use `read` to check `.agents/results/progress-{agent}.md` for logic updates.
 
-- Use memory edit tool to update `task-board.md` with turn counts and status changes.
+- Use `edit` to update `.agents/results/task-board.md` with turn counts and status changes.
 - Watch for: completion, failures, crashes.
 
 ### Context Anxiety Check (per polling cycle)
@@ -137,7 +135,7 @@ For each completed agent, run automated verification:
 ## Step 6: Collect Results
 
 // turbo
-After all agents complete, use memory read tool to read all `result-{agent}-{sessionId}.md` files.
+After all agents complete, use `read` to read all `.agents/results/result-{agent}-{sessionId}.md` files.
 Compile summary: completed tasks, failed tasks, files changed, remaining issues.
 
 ---

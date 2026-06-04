@@ -5,12 +5,10 @@ description: Ultrawork - high-quality 5-phase development workflow with 11 revie
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
-- **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
+- Use OpenCode's built-in tools for all operations:
+  - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
+  - Use `.agents/results/` for all coordination and progress files
+  - Do NOT rely on MCP-specific tools or memory providers
 - **Read the coordination skill BEFORE starting.** Read `.agents/skills/coordination/SKILL.md` and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
@@ -23,12 +21,12 @@ description: Ultrawork - high-quality 5-phase development workflow with 11 revie
 
 1. Read `.agents/skills/coordination/SKILL.md` and confirm Core Rules.
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
-3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
+3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
 4. Read `.agents/workflows/ultrawork/resources/multi-review-protocol.md` (11 review guides)
 5. Read `.agents/skills/_shared/core/quality-principles.md` (4 principles)
 6. Read `.agents/workflows/ultrawork/resources/phase-gates.md` (gate definitions)
-7. Record session start using memory write tool:
-   - Create `session-ultrawork.md` in the memory base path
+7. Record session start:
+   - Write `.agents/results/session-ultrawork.md`
    - Include: session start time, user request summary, workflow version (ultrawork)
 
 ---
@@ -46,8 +44,8 @@ Activate PM Agent to execute Steps 1-4:
 5. Execute Meta Review (Step 3).
 6. Execute Over-Engineering Review (Step 4).
 7. Save plan to `.agents/results/plan-{sessionId}.json`.
-8. Create `task-board.md` in memory path for dashboard compatibility.
-9. Use memory write tool to record plan completion.
+8. Create `task-board.md` in `.agents/results/` for dashboard compatibility.
+9. Write plan completion to `.agents/results/session-ultrawork.md`.
 
 ### Step 2: Plan Review (Completeness)
 - **Executed by PM Agent**: Ensure requirements are fully mapped.
@@ -65,7 +63,7 @@ Activate PM Agent to execute Steps 1-4:
 - [ ] Over-engineering review done
 - [ ] **User confirmation**
 
-**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
 
 **Gate failure → Return to Step 1**
 
@@ -90,10 +88,10 @@ Spawn implementation agents in parallel using the OpenCode Task tool:
 
 **Wait for all implementation agents to complete before proceeding.**
 
-1. Use memory read tool to poll `progress-{agent}[-{sessionId}].md` files
-2. Use MCP code analysis tools to verify implementation alignment
+1. Read `.agents/results/progress-{agent}[-{sessionId}].md` files
+2. Use `grep` and `glob` to verify implementation alignment
 3. Check for `result-{agent}[-{sessionId}].md` files to confirm completion
-4. Use memory edit tool to record monitoring results in `session-ultrawork.md`
+4. Update `.agents/results/session-ultrawork.md` with monitoring results
 
 **Continue polling until all agents report completion or failure.**
 
@@ -103,7 +101,7 @@ If automated measurement is available (tests, lint exist):
 
 1. Load `quality-score.md` (conditional, per `context-loading.md`)
 2. Run tests, lint, type-check via Bash to measure baseline
-3. Create Experiment Ledger via memory tools: `[WRITE]("experiment-ledger.md", initial ledger with baseline row)`
+3. Create Experiment Ledger: write `.agents/results/experiment-ledger.md` with initial baseline row
 4. Record composite score as the IMPL baseline
 
 If no measurement tools: skip; gates fall back to binary checklist.
@@ -114,7 +112,7 @@ If no measurement tools: skip; gates fall back to binary checklist.
 - [ ] Only planned files modified
 - [ ] (If measured) Baseline Quality Score recorded in Experiment Ledger
 
-**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
 
 **Gate failure → Return to Step 5, re-spawn failed agents, and repeat monitoring until GATE passes.**
 
@@ -134,9 +132,9 @@ Spawn QA Agent via OpenCode Task tool (subagent_type="general").
 
 **Wait for QA Agent to complete verification before proceeding.**
 
-1. Use memory read tool to poll `progress-qa-agent[-{sessionId}].md`
-2. Check for `result-qa-agent[-{sessionId}].md` to confirm completion
-3. Use memory edit tool to record QA results in `session-ultrawork.md`
+1. Read `.agents/results/progress-qa-agent[-{sessionId}].md`
+2. Check for `.agents/results/result-qa-agent[-{sessionId}].md` to confirm completion
+3. Update `.agents/results/session-ultrawork.md` with QA results
 
 **Continue polling until QA Agent reports completion.**
 
@@ -154,7 +152,7 @@ Spawn QA Agent via OpenCode Task tool (subagent_type="general").
 If baseline was measured at Step 5.2:
 1. Measure Quality Score incorporating QA findings
 2. Calculate delta from IMPL baseline
-3. Record as experiment in Experiment Ledger via memory tools
+3. Record as experiment in `.agents/results/experiment-ledger.md`
 
 ### VERIFY_GATE
 - [ ] Implementation = Requirements
@@ -163,7 +161,7 @@ If baseline was measured at Step 5.2:
 - [ ] No regressions
 - [ ] (If measured) Quality Score >= 75 (Grade B)
 
-**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
 
 **Gate failure (1st time)** → Before re-spawning for the next VERIFY cycle, check the session cost cap:
 
@@ -200,9 +198,9 @@ Spawn Debug Agent via OpenCode Task tool (subagent_type="general").
 
 **Wait for Debug Agent to complete refinement before proceeding.**
 
-1. Use memory read tool to poll `progress-debug-agent[-{sessionId}].md`
-2. Check for `result-debug-agent[-{sessionId}].md` to confirm completion
-3. Use memory edit tool to record refinement results in `session-ultrawork.md`
+1. Read `.agents/results/progress-debug-agent[-{sessionId}].md`
+2. Check for `.agents/results/result-debug-agent[-{sessionId}].md` to confirm completion
+3. Update `.agents/results/session-ultrawork.md` with refinement results
 
 **Continue polling until Debug Agent reports completion.**
 
@@ -236,7 +234,7 @@ If baseline was measured at Step 5.2:
 - [ ] Code cleaned
 - [ ] (If measured) Quality Score >= Post-VERIFY score (no regression from refinement)
 
-**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
 
 **Gate failure → Before re-spawning the Debug Agent, apply the same termination check:**
 
@@ -264,9 +262,9 @@ Spawn QA Agent via OpenCode Task tool (subagent_type="general").
 
 **Wait for QA Agent to complete final review before proceeding.**
 
-1. Use memory read tool to poll `progress-qa-agent[-{sessionId}].md`
-2. Check for `result-qa-agent[-{sessionId}].md` to confirm completion
-3. Use memory edit tool to record final QA results in `session-ultrawork.md`
+1. Read `.agents/results/progress-qa-agent[-{sessionId}].md`
+2. Check for `.agents/results/result-qa-agent[-{sessionId}].md` to confirm completion
+3. Update `.agents/results/session-ultrawork.md` with final QA results
 
 **Continue polling until QA Agent reports completion.**
 
@@ -308,7 +306,7 @@ If Quality Score was measured during this session:
 - [ ] (If measured) Experiment Ledger summary recorded
 - [ ] **User final approval**
 
-**On gate pass**: Use memory write tool to record final results in `session-ultrawork.md`
+**On gate pass**: Write final results in `session-ultrawork.md`
 
 **Gate failure → Address issues, re-run affected steps, and repeat until GATE passes.**
 

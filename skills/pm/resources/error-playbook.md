@@ -20,10 +20,10 @@ When you encounter a failure during planning, follow these recovery steps.
 
 **Symptoms**: Planning for an existing project but don't know the architecture
 
-1. Use Serena: `get_symbols_overview("src/")` or `get_symbols_overview("app/")`
+1. Use grep/glob/read: `glob("src/**")` or `read("src/")`
 2. Look for framework indicators: `package.json`, `pyproject.toml`, `pubspec.yaml`
-3. Check for existing patterns: `search_for_pattern("@app.get|@app.post")` (FastAPI)
-4. If Serena unavailable: note in plan "architecture assumptions: verify before execution"
+3. Check for existing patterns: `grep("@app.get|@app.post")` (FastAPI)
+4. If tools unavailable: note in plan "architecture assumptions: verify before execution"
 
 ---
 
@@ -62,7 +62,7 @@ When you encounter a failure during planning, follow these recovery steps.
 
 ---
 
-## Serena Memory / Quota Issues
+## Memory / Quota Issues
 
 Same as backend-agent playbook: See relevant sections.
 

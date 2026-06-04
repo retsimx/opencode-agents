@@ -91,7 +91,7 @@ Reproduce, diagnose, minimally fix, and regression-test bugs while preserving sc
 
 ### Tools and instruments
 - Project test, lint, typecheck, runtime, and logging commands
-- Serena MCP symbol/reference/pattern search when available
+- grep/glob/read for symbol/reference/pattern search
 - Debugging checklist and bug report template
 
 ### Canonical workflow path
@@ -126,10 +126,10 @@ Then run the smallest reproduction command first, add a regression test, and re-
 5. Search for similar patterns elsewhere after fixing
 6. Document in `.agents/results/bugs/`
 
-### Serena MCP
-- `find_symbol("functionName")`: Locate the function
-- `find_referencing_symbols("Component")`: Find all usages
-- `search_for_pattern("error pattern")`: Find similar issues
+### grep/glob/read
+- `grep("functionName")`: Locate the function
+- `grep("Component")`: Find all usages
+- `grep("error pattern")`: Find similar issues
 
 ## References
 Follow `resources/execution-protocol.md` step by step.

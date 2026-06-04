@@ -130,36 +130,21 @@ Task tool invocation:
 | MAX_TURNS (review) | 15 | Turn limit for qa/debug |
 | MAX_TURNS (plan) | 10 | Turn limit for pm |
 
-### Memory Configuration
+### Coordination Files
 
-Memory provider and tool names are configurable via `mcp.json`:
-```json
-{
-  "memoryConfig": {
-    "provider": "serena",
-    "basePath": ".serena/memories",
-    "tools": {
-      "read": "read_memory",
-      "write": "write_memory",
-      "edit": "edit_memory"
-    }
-  }
-}
-```
-
-### Workflow Phases
+All coordination is file-based in `.agents/results/`. See `resources/coordination-schema.md` for file formats.
 
 **PHASE 1 - Plan**: Analyze request -> decompose tasks -> generate session ID
-**PHASE 2 - Setup**: Use memory write tool to create `orchestrator-session.md` + `task-board.md`
+**PHASE 2 - Setup**: Write `orchestrator-session.md` + `task-board.md` to `.agents/results/`
 **PHASE 3 - Execute**: Spawn agents by priority tier (never exceed MAX_PARALLEL)
 **PHASE 4 - Monitor**: Poll every POLL_INTERVAL; handle completed/failed/crashed agents
 **PHASE 4.5 - Verify**: Run the agent's verification commands (build, test, lint) per completed agent
 **PHASE 5 - Collect**: Read all `result-{agent}-{sessionId}.md`, compile summary, cleanup progress files
 
 See `resources/subagent-prompt-template.md` for prompt construction.
-See `resources/memory-schema.md` for memory file formats.
+See `resources/coordination-schema.md` for coordination file formats.
 
-### Memory File Ownership
+### Coordination File Ownership
 
 | File | Owner | Others |
 |------|-------|--------|
@@ -274,7 +259,7 @@ At session end, if CD >= 50:
 
 ## References
 - Prompt template: `resources/subagent-prompt-template.md`
-- Memory schema: `resources/memory-schema.md`
+- Coordination schema: `resources/coordination-schema.md`
 - Config: `config/cli-config.yaml`
 - Task templates: `templates/`
 - Skill-to-agent mapping: `../_shared/core/skill-routing.md`

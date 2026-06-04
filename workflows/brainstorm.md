@@ -15,9 +15,7 @@ description: Design-first ideation workflow that explores user intent, clarifies
 ## Step 1: Explore Project Context
 
 // turbo
-Use MCP code analysis tools to understand the current codebase:
-- `get_symbols_overview` for project structure and existing architecture.
-- `find_symbol` and `search_for_pattern` to identify relevant modules, patterns, and conventions.
+Use `grep`, `glob`, `read` to understand the current codebase:
 - Summarize what exists and what the user's idea would affect.
 
 ---

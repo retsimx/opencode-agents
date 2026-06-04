@@ -5,12 +5,10 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip phases.** Execute from Phase 0 in order. Explicitly report completion of each phase to the user before proceeding to the next.
-- **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
+- Use OpenCode's built-in tools for all operations:
+  - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
+  - Use `.agents/results/` for all coordination and progress files
+  - Do NOT rely on MCP-specific tools or memory providers
 - **This workflow does NOT stop until all completion criteria pass or safeguards trigger.**
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
@@ -23,7 +21,7 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
 ### Step 0.1: Load Prerequisites
 
 1. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
-2. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
+2. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
 3. Read `.agents/workflows/ralph/resources/judge-protocol.md` for JUDGE rules.
 
 ### Step 0.2: Define Completion Criteria
@@ -52,8 +50,8 @@ criteria:
 
 1. Set `max_iterations: 5` (default safeguard)
 2. Set `current_iteration: 0`
-3. Record session start using memory write tool:
-   - Create `session-ralph.md` in the memory base path
+3. Record session start:
+   - Write `.agents/results/session-ralph.md`
    - Include: session start time, user request summary, completion criteria, max_iterations
 
 ---
@@ -84,7 +82,7 @@ Delegate to the ultrawork workflow:
 ### Step 1.3: Record EXEC Completion
 
 1. Increment `current_iteration`
-2. Use memory edit tool to record iteration start in `session-ralph.md`
+2. Update `.agents/results/session-ralph.md` with iteration start
 
 ---
 
@@ -161,7 +159,7 @@ If all criteria are either PASS or BLOCKED:
 
 1. **If any BLOCKED exists**: Report partial completion with BLOCKED items listed
 2. **If all PASS**: Report full completion
-3. Use memory edit tool to record final results in `session-ralph.md`
+3. Update `.agents/results/session-ralph.md` with final results
 4. Output completion summary:
    ```
    ## Ralph Complete — Iteration {N}/{max}
@@ -192,7 +190,7 @@ If `current_iteration >= max_iterations`:
 
    Recommendation: Review FAILED criteria manually or increase max_iterations.
    ```
-3. Use memory edit tool to record safeguard trigger in `session-ralph.md`
+3. Update `.agents/results/session-ralph.md` with safeguard trigger
 4. Workflow ends.
 
 ---
@@ -242,7 +240,7 @@ Compose a focused task description containing the remaining work, separating reg
 
 ### Step 3.3: Loop Back
 
-1. Use memory edit tool to record REPLAN in `session-ralph.md`
+1. Update `.agents/results/session-ralph.md` with REPLAN status
 2. Return to **Phase 1: EXEC** with the narrowed scope
 
 ---

@@ -36,4 +36,4 @@ All logic is defined in the workflow file at `.agents/workflows/work.md`. Load a
 - Workflow: `.agents/workflows/work.md`
 - Coordination skill: `.agents/skills/coordination/SKILL.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
-- Memory protocol: `.agents/skills/_shared/runtime/memory-protocol.md`
+- Coordination protocol: `.agents/skills/_shared/runtime/coordination-protocol.md`

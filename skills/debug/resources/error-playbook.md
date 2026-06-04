@@ -25,7 +25,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 1. Read the failing tests; are they testing the old (buggy) behavior?
 2. If yes: update tests to reflect correct behavior
 3. If no: your fix has side effects. Revert and try a more targeted approach
-4. `find_referencing_symbols("fixedFunction")` to check all callers
+4. `grep("fixedFunction")` to check all callers
 5. Consider: is the function contract changing? If so, update all callers
 
 ---
@@ -36,7 +36,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 1. Add logging at each step of the execution path
 2. Binary search: is the bug before or after the midpoint?
-3. `search_for_pattern("suspicious_pattern")` to find related code
+3. `grep("suspicious_pattern")` to find related code
 4. Check git history: `git log --oneline -20 -- path/to/file`. When was it last changed?
 5. Check: is it a dependency issue? Library version mismatch?
 6. **No progress after 5 turns**: Record current analysis in progress, switch to different hypothesis

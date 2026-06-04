@@ -61,7 +61,7 @@ Step 4: QA review
 "You want fully automated execution. Let me switch to the
 orchestrator skill instead, which will:
 1. Spawn agents automatically via the OpenCode Task tool
-2. Coordinate via Serena Memory
+2. Coordinate via progress files
 3. Monitor progress and handle retries
 4. Return unified results
 

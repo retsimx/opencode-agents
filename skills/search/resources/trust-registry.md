@@ -85,13 +85,13 @@ Use it as a validator, not a scorer:
 **Rate limit**: free for light non-commercial use. Do NOT call for every result.
 Call only when heuristic returns `unknown` and you need validation.
 
-### Step 3: Cache in Serena memory
+### Step 3: Cache locally
 
 Cache resolved scores to avoid re-evaluation:
 
 ```
-write_memory("trust-registry-cache", resolved_scores)
-read_memory("trust-registry-cache")
+write("trust-registry-cache", resolved_scores)
+read("trust-registry-cache")
 ```
 
 Cache is project-scoped and survives skill updates.
@@ -100,7 +100,7 @@ Cache is project-scoped and survives skill updates.
 
 ```
 1. Extract domain from result URL (strip protocol, path, query)
-2. Check Serena memory cache (trust-registry-cache)
+2. Check local cache (trust-registry-cache)
 3. If cache miss → apply heuristic pattern matching (Step 1)
 4. If heuristic returns unknown → call Tranco API for validation (Step 2)
 5. Attach [level, tags, score] to result
@@ -114,4 +114,4 @@ Cache is project-scoped and survives skill updates.
 | Heuristic patterns | Domain category classification | Free | N/A (built-in rules) |
 | [Tranco List](https://tranco-list.eu/) | Domain popularity validation | Free | `siterank.redirect2.me/api/rank.json` |
 | [redirect2me/siterank](https://github.com/redirect2me/siterank) | Self-hostable Tranco API | Free, OSS | Self-host option |
-| Serena memory | Score caching | Free | MCP memory tools |
+| Local cache | Score caching | Free | write/read |

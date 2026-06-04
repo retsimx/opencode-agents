@@ -32,11 +32,11 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ## Cannot Access Source Code
 
-**Symptoms**: Serena `find_symbol` returns nothing, file not found
+**Symptoms**: `grep` returns nothing, file not found
 
-1. Check: correct file path? Use `search_for_pattern` with broader terms
+1. Check: correct file path? Use `grep` with broader terms
 2. Check: is the code in a different directory or monorepo?
-3. Use `get_symbols_overview` on parent directories to find the structure
+3. Use `read` or `glob` on parent directories to find the structure
 4. If truly inaccessible: review what you CAN access and note gaps in report
 
 ---
@@ -62,8 +62,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 1. Prioritize: auth/security-critical files first
 2. Use pattern search to find high-risk areas:
-   - `search_for_pattern("password|secret|token|api_key")`
-   - `search_for_pattern("execute|eval|innerHTML")`
+   - `grep("password|secret|token|api_key")`
+   - `grep("execute|eval|innerHTML")`
 3. Review critical paths: auth flow, payment, data mutation
 4. Note in report: `scope_coverage: "critical paths only, full audit requires more"`
 
@@ -80,7 +80,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Serena Memory Unavailable
+## Memory Tools Unavailable
 
 1. Retry once
 2. If 2 consecutive failures: use local file `/tmp/progress-{agent-id}[-{sessionId}].md`

@@ -1,12 +1,12 @@
 # Subagent Prompt Template
 
-This template is used by the orchestrator to construct self-contained prompts for CLI subagents. The execution protocol is included in the Task tool prompt.
+This template is used by the orchestrator to construct self-contained prompts
+for subagents spawned via the OpenCode Task tool.
 
 ## Template
 
-The orchestrator fills in the `{placeholders}` and passes the assembled prompt to the OpenCode Task tool.
-
----
+The orchestrator fills in the `{placeholders}` and passes the assembled prompt
+to the OpenCode Task tool.
 
 ```
 You are a {AGENT_ROLE} working as part of an automated multi-agent system.
@@ -38,16 +38,20 @@ If you are running low on turns, prioritize:
 2. Document what remains incomplete
 3. Ensure created files are in a usable state
 
-## Execution Protocol
+## Coordination Protocol
 
-The execution protocol (state management, progress reporting, result format) is included in the prompt. See `.agents/skills/_shared/runtime/execution-protocol.md`.
+Use `.agents/results/` for shared state coordination:
 
-Follow the injected execution protocol for:
-- Reading your task assignment on start
-- Reporting progress during execution
-- Creating result files on completion or failure
+- **On start**: Read `.agents/results/task-board.md` to confirm your task.
+  Write `.agents/results/progress-{AGENT_ID}-{SESSION_ID}.md` with initial status.
+- **During execution**: Every 3-5 turns, edit
+  `.agents/results/progress-{AGENT_ID}-{SESSION_ID}.md` to append progress.
+- **On completion**: Write `.agents/results/result-{AGENT_ID}-{SESSION_ID}.md`
+  with final result including status, summary, files changed, and acceptance
+  criteria checklist.
+- **On failure**: Write the result file with Status: failed + error details.
 
-## Charter Preflight (MANDATORY)
+## Charter (MANDATORY — output this block in your first response)
 
 Before ANY code changes, you MUST output this block in your first response:
 
@@ -67,8 +71,6 @@ CHARTER_CHECK:
 
 If you cannot fill this block completely, you are not ready to start. Ask for clarification.
 
----
-
 ## Rules
 
 1. **Stay in scope**: Only work on your assigned task. Do not modify files outside your task's domain.
@@ -84,15 +86,13 @@ If you discover a necessary change outside your domain:
 3. Orchestrator will create a separate task if needed
 ```
 
----
-
 ## Placeholder Reference
 
 | Placeholder | Source | Example |
 |-------------|--------|---------|
 | `{AGENT_ROLE}` | Agent SKILL.md title | "Backend Specialist" |
 | `{AGENT_ID}` | Task assignment | "backend" |
-| `{AGENT_SKILL_CONTENT}` | Agent SKILL.md (tech stack, architecture, checklist sections) | Full markdown content |
+| `{AGENT_SKILL_CONTENT}` | Agent SKILL.md body | Full markdown content |
 | `{TASK_ID}` | task-board.md | "task-1" |
 | `{TASK_TITLE}` | task-board.md | "JWT authentication API" |
 | `{TASK_PRIORITY}` | task-board.md | "1" |
@@ -100,4 +100,4 @@ If you discover a necessary change outside your domain:
 | `{ACCEPTANCE_CRITERIA}` | task-board.md | Bulleted list |
 | `{WORKSPACE_PATH}` | Orchestrator config | "/path/to/project" |
 | `{MAX_TURNS}` | Orchestrator config | "20" |
-| `{MAX_TURNS_WARNING}` | MAX_TURNS - 3 | "17" |
+| `{SESSION_ID}` | Orchestrator session | "session-20260405-100835" |

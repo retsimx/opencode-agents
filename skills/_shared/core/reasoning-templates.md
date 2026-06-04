@@ -206,5 +206,5 @@ Selection: Hypothesis A (higher confidence, better predicted impact)
 
 1. **When to use**: Required for Complex difficulty tasks, recommended for Medium
 2. **Where to record**: Record reasoning process in `progress-{agent-id}.md`
-3. **If blanks cannot be filled**: Gather that information first (Serena, code reading, log checking)
+3. **If blanks cannot be filled**: Gather that information first (code reading, log checking)
 4. **Unresolved after 3 iterations**: `Status: blocked` + include reasoning so far in result

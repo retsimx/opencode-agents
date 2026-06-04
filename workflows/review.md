@@ -5,12 +5,10 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 1 in order.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code analysis and review.
-  - Use memory write tool to record review results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
-  - Do NOT use raw file reads or grep as substitutes.
+- **You MUST use OpenCode's built-in tools for the workflow.**
+  - Use `grep`, `glob`, `read` for code analysis and review.
+  - Use `write` and `edit` to record review results.
+  - Use `.agents/results/` for output files.
 
 ---
 
@@ -33,7 +31,7 @@ Check for known vulnerabilities in dependencies. Flag any CRITICAL or HIGH findi
 
 ## Step 3: Manual Security Review (OWASP Top 10)
 
-Use MCP code analysis tools (`search_for_pattern` and `find_symbol`) to review code for:
+Use `grep` and `read` to review code for:
 - Injection (SQL, XSS, command)
 - Broken auth, sensitive data exposure
 - Broken access control, security misconfig
@@ -45,7 +43,7 @@ Use MCP code analysis tools (`search_for_pattern` and `find_symbol`) to review c
 
 ## Step 4: Performance Analysis
 
-Use MCP tools to check for:
+Use `grep` to check for:
 - N+1 queries, missing indexes
 - Unbounded pagination, memory leaks
 - Unnecessary re-renders (React)
@@ -66,7 +64,7 @@ Check for:
 
 ## Step 6: Code Quality Review
 
-Use MCP code analysis tools (`get_symbols_overview` and `find_referencing_symbols`) to check for:
+Use `grep`/`glob` and `read` to check for:
 - Consistent naming, proper error handling
 - Test coverage, TypeScript strict mode compliance
 - Unused imports/variables

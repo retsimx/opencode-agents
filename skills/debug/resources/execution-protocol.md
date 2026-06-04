@@ -8,7 +8,7 @@
    - Check **Uncertainty Triggers**: security/auth related bugs, existing code conflict potential?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
 4. **Use reasoning templates**: for Complex bugs, use `../../_shared/core/reasoning-templates.md` (hypothesis loop, execution trace)
-5. **Budget context**: follow `../../_shared/core/context-budget.md` (use find_symbol, not read_file)
+5. **Budget context**: follow `../../_shared/core/context-budget.md` (use grep/glob, not read_file)
 
 **Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
 
@@ -16,10 +16,10 @@ Follow these steps in order (adjust depth by difficulty).
 
 ## Step 1: Understand
 - Gather: What happened? What was expected? Error messages? Steps to reproduce?
-- Read relevant code using Serena:
-  - `find_symbol("functionName")`: Locate the failing function
-  - `find_referencing_symbols("Component")`: Find all callers
-  - `search_for_pattern("error pattern")`: Find similar issues
+- Read relevant code:
+  - `grep("functionName")`: Locate the failing function
+  - `grep("Component")`: Find all callers
+  - `grep("error pattern")`: Find similar issues
 - Classify: logic bug, runtime error, performance issue, security flaw, or integration failure
 
 ## Step 2: Reproduce & Diagnose
@@ -38,7 +38,7 @@ Follow these steps in order (adjust depth by difficulty).
   - Fails without the fix
   - Passes with the fix
   - Covers the specific edge case
-- Check for similar patterns elsewhere: `search_for_pattern("same_bug_pattern")`
+- Check for similar patterns elsewhere: `grep("same_bug_pattern")`
 - If found, fix proactively or report them
 
 ## Step 4: Document & Verify

@@ -38,7 +38,7 @@ All logic is defined in the workflow file at `.agents/workflows/ultrawork.md`. L
 - Coordination skill: `.agents/skills/coordination/SKILL.md`
 - Quality principles: `.agents/skills/_shared/core/quality-principles.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
-- Memory protocol: `.agents/skills/_shared/runtime/memory-protocol.md`
+- Coordination protocol: `.agents/skills/_shared/runtime/coordination-protocol.md`
 - Exploration loop: `.agents/skills/_shared/conditional/exploration-loop.md`
 - Phase gates: `.agents/workflows/ultrawork/resources/phase-gates.md`
 - Multi-review protocol: `.agents/workflows/ultrawork/resources/multi-review-protocol.md`

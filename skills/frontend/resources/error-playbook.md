@@ -37,7 +37,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 1. Read the full error: which module, which file
 2. If missing dependency: note in result as "requires `npm install X`"; do NOT install yourself
-3. If import path wrong: use `search_for_pattern("export.*ComponentName")` to find actual path
+3. If import path wrong: use `grep("export.*ComponentName")` to find actual path
 4. If dynamic import issue: ensure component is client-side (`'use client'`)
 5. Re-run build after fix to confirm
 
@@ -48,7 +48,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 **Symptoms**: `vitest` FAILED, `expect(X).toBe(Y)` assertion errors
 
 1. Read the error: expected vs received, which test file
-2. `find_symbol("ComponentName")` to check current implementation
+2. `grep("ComponentName")` to check current implementation
 3. Determine: test outdated or implementation wrong?
    - Test expects old behavior → update test
    - Component bug → fix component
@@ -106,7 +106,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Serena Memory Unavailable
+## Memory Tools Unavailable
 
 1. Retry once
 2. If 2 consecutive failures: use local file `/tmp/progress-{agent-id}[-{sessionId}].md`

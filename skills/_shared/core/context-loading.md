@@ -23,7 +23,7 @@ This saves context window and prevents confusion from irrelevant information.
 7. `resources/checklist.md`: Load at Step 4 (Verify)
 8. `resources/error-playbook.md`: Load only when errors occur
 9. `common-checklist.md`: For final verification of Complex tasks
-10. `../runtime/memory-protocol.md`: CLI mode only
+10. `../runtime/coordination-protocol.md`: coordination for multi-agent sessions
 
 ### Load on Measurement / Exploration (Conditional)
 11. `../conditional/quality-score.md`: Load when Quality Score measurement is needed (VERIFY/SHIP gates)
@@ -42,7 +42,7 @@ This saves context window and prevents confusion from irrelevant information.
 | Authentication implementation | stack/snippets.md (JWT, password) + stack/tech-stack.md |
 | DB migration                  | stack/snippets.md (migration)                     |
 | Performance optimization      | examples.md (N+1 example)                   |
-| Existing code modification    | examples.md + Serena MCP                    |
+| Existing code modification    | examples.md + grep/glob/read                     |
 
 ### Frontend Agent
 
@@ -116,8 +116,8 @@ This saves context window and prevents confusion from irrelevant information.
 | Task Type                 | Required Resources                                           |
 | ------------------------- | ------------------------------------------------------------ |
 | New project planning      | examples.md + task-template.json + api-contracts/template.md |
-| Feature addition planning | examples.md + Serena MCP (understand existing structure)     |
-| Refactoring planning      | Serena MCP only                                              |
+| Feature addition planning | examples.md + grep/glob/read (understand existing structure)     |
+| Refactoring planning      | grep/glob/read only                                              |
 
 ### Design Agent
 
@@ -144,7 +144,7 @@ Prompt composition:
 2. execution-protocol.md
 3. Resources matching task type (see tables above)
 4. error-playbook.md (always include; recovery is essential)
-5. Serena Memory Protocol (CLI mode)
+5. Coordination protocol: `coordination-protocol.md`
 ```
 
 This approach avoids loading unnecessary resources, maximizing subagent context efficiency.

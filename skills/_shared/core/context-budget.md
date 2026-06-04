@@ -16,20 +16,18 @@ Follow this guide to use context efficiently.
 
 ## File Reading Strategy
 
-### When Using Serena MCP (Recommended)
-
-```
-Bad: read_file("app/api/todos.py")          ← entire file 500 lines
-Good: find_symbol("create_todo")             ← just that function 30 lines
-Good: get_symbols_overview("app/api")        ← function list only
-Good: find_referencing_symbols("TodoService") ← usage only
-```
-
-### When Reading Files Without Serena
+### Using OpenCode Built-In Tools
 
 ```
 Bad: Read entire file at once
 Good: Check first 50 lines (imports + class definitions) → read additional functions as needed
+```
+
+### Using grep for Targeted Code Lookup
+
+```
+Bad: grep for broad patterns that return 100+ lines
+Good: grep with specific function/class names to locate relevant code
 ```
 
 ---
@@ -67,8 +65,8 @@ Agents record read files/symbols when updating progress:
 ## Turn 3 Progress
 
 ### Read Files
-- app/api/todos.py: create_todo(), update_todo() (find_symbol)
-- app/models/todo.py: Todo class (find_symbol)
+- app/api/todos.py: create_todo(), update_todo() (grep)
+- app/models/todo.py: Todo class (grep)
 - app/schemas/todo.py: entire file (short file, 40 lines)
 
 ### Not Yet Read
@@ -90,8 +88,8 @@ This approach:
 
 ### Files Over 500 Lines
 
-1. Use `get_symbols_overview` to understand structure
-2. Read only necessary symbols with `find_symbol`
+1. Use `grep`/`glob` to understand structure
+2. Read only necessary sections with targeted `read` offsets
 3. Never read the entire file
 
 ### Complex Components (React/Flutter)
@@ -146,7 +144,7 @@ When a trigger fires, the Orchestrator executes:
 
 1. **Checkpoint**: Save agent's current state
    ```
-   write_memory("checkpoint-{agent-id}", content)
+   write(".agents/results/checkpoint-{agent-id}", content)
    ```
    Content (assembled by Orchestrator from progress file):
    - Completed items with file paths

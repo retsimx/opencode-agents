@@ -355,7 +355,7 @@ After fixing, document in `.agents/results/bugs/`:
 ## Tools Reference
 
 - **Browser DevTools**: F12 (Console, Network, React DevTools)
-- **Serena MCP**: find_symbol, search_for_pattern, find_referencing_symbols
+- **grep/glob/read**: grep for symbols/patterns, glob for files, read for content
 - **Antigravity Browser**: Automated testing and reproduction
 - **React Profiler**: Performance analysis
 - **Lighthouse**: Performance audit

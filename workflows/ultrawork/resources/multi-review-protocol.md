@@ -55,7 +55,7 @@
 
 ### 10. Cascade Impact Review (Step 16)
 - **Question**: "Did we break anything elsewhere?"
-- **Check**: Use find_referencing_symbols for impact scope
+- **Check**: Use `grep` for impact scope
 - **Pass Condition**: No cascade impact or handled
 
 ### 11. Final Review (Step 17)

@@ -19,7 +19,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Identify explicit and implicit features
 - List edge cases and assumptions
 - Ask clarifying questions if ambiguous
-- Use Serena (if existing codebase): `get_symbols_overview` to understand current architecture
+- Use grep/glob/read (if existing codebase): `glob("src/**")` or `read("src/")` to understand current architecture
 - If risk or governance matters, identify:
   - stakeholders
   - constraints

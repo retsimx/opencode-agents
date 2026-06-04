@@ -1,38 +1,24 @@
-# MCP Memory Schema for Multi-Agent Orchestration
+# Coordination Schema for Multi-Agent Orchestration
 
 ## Overview
 
-Each subagent writes only to its own dedicated files. The orchestrator manages session-level files. This ownership model prevents write conflicts between concurrent agents.
-
-## Configuration
-
-Memory base path and tool names are configurable via `mcp.json`:
-```json
-{
-  "memoryConfig": {
-    "basePath": ".serena/memories",
-    "tools": {
-      "read": "read_memory",
-      "write": "write_memory",
-      "edit": "edit_memory"
-    }
-  }
-}
-```
-
-Default base path: `.serena/memories`
+Each subagent writes only to its own dedicated files in `.agents/results/`.
+The orchestrator manages session-level files. This ownership model prevents
+write conflicts between concurrent agents.
 
 ## File Structure
 
 ```
-{memoryConfig.basePath}/
+.agents/results/
   orchestrator-session.md              # Session metadata (orchestrator only)
   task-board.md                        # Master task list (orchestrator writes, agents read)
   progress-{agent-id}-{sessionId}.md  # Per-agent progress log (owning agent only)
   result-{agent-id}-{sessionId}.md    # Per-agent final result (owning agent only)
 ```
 
-> **Path rule**: All files MUST be at the project root memory path. In monorepos, never write to a subdirectory's memory path. The session ID suffix prevents conflicts between concurrent sessions.
+> **Path rule**: All files MUST be in `.agents/results/` at the project root.
+> In monorepos, never write to a subdirectory's results path. The session ID
+> suffix prevents conflicts between concurrent sessions.
 
 ## orchestrator-session.md
 
@@ -45,11 +31,11 @@ Created by the orchestrator at session start. Updated throughout execution.
 ## Status: running | completed | failed | aborted
 
 ## Agents
-| Agent ID | PID | Status | Task |
-|----------|-----|--------|------|
-| backend  | 12345 | running | task-1 |
-| frontend | 12346 | completed | task-2 |
-| mobile   | 12347 | running | task-3 |
+| Agent ID | Status | Task |
+|----------|--------|------|
+| backend  | running | task-1 |
+| frontend | completed | task-2 |
+| mobile   | running | task-3 |
 
 ## Configuration
 - MAX_PARALLEL: 3
@@ -66,7 +52,8 @@ Created by the orchestrator at session start. Updated throughout execution.
 
 ## task-board.md
 
-Master task list created by the orchestrator. Subagents read this to understand their assignment but never write to it.
+Master task list created by the orchestrator. Subagents read this to
+understand their assignment but never write to it.
 
 ```markdown
 # Task Board
@@ -113,7 +100,8 @@ Master task list created by the orchestrator. Subagents read this to understand 
 
 ## progress-{agent-id}-{sessionId}.md
 
-Each agent creates this file at start and appends entries every 3-5 turns. Only the owning agent writes to this file.
+Each agent creates this file at start and appends entries every 3-5 turns.
+Only the owning agent writes to this file.
 
 ```markdown
 # Progress: backend
@@ -145,7 +133,8 @@ Each agent creates this file at start and appends entries every 3-5 turns. Only 
 
 ## result-{agent-id}-{sessionId}.md
 
-Each agent creates this file upon completion (success or failure). Only the owning agent writes to this file.
+Each agent creates this file upon completion (success or failure). Only the
+owning agent writes to this file.
 
 ```markdown
 # Result: backend

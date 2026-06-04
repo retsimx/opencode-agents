@@ -1,6 +1,6 @@
 ---
 name: search
-description: Intent-based search router with trust scoring. Routes queries to optimal channels (Context7 docs, native web search, gh/glab code search, Serena local) and attaches domain trust labels. Use for search, find, lookup, reference, docs, code search, and web research.
+description: Intent-based search router with trust scoring. Routes queries to optimal channels (Context7 docs, native web search, gh/glab code search, local file search) and attaches domain trust labels. Use for search, find, lookup, reference, docs, code search, and web research.
 ---
 
 # Search Agent - Intent-Based Search Router
@@ -22,7 +22,7 @@ Classify information-seeking requests, route them to the best search channel, at
 - Other skills needing search infrastructure (shared invocation)
 
 ### When NOT to use
-- Local codebase exploration only -> use Serena MCP directly
+- Local codebase exploration only -> use grep/glob/read
 - Git history or blame analysis -> use SCM Agent
 - Full architecture research -> use Architecture Agent (may invoke this skill internally)
 
@@ -36,7 +36,7 @@ Classify information-seeking requests, route them to the best search channel, at
 - Source links or references suitable for the calling skill
 
 ### Dependencies
-- Context7 MCP for docs, runtime-native web search, `gh`/`glab` for code, Serena for local search
+- Context7 MCP for docs, runtime-native web search, `gh`/`glab` for code, grep/glob/read for local search
 - `resources/intent-rules.md`, `resources/trust-registry.md`, execution protocol, examples, and checklist
 
 ### Control-flow features
@@ -62,7 +62,7 @@ Classify information-seeking requests, route them to the best search channel, at
 - If `--docs`, `--code`, `--web`, `--strict`, `--wide`, or `--gitlab` is provided, flags override classifier.
 - If docs route fails, fall back to web.
 - If web search needs fetch escalation, use `web-fetch` strategies.
-- If query is purely local, use Serena MCP instead of web.
+- If query is purely local, use grep/glob/read instead of web.
 
 ### Failure and recovery
 - If primary route fails, fall forward to the next appropriate route.
@@ -90,7 +90,7 @@ Classify information-seeking requests, route them to the best search channel, at
 - Context7 docs tools
 - Runtime-native web search
 - `gh search code` or `glab api`
-- Serena MCP for local project search
+- grep/glob/read for local project search
 
 ### Canonical command path
 ```bash
@@ -122,7 +122,7 @@ For docs and web routes, use the runtime's available official-docs or web-search
 3. **Trust score every result**: all non-local results get domain trust labels from the registry
 4. **Flags override classifier**: user-provided flags (`--docs`, `--code`, `--web`, `--strict`, `--wide`, `--gitlab`) always take precedence
 5. **Fail forward**: if primary route fails, fall back gracefully (docs->web, web->`web-fetch` strategies)
-6. **No additional MCP required**: Context7 for docs, runtime native for web, CLI for code, Serena for local
+6. **No additional MCP required**: Context7 for docs, runtime native for web, CLI for code, grep/glob/read for local
 7. **Vendor-agnostic web search**: use whatever the current runtime provides (WebSearch, Google, Bing)
 8. **Domain-level trust only**: do not attempt sub-path or page-level scoring
 
@@ -133,7 +133,7 @@ For docs and web routes, use the runtime's available official-docs or web-search
 | `docs` | Context7 MCP (`resolve-library-id` → `query-docs`) | `web` route | Official docs, API reference |
 | `web` | Runtime native search | `web-fetch` (api/probe/impersonate/browser) | Tutorials, examples, solutions |
 | `code` | `gh search code` / `glab api` | (none) | Implementation patterns, repos |
-| `local` | Serena MCP (delegate) | (none) | Current project files, symbols |
+| `local` | grep/glob/read | (none) | Current project files, symbols |
 
 ### Default Workflow
 1. **Parse**: Extract query, detect flags, classify intent

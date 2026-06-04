@@ -12,8 +12,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 1. Check the import path: typo? wrong package name?
 2. Verify the dependency exists in your package manifest
 3. If missing: note it in your result as "requires install the missing dependency"; do NOT install yourself
-4. If it's a local module: check the directory structure with `get_symbols_overview`
-5. If the path changed: use `search_for_pattern("class ClassName")` to find the new location
+4. If it's a local module: check the directory structure with `read` or `glob`
+5. If the path changed: use `grep("class ClassName")` to find the new location
 
 ---
 
@@ -22,7 +22,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 **Symptoms**: test runner returns FAILED, assertion errors
 
 1. Read the full error output: which test, which assertion, expected vs actual
-2. `find_symbol("test_function_name")` to read the test code
+2. `grep("test_function_name")` to read the test code
 3. Determine: is the test wrong or is the implementation wrong?
    - Test expects old behavior → update test
    - Implementation has a bug → fix implementation
@@ -79,9 +79,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Serena Memory Unavailable
+## Memory Tools Unavailable
 
-**Symptoms**: `write_memory` / `read_memory` failure, timeout
+**Symptoms**: `write` / `read` failure, timeout
 
 1. Retry once (may be transient error)
 2. If 2 consecutive failures: fall back to local files

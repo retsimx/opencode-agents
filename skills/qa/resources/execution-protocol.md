@@ -19,11 +19,11 @@ Follow these steps in order (adjust depth by difficulty).
 - Identify what to review: new feature, full audit, or specific concern
 - List all files/modules to inspect
 - Determine review depth: quick check vs. comprehensive audit
-- Use Serena to map the codebase:
-  - `get_symbols_overview("src/")`: Understand structure
-  - `search_for_pattern("password.*=.*[\"']")`: Find hardcoded secrets
-  - `search_for_pattern("execute.*\\$\\{")`: Find SQL injection
-  - `search_for_pattern("innerHTML")`: Find XSS vulnerabilities
+- Use grep/glob/read to map the codebase:
+  - `glob("src/**")` or `read("src/")`: Understand structure
+  - `grep("password.*=.*[\"']")`: Find hardcoded secrets
+  - `grep("execute.*\\$\\{")`: Find SQL injection
+  - `grep("innerHTML")`: Find XSS vulnerabilities
 
 ## Step 2: Audit
 Review in this priority order:

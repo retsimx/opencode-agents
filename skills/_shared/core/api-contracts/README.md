@@ -26,9 +26,7 @@ Read contract and integrate API client exactly as specified:
 
 ## Tool Reference
 
-Tool names are configured in `mcp.json → memoryConfig.tools`:
-- `[READ]` → default: `read_memory`
-- `[WRITE]` → default: `write_memory`
+In OpenCode, use the built-in `read` and `write` tools for contract files.
 
 ## Contract Format
 

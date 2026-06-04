@@ -5,9 +5,10 @@ description: Initialize project harness with AGENTS.md as table of contents, ARC
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
-- **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`, `list_dir`) for code exploration.
-  - Use file writing tools to generate all output files.
+- **You MUST use OpenCode's built-in tools for the workflow.**
+  - Use `grep`, `glob`, `read` for codebase exploration.
+  - Use `write` and `edit` for all output files.
+  - Use `.agents/results/` for output files.
 - **Exclude directories:**
   - Respect the project's `.gitignore` as the source of truth for excluding directories.
   - Automatically skip framework-generated cross-platform build/project directories (e.g., Flutter/React Native's `android`, `ios`, `macos`, `linux`, `windows`, `web` folders).
@@ -95,7 +96,7 @@ Not all files are required. Generate only what is **discoverable and relevant** 
    - What packages/apps/services exist?
    - What tech stacks are used?
 
-2. **Discover architectural patterns** using `get_symbols_overview` and `search_for_pattern`:
+2. **Discover architectural patterns** using `grep` and `glob`:
    - Layer structure (e.g., controllers → services → repositories)
    - Module boundaries and dependency direction
    - Naming conventions in use

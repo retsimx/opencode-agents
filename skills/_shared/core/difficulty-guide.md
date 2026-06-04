@@ -44,7 +44,7 @@ All agents assess task difficulty at the start and apply the appropriate protoco
 
 ### Complex → Extended Protocol (Sprint-Based)
 
-1. Step 1 (Analyze): Full + explore existing code with Serena
+1. Step 1 (Analyze): Full + explore existing code with `grep`/`glob`/`read`
 2. Step 2 (Plan): Full + **decompose into 2-4 feature-focused sprints**
    - Each sprint = independently testable deliverable
    - Target: 5-8 turns per sprint

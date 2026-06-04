@@ -24,7 +24,7 @@ Forbidden actions (any of these is a fatal self-error; retract immediately):
 
 Reference: https://nextjs.org/docs/messages/middleware-to-proxy
 
-## Serena MCP Shortcuts
-- `find_symbol("ComponentName")`: locate existing component
-- `get_symbols_overview("src/components")`: list all components
-- `find_referencing_symbols("Button")`: find usages before changes
+## grep/glob/read Shortcuts
+- `grep("ComponentName")`: locate existing component
+- `glob("src/components/**")` or `read("src/components")`: list all components
+- `grep("Button")`: find usages before changes

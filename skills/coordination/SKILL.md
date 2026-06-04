@@ -88,7 +88,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 ### Tools and instruments
 - OpenCode Task tool (subagent_type="general"/"explore"), PM/frontend/backend/mobile/QA agents
 - Memory/progress/result files
-- Serena MCP for exploration and modification when used by specialists
+- OpenCode built-in tools (`grep`, `glob`, `read`, `write`, `edit`) for exploration and progress tracking when used by specialists
 
 ### Canonical task pattern
 ```
@@ -121,7 +121,7 @@ Task tool invocation pattern:
 3. Define API contracts before frontend/mobile tasks
 4. QA review is always the final step
 5. Assign separate workspaces to avoid file conflicts
-6. Always use Serena MCP tools as the primary method for code exploration and modification
+6. Use OpenCode's built-in tools (`grep`, `glob`, `read`) for code exploration
 7. Never skip steps in the workflow; follow each step sequentially without omission
 
 ### Workflow
