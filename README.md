@@ -21,6 +21,9 @@ opencode "run stack-set"
 
 OpenCode loads skills from `.agents/skills/` on startup — no additional config needed.
 
+> **Important:** Add `.agents/` to your host project's `.gitignore`. This directory
+> is its own standalone git repo — it should not be nested inside another.
+
 ## Directory Structure
 
 ```
