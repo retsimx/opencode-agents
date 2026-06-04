@@ -1,0 +1,110 @@
+---
+description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.1 AA), and code quality review
+---
+
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
+
+- **NEVER skip steps.** Execute from Step 1 in order.
+- **You MUST use MCP tools throughout the workflow.**
+  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code analysis and review.
+  - Use memory write tool to record review results.
+  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
+  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Do NOT use raw file reads or grep as substitutes.
+
+---
+
+
+
+## Step 1: Identify Review Scope
+
+Ask the user what to review: specific files, a feature branch, or the entire project.
+If a PR or branch is provided, diff against the base branch to scope the review.
+
+---
+
+## Step 2: Run Automated Security Checks
+
+// turbo
+Run available security tools: `npm audit` (Node.js), `bandit` (Python), or equivalent.
+Check for known vulnerabilities in dependencies. Flag any CRITICAL or HIGH findings.
+
+---
+
+## Step 3: Manual Security Review (OWASP Top 10)
+
+Use MCP code analysis tools (`search_for_pattern` and `find_symbol`) to review code for:
+- Injection (SQL, XSS, command)
+- Broken auth, sensitive data exposure
+- Broken access control, security misconfig
+- Insecure deserialization
+- Known vulnerable components
+- Insufficient logging
+
+---
+
+## Step 4: Performance Analysis
+
+Use MCP tools to check for:
+- N+1 queries, missing indexes
+- Unbounded pagination, memory leaks
+- Unnecessary re-renders (React)
+- Missing lazy loading
+- Large bundle sizes, unoptimized images
+
+---
+
+## Step 5: Accessibility Review (WCAG 2.1 AA)
+
+Check for:
+- Semantic HTML, ARIA labels
+- Keyboard navigation, color contrast
+- Focus management, screen reader compatibility
+- Image alt text
+
+---
+
+## Step 6: Code Quality Review
+
+Use MCP code analysis tools (`get_symbols_overview` and `find_referencing_symbols`) to check for:
+- Consistent naming, proper error handling
+- Test coverage, TypeScript strict mode compliance
+- Unused imports/variables
+- Proper async/await usage
+- Public API documentation
+
+---
+
+## Step 7: Generate QA Report
+
+Compile all findings into a prioritized report:
+- **CRITICAL**: Security breaches, data loss risks
+- **HIGH**: Blocks launch
+- **MEDIUM**: Fix this sprint
+- **LOW**: Backlog
+
+Each finding must include: `file:line`, description, and remediation code.
+Use memory write tool to record the final report.
+
+---
+
+## Agent Delegation: Spawn QA Agent
+
+For large review scopes, delegate Steps 2-7 to a QA agent via the OpenCode Task tool:
+- Use `subagent_type="general"`
+- Include the file list and review standards from `.agents/skills/qa/SKILL.md` in the prompt
+
+---
+
+## Fix-Verify Loop (with --fix option)
+
+When user wants fixes too, execute review then fix then re-review loop:
+
+1. Spawn QA agent (via OpenCode Task tool) to get issue list.
+2. If CRITICAL/HIGH issues exist:
+   - Spawn domain agent(s) to fix issues via OpenCode Task tool:
+     - `subagent_type="general"` with fix instructions and file list in prompt
+     - For multi-domain fixes, spawn separate tasks per domain
+
+3. Re-spawn QA agent (via OpenCode Task tool) to re-review fixed code.
+4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.
