@@ -159,7 +159,6 @@ Skills live in `.agents/skills/{name}/SKILL.md`. Workflows live in `.agents/work
 | **search** | Intent-based search router: Context7 docs, web search, gh/glab code search, Serena local |
 | **skill-creator** | Skill authoring: create/update SSL-lite SKILL.md files |
 | **stack-set** | Tech stack detection: scan manifests, generate stack.yaml, snippets, API boilerplate |
-| **tools** | MCP tool management: list, enable, disable tools and tool groups |
 | **translator** | Context-aware translation: preserves tone, style, natural word order |
 | **ultrawork** | 5-phase high-quality dev: PLAN → IMPL → VERIFY → REFINE → SHIP (11 review steps) |
 | **work** | Multi-domain coordination: PM plan + parallel agents + QA review |
@@ -184,6 +183,5 @@ Skills live in `.agents/skills/{name}/SKILL.md`. Workflows live in `.agents/work
 | **review** | Full QA: security, performance, accessibility, code quality |
 | **scm** | Git operations: branching, merge, conflict, Conventional Commits |
 | **stack-set** | Auto-detect tech stack, generate stack-specific references |
-| **tools** | MCP tools management |
 | **ultrawork** | High-quality 5-phase development with deep quality gates |
 | **work** | Multi-agent coordination with PM + parallel impl + QA |

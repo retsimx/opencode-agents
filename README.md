@@ -37,7 +37,7 @@ OpenCode loads skills from `.agents/skills/` on startup — no additional config
 │   ├── frontend/          # Frontend UI implementation
 │   ├── ...                # (see full list below)
 │   └── work/              # Multi-agent coordination
-└── workflows/             # Executable workflow definitions (19 workflows)
+└── workflows/             # Executable workflow definitions
 ```
 
 ## Initial Setup
@@ -48,7 +48,6 @@ Before using the agent system, consider running these setup workflows:
 |----------|---------|------|
 | `deepinit` | Initialize AI harness: AGENTS.md, ARCHITECTURE.md, structured docs/ | First time setting up a project |
 | `stack-set` | Auto-detect tech stack, generate stack.yaml, snippets, API boilerplate | After deepinit, or when stack changes |
-| `tools` | List, enable, or disable MCP tools | As needed |
 
 ## Standard Workflows
 
@@ -83,9 +82,7 @@ Workflows are executable via natural language commands. The major ones:
 
 ### Full workflow list
 
-Run `agenthelp` or check `.agents/workflows/` for all 19 workflows:
-architecture, brainstorm, debug, deepinit, deepsec, design, docs, gh-autopilot,
-orchestrate, pdf, plan, ralph, recap, review, scm, stack-set, tools, ultrawork, work
+Run `agenthelp` or check `.agents/workflows/` for all workflows listed above.
 
 ## Skills — When to Use Which
 
@@ -122,7 +119,6 @@ All 34 skills can be loaded via the `skill` tool. The main categories:
 - **deepsec** — Vulnerability scanning
 - **deepinit** — Project AI harness initialization
 - **dev-workflow** — Monorepo task automation, CI/CD, releases
-- **tools** — MCP tool management
 - **stack-set** — Tech stack detection and reference generation
 - **gh-autopilot** — GitHub issue → draft PR automation
 - **skill-creator** — Authoring new skills in SSL-lite format
