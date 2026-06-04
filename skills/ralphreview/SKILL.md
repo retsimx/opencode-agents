@@ -94,11 +94,14 @@ Iteratively review and remediate the current implementation until review stabili
 | Report result | `NOTIFY` | Final completion or escalation message |
 
 ### Tools and instruments
-- OpenCode `task` tool (`subagent_type="general"`) — for delegating review and remediation
+- OpenCode `task` tool (`subagent_type="general"`) — for delegating review and remediation.
+  **IMPORTANT: `task` is a built-in agent tool, NOT a shell command. Invoke it like `read`, `write`, or `grep` — through your tool-calling interface. Never run `$ task ...` in bash.**
 
 ### Canonical workflow path
 
 **YOU MUST follow this exact sequence. Do not deviate.**
+
+**CRITICAL: The `task` tool is a built-in agent function call, the same as `read`, `write`, `grep`. Do NOT run it as a bash command — use your tool-calling interface directly.**
 
 ```
 clean_review_streak := 0
@@ -107,12 +110,13 @@ handled_issues := []
 while clean_review_streak < 3:
 
     # ── Phase A: Review ──────────────────────────────────────────
-    # Do NOT read files or run git diff. Delegate to the `task` tool.
+    # Do NOT read files or run git diff. Call your built-in `task`
+    # tool (same mechanism as read/write/grep — not bash).
 
-    Invoke the `task` tool with these parameters:
+    Call the `task` tool with these parameters:
       subagent_type: "general"
       description: "deep-review"
-      prompt: >
+      prompt:
         "Load the deep-review skill and review the recent uncommitted
          changes in this project. Provide scope as: DIFF (uncommitted
          changes). Return findings in the format specified by the
@@ -133,15 +137,15 @@ while clean_review_streak < 3:
     if new_findings:
 
         # ── Phase C: Remediation ─────────────────────────────────
-        # Do NOT read files or edit files yourself. Delegate to the
-        # `task` tool. The remediation subagent evaluates each finding,
-        # fixes fixable ones, and reports back which were fixed vs
-        # skipped (intentional, not practical, by design, etc.).
+        # Do NOT read files or edit files yourself. Call your built-in
+        # `task` tool (not bash). The remediation subagent evaluates
+        # each finding, fixes fixable ones, and reports back which were
+        # fixed vs skipped.
 
-        Invoke the `task` tool with these parameters:
+        Call the `task` tool with these parameters:
           subagent_type: "general"
           description: "remediation"
-          prompt: >
+          prompt:
             "Review the following findings against the actual code.
              For each one, determine if it is:
                - FIXABLE — a real issue that should be fixed now
@@ -200,18 +204,19 @@ exit  # clean_review_streak == 3
 - Does not stage or commit changes.
 
 ### Guardrails
-1. **Never perform your own review** — always delegate to a Task subagent with the `deep-review` skill.
+1. **Never perform your own review** — always delegate to a subagent via the built-in `task` tool.
 2. **Never skip review** or substitute your own judgment.
-3. **Review and remediation MUST use SEPARATE Task invocations** — never combine them.
+3. **Review and remediation MUST use separate `task` tool invocations** — never combine them.
 4. **Any fix resets `clean_review_streak` to 0.** If all findings are skipped (intentional / not practical), increment streak — they've been evaluated and won't be re-flagged.
 5. **Foreground context is orchestration only** — no review or remediation inline.
 6. **Prefer minimal targeted fixes over broad refactors.**
 7. **Exit immediately when `clean_review_streak == 3`.**
-8. **Remediation agent triages fixability.** The remediation Task reads the actual code and decides what to fix vs skip. INTENTIONAL (by design) and NOT PRACTICAL (disproportionate effort) findings are skipped and added to `handled_issues` — they won't be re-flagged. Streak only resets when something was actually fixed.
+8. **Remediation agent triages fixability.** The remediation subagent reads the actual code and decides what to fix vs skip. INTENTIONAL (by design) and NOT PRACTICAL (disproportionate effort) findings are skipped and added to `handled_issues` — they won't be re-flagged. Streak only resets when something was actually fixed.
 9. **Maintain `handled_issues` across iterations.** Include it in every review invocation so the deep-review skill knows what not to re-report. Append fixed findings after each remediation cycle.
-10. **TOOL RESTRICTION — Review: You MUST NOT read any source files in the foreground.** You MUST NOT run `git diff` (full diff). Your only tools for Phase A are the `task` tool (to delegate) and reading the Task's returned findings. All code understanding must come from the deep-review skill's output. You do NOT evaluate fixability yourself — that is the remediation Task's job.
-11. **TOOL RESTRICTION — Remediation: You MUST NOT read any source files to prepare or verify remediation.** You MUST NOT edit any files directly. You MUST NOT run `git diff` beyond `git diff --stat`. ALL remediation MUST go through a Task subagent.
+10. **TOOL RESTRICTION — Review: You MUST NOT read any source files in the foreground.** You MUST NOT run `git diff` (full diff). Your only tool for Phase A is the built-in `task` tool (used via your tool-calling interface, NOT bash). Do NOT try to run `$ task` as a shell command. All code understanding must come from the deep-review skill's output.
+11. **TOOL RESTRICTION — Remediation: You MUST NOT read any source files to prepare or verify remediation.** You MUST NOT edit any files directly. You MUST NOT run `git diff` beyond `git diff --stat`. ALL remediation MUST go through a `task` tool invocation.
 12. **TOOL RESTRICTION — Diff: You may only run `git diff --stat` (file names only) to check whether files changed. Never the full diff.**
+13. **CRITICAL: The `task` tool is a built-in agent function call, the same as `read`, `write`, or `grep`. It is NOT a bash command. Never run `$ task ...` in a shell — use the agent's tool-calling interface instead.**
 
 ## References
 
