@@ -51,34 +51,34 @@ Before using the agent system, consider running these setup workflows:
 
 ## Standard Workflows
 
-Workflows are executable via natural language commands. The major ones:
+Invoke workflows directly by name (e.g. `/brainstorm "Load the brainstorm skill and..."`).
 
 ### Planning & Design
-| Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| `brainstorm` | "let's think about..." | Design-first ideation — explores intent, constraints, approaches |
-| `plan` | "plan this feature" | PM-driven task breakdown with priorities and dependencies |
+| Workflow | What it does |
+|----------|-------------|
+| `brainstorm` | Design-first ideation — explores intent, constraints, approaches |
+| `plan` | PM-driven task breakdown with priorities and dependencies |
 
 ### Multi-Agent Execution
-| Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| `orchestrate` | "implement this with agents" | Spawns parallel subagents, coordinates via MCP memory |
-| `work` | multi-domain feature | PM plan + parallel agents + QA review |
-| `ultrawork` | high-stakes feature | 5-phase process with 11+ review steps |
+| Workflow | What it does |
+|----------|-------------|
+| `orchestrate` | Spawns parallel subagents, coordinates via MCP memory |
+| `work` | PM plan + parallel agents + QA review |
+| `ultrawork` | 5-phase process with 11+ review steps |
 
 ### Review & Quality
-| Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| `ralph` | "ralph review this" | Iterative deep-review loop until 3 clean passes |
-| `review` | "review this code" | Full QA: security (OWASP), performance, accessibility, code quality |
+| Workflow | What it does |
+|----------|-------------|
+| `ralph` | Iterative deep-review loop until 3 clean passes |
+| `review` | Full QA: security (OWASP), performance, accessibility, code quality |
 
 ### Operations
-| Workflow | Trigger | What it does |
-|----------|---------|-------------|
-| `scm` | git operations | Branch, merge, commit with Conventional Commits |
-| `debug` | "fix this bug" | Structured diagnosis: reproduce → root cause → fix → regression test |
-| `docs` | "check docs" | Documentation drift detection and sync |
-| `recap` | "what did I do today" | Session recap from multi-tool conversation histories |
+| Workflow | What it does |
+|----------|-------------|
+| `scm` | Branch, merge, commit with Conventional Commits |
+| `debug` | Structured diagnosis: reproduce → root cause → fix → regression test |
+| `docs` | Documentation drift detection and sync |
+| `recap` | Session recap from multi-tool conversation histories |
 
 ### Full workflow list
 
