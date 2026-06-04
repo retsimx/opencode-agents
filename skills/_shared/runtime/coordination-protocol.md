@@ -7,9 +7,20 @@ tools against `.agents/results/`.
 ## Guiding Principles
 
 ### Prefer Task subagents for isolated work
-Delegate distinct subtasks to sub-subagents via the `task` tool rather than doing
+Delegate distinct subtasks to sub-subagents via the Task tool rather than doing
 everything inline. Each subagent gets a focused context, reducing dilution and
 preventing scope creep. Subagents are cheap — use them liberally.
+
+**Note:** The `task` tool must be explicitly allowed in your OpenCode
+configuration for subagents. Add to `opencode.json`:
+```json
+{
+  "agent": {
+    "general": { "permission": { "task": "allow" } },
+    "explore": { "permission": { "task": "allow" } }
+  }
+}
+```
 
 ### Ask when uncertain
 Use the `question` tool whenever you face ambiguity. Never make assumptions —

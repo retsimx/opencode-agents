@@ -12,7 +12,16 @@ git clone https://github.com/retsimx/opencode-agents.git .agents
 
 # 2. OpenCode picks up skills automatically — just start using them
 
-# 3. Initialize AI harness (AGENTS.md, ARCHITECTURE.md, docs/)
+# 3. Grant the `task` tool to subagents in your opencode.json:
+#    (required for orchestration workflows that spawn sub-subagents)
+#    {
+#      "agent": {
+#        "general": { "permission": { "task": "allow" } },
+#        "explore": { "permission": { "task": "allow" } }
+#      }
+#    }
+
+# 4. Initialize AI harness (AGENTS.md, ARCHITECTURE.md, docs/)
 opencode "run deepinit"
 
 # 4. Detect tech stack and generate references
