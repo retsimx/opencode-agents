@@ -1,6 +1,6 @@
 # `.agents/` — Agent Skills, Workflows & Configuration
 
-> **Adapted fork of [oh-my-agent](https://github.com/anthropics/oh-my-agent).**
+> **Adapted fork of [oh-my-agent](https://github.com/first-fluke/oh-my-agent).**
 > This directory provides a structured skill library, workflow definitions, and
 > coding rules for the OpenCode agent framework.
 
