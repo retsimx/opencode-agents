@@ -176,7 +176,7 @@ Use `resources/anti-patterns.md` when reviewing or remediating logical, physical
 Use `resources/vector-db.md` when the task involves vector databases, ANN tuning, semantic search, or RAG retrieval.
 Use `resources/iso-controls.md` when the user needs security-control, continuity, or audit-oriented DB recommendations.
 Before submitting, run `resources/checklist.md`.
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 - Execution steps: `resources/execution-protocol.md`
 - Self-check: `resources/checklist.md`

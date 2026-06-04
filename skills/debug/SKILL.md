@@ -135,7 +135,7 @@ Then run the smallest reproduction command first, add a regression test, and re-
 Follow `resources/execution-protocol.md` step by step.
 See `resources/examples.md` for input/output examples.
 Before submitting, run `resources/checklist.md`.
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 - Execution steps: `resources/execution-protocol.md`
 - Code examples: `resources/examples.md`

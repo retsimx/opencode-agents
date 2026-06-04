@@ -39,7 +39,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 ### Dependencies
 - PM, frontend, backend, mobile, QA, and orchestrator skills
 - `resources/examples.md`
-- OpenCode Task tool and progress/result memory conventions
+- OpenCode `task` tool and progress/result memory conventions
 
 ### Control-flow features
 - Branches by task complexity, priority tiers, dependency ordering, and whether automation is desired
@@ -80,19 +80,19 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 |--------|---------------|----------|
 | Read request and domains | `READ` | User prompt and project context |
 | Select agent plan | `SELECT` | PM decomposition and priority tiers |
-| Spawn agents | `CALL_TOOL` | OpenCode Task tool (subagent_type="general") |
+| Spawn agents | `CALL_TOOL` | OpenCode `task` tool (subagent_type="general") |
 | Monitor progress | `READ` | `progress-{agent}.md` |
 | Validate contracts | `VALIDATE` | API/data model alignment |
 | Notify coordination status | `NOTIFY` | Final coordination summary |
 
 ### Tools and instruments
-- OpenCode Task tool (subagent_type="general"/"explore"), PM/frontend/backend/mobile/QA agents
+- OpenCode `task` tool (subagent_type="general"/"explore"), PM/frontend/backend/mobile/QA agents
 - Memory/progress/result files
 - OpenCode built-in tools (`grep`, `glob`, `read`, `write`, `edit`) for exploration and progress tracking when used by specialists
 
 ### Canonical task pattern
 ```
-Task tool invocation pattern:
+`task` tool invocation pattern:
 - PM: Call Task with subagent_type="general", prompt=<PM task>, and workdir=<workspace>/pm
 - Backend: Call Task with subagent_type="general", prompt=<backend task>, and workdir=<workspace>/backend (run in parallel)
 - Frontend: Call Task with subagent_type="general", prompt=<frontend task>, and workdir=<workspace>/frontend (run in parallel)
@@ -102,7 +102,7 @@ Task tool invocation pattern:
 | Scope | Resource target |
 |-------|-----------------|
 | `LOCAL_FS` | Progress/result files and workspaces |
-| `PROCESS` | Task tool invocations |
+| `PROCESS` | `task` tool invocations |
 | `MEMORY` | Session state and task board |
 | `CODEBASE` | Shared contracts and implementation areas |
 
@@ -132,10 +132,10 @@ PM Agent analyzes requirements, selects tech stack, creates task breakdown with 
 
 ### Step 2: Spawn Agents by Priority
 
-Use the OpenCode Task tool for each task:
+Use the OpenCode `task` tool for each task:
 
 1. Use Task with subagent_type="general" for each task, passing the agent role in the prompt
-2. Spawn all same-priority tasks in parallel via concurrent Task tool calls
+2. Spawn all same-priority tasks in parallel via concurrent `task` tool calls
 3. Assign separate workspaces via the workdir parameter to avoid file conflicts
 
 ### Step 3: Monitor & Coordinate

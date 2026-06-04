@@ -130,7 +130,7 @@ Follow `resources/execution-protocol.md` step by step.
 See `resources/examples.md` for input/output examples.
 Use `resources/iso-quality.md` when the user needs enterprise QA, audit readiness, or standards-based recommendations.
 Before submitting, run `resources/self-check.md`.
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 - Execution steps: `resources/execution-protocol.md`
 - Report examples: `resources/examples.md`

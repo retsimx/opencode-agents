@@ -175,7 +175,7 @@ Skills live in `.agents/skills/{name}/SKILL.md`. Workflows live in `.agents/work
 | **design** | Design systems, DESIGN.md, design tokens, accessibility checks |
 | **docs** | Documentation drift detection and sync |
 | **gh-autopilot** | GitHub issue → draft PR with auto-implement, review, CI verify |
-| **orchestrate** | Automated parallel agent execution via OpenCode Task tool |
+| **orchestrate** | Automated parallel agent execution via OpenCode `task` tool |
 | **pdf** | PDF to Markdown conversion |
 | **plan** | PM planning: requirements → prioritized tasks → machine-readable plan |
 | **ralph** | Persistent review loop wrapping ultrawork with independent verifier |

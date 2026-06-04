@@ -1,5 +1,5 @@
 ---
-description: Automated parallel agent execution that spawns subagents via OpenCode Task tool and coordinates through file-based progress tracking
+description: Automated parallel agent execution that spawns subagents via OpenCode `task` tool and coordinates through file-based progress tracking
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -52,9 +52,9 @@ For each priority tier (P0 first, then P1, etc.):
 - Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`.
 - Use `edit` to update `.agents/results/task-board.md` with agent status.
 
-### Dispatch via OpenCode Task tool
+### Dispatch via OpenCode `task` tool
 
-Spawn agents using the OpenCode Task tool. All same-priority tasks should be spawned in parallel (multiple Task tool calls in one message).
+Spawn agents using the OpenCode `task` tool. All same-priority tasks should be spawned in parallel (multiple `task` tool calls in one message).
 
 | Domain | subagent_type |
 |:-------|:--------------|
@@ -69,7 +69,7 @@ Spawn agents using the OpenCode Task tool. All same-priority tasks should be spa
 | tf-infra | general |
 | docs | explore |
 
-Each Task tool invocation receives:
+Each `task` tool invocation receives:
 - `description`: short label
 - `subagent_type`: "general" (or "explore" for docs/analysis)
 - `prompt`: task description + execution protocol + relevant context + API contracts

@@ -133,7 +133,7 @@ Follow `resources/execution-protocol.md` step by step.
 See `resources/examples.md` for input/output examples.
 Use `resources/iso-planning.md` when the user needs standards-based planning, risk framing, or governance-oriented recommendations.
 Save plan to `.agents/results/plan-{sessionId}.json` and `.agents/results/result-pm.md`.
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 - Execution steps: `resources/execution-protocol.md`
 - Plan examples: `resources/examples.md`

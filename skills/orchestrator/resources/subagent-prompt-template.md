@@ -1,12 +1,12 @@
 # Subagent Prompt Template
 
 This template is used by the orchestrator to construct self-contained prompts
-for subagents spawned via the OpenCode Task tool.
+for subagents spawned via the OpenCode `task` tool.
 
 ## Template
 
 The orchestrator fills in the `{placeholders}` and passes the assembled prompt
-to the OpenCode Task tool.
+to the OpenCode `task` tool.
 
 ```
 You are a {AGENT_ROLE} working as part of an automated multi-agent system.

@@ -77,9 +77,9 @@ Activate PM Agent to execute Steps 1-4:
 // turbo
 Spawn Implementation Agents (Backend/Frontend/Mobile) in parallel.
 
-### Dispatch via OpenCode Task tool
+### Dispatch via OpenCode `task` tool
 
-Spawn implementation agents in parallel using the OpenCode Task tool:
+Spawn implementation agents in parallel using the OpenCode `task` tool:
 - Use `subagent_type="general"` for all implementation agents
 - Include execution protocol, task description, and context-loading rules in the prompt
 - Spawn all same-priority agents in a single message for parallel execution
@@ -126,7 +126,7 @@ If no measurement tools: skip; gates fall back to binary checklist.
 // turbo
 Spawn QA Agent to execute Steps 6-8.
 
-Spawn QA Agent via OpenCode Task tool (subagent_type="general").
+Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 
 ---
 
@@ -192,7 +192,7 @@ If baseline was measured at Step 5.2:
 // turbo
 Spawn Debug Agent (or Senior Dev Agent) to execute Steps 9-13.
 
-Spawn Debug Agent via OpenCode Task tool (subagent_type="general").
+Spawn Debug Agent via OpenCode `task` tool (subagent_type="general").
 
 ---
 
@@ -256,7 +256,7 @@ If baseline was measured at Step 5.2:
 // turbo
 Spawn QA Agent to execute Steps 14-17.
 
-Spawn QA Agent via OpenCode Task tool (subagent_type="general").
+Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 
 ---
 

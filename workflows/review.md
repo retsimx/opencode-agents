@@ -90,7 +90,7 @@ Use memory write tool to record the final report.
 
 ## Agent Delegation: Spawn QA Agent
 
-For large review scopes, delegate Steps 2-7 to a QA agent via the OpenCode Task tool:
+For large review scopes, delegate Steps 2-7 to a QA agent via the OpenCode `task` tool:
 - Use `subagent_type="general"`
 - Include the file list and review standards from `.agents/skills/qa/SKILL.md` in the prompt
 
@@ -100,11 +100,11 @@ For large review scopes, delegate Steps 2-7 to a QA agent via the OpenCode Task 
 
 When user wants fixes too, execute review then fix then re-review loop:
 
-1. Spawn QA agent (via OpenCode Task tool) to get issue list.
+1. Spawn QA agent (via OpenCode `task` tool) to get issue list.
 2. If CRITICAL/HIGH issues exist:
-   - Spawn domain agent(s) to fix issues via OpenCode Task tool:
+   - Spawn domain agent(s) to fix issues via OpenCode `task` tool:
      - `subagent_type="general"` with fix instructions and file list in prompt
      - For multi-domain fixes, spawn separate tasks per domain
 
-3. Re-spawn QA agent (via OpenCode Task tool) to re-review fixed code.
+3. Re-spawn QA agent (via OpenCode `task` tool) to re-review fixed code.
 4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.

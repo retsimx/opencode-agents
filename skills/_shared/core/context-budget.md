@@ -155,7 +155,7 @@ When a trigger fires, the Orchestrator executes:
 
 3. **Re-spawn**: Start a fresh agent with the checkpoint as context
    - **Claude Code**: New Agent tool call with checkpoint in prompt
-   - **Task tool agents**: Include checkpoint context in the task prompt
+   - **`task` tool agents**: Include checkpoint context in the task prompt
 
 4. **Resume**: New agent reads checkpoint, continues from remaining items only
 

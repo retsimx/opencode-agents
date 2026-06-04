@@ -37,7 +37,7 @@ Iteratively review and remediate the current implementation until review stabili
 - All identified issues remediated
 
 ### Dependencies
-- OpenCode Task tool — for delegating review and remediation
+- OpenCode `task` tool — for delegating review and remediation
 - `deep-review` skill — performs the actual deep code review inside the Task subagent
 
 ### Control-flow features
@@ -77,24 +77,24 @@ Iteratively review and remediate the current implementation until review stabili
 ### Exit
 - Success: `clean_review_streak == 3`
 - Partial success: streak never reached, user intervention needed
-- Failure: Task tool unavailable
+- Failure: `task` tool unavailable
 
 ## Logical Operations
 
 ### Actions
 | Action | SSL primitive | Evidence |
 |--------|---------------|----------|
-| Invoke review | `CALL_TOOL` | OpenCode Task tool with review instructions + handled_issues |
-| Inspect results | `READ` | Task tool return value |
+| Invoke review | `CALL_TOOL` | OpenCode `task` tool with review instructions + handled_issues |
+| Inspect results | `READ` | `task` tool return value |
 | Dedup against handled | `COMPARE` | Filter findings not already in handled_issues |
-| Invoke remediation | `CALL_TOOL` | OpenCode Task tool with findings; returns fixed + skipped |
+| Invoke remediation | `CALL_TOOL` | OpenCode `task` tool with findings; returns fixed + skipped |
 | Parse remediation result | `READ` | Extract fixed vs skipped from Task output |
 | Append to context | `UPDATE_STATE` | Add ALL findings (fixed + skipped) to handled_issues |
 | Update streak | `UPDATE_STATE` | Reset if fixed found, unchanged if all skipped |
 | Report result | `NOTIFY` | Final completion or escalation message |
 
 ### Tools and instruments
-- OpenCode Task tool (`subagent_type="general"`) — for delegating review and remediation
+- OpenCode `task` tool (`subagent_type="general"`) — for delegating review and remediation
 
 ### Canonical workflow path
 
@@ -107,9 +107,9 @@ handled_issues := []
 while clean_review_streak < 3:
 
     # ── Phase A: Review ──────────────────────────────────────────
-    # Use the Task tool. Do NOT read files or run git diff yourself.
+    # Use the `task` tool. Do NOT read files or run git diff yourself.
 
-    Use the Task tool (subagent_type="general") with this exact prompt:
+    Use the `task` tool (subagent_type="general") with this exact prompt:
 
         "Load the deep-review skill and review the recent uncommitted
          changes in this project. Provide scope as: DIFF (uncommitted
@@ -132,7 +132,7 @@ while clean_review_streak < 3:
     if new_findings:
 
         # ── Phase C: Remediation ─────────────────────────────────
-        # YOU MUST use the Task tool here. Do NOT read any source
+        # YOU MUST use the `task` tool here. Do NOT read any source
         # files. Do NOT edit any files. ALL remediation must be
         # delegated to this Task.
         #
@@ -140,7 +140,7 @@ while clean_review_streak < 3:
         # and reports back which were fixed vs skipped (intentional,
         # not practical, by design, etc.).
 
-        Use the Task tool (subagent_type="general") with this exact prompt:
+        Use the `task` tool (subagent_type="general") with this exact prompt:
 
             "Review the following findings against the actual code.
              For each one, determine if it is:
@@ -187,7 +187,7 @@ exit  # clean_review_streak == 3
 | Scope | Resource target |
 |-------|-----------------|
 | `LOCAL_FS` | Working tree git state |
-| `PROCESS` | Task tool subagent processes |
+| `PROCESS` | `task` tool subagent processes |
 | `MEMORY` | `clean_review_streak`, `handled_issues` |
 
 ### Preconditions
@@ -195,7 +195,7 @@ exit  # clean_review_streak == 3
 - `deep-review` skill is available at `.agents/skills/deep-review/SKILL.md`.
 
 ### Effects and side effects
-- Invokes subagents via the Task tool for review and remediation.
+- Invokes subagents via the `task` tool for review and remediation.
 - May modify code through remediation agents.
 - Does not stage or commit changes.
 
@@ -209,7 +209,7 @@ exit  # clean_review_streak == 3
 7. **Exit immediately when `clean_review_streak == 3`.**
 8. **Remediation agent triages fixability.** The remediation Task reads the actual code and decides what to fix vs skip. INTENTIONAL (by design) and NOT PRACTICAL (disproportionate effort) findings are skipped and added to `handled_issues` — they won't be re-flagged. Streak only resets when something was actually fixed.
 9. **Maintain `handled_issues` across iterations.** Include it in every review invocation so the deep-review skill knows what not to re-report. Append fixed findings after each remediation cycle.
-10. **TOOL RESTRICTION — Review: You MUST NOT read any source files in the foreground.** You MUST NOT run `git diff` (full diff). Your only tools for Phase A are the Task tool (to delegate) and reading the Task's returned findings. All code understanding must come from the deep-review skill's output. You do NOT evaluate fixability yourself — that is the remediation Task's job.
+10. **TOOL RESTRICTION — Review: You MUST NOT read any source files in the foreground.** You MUST NOT run `git diff` (full diff). Your only tools for Phase A are the `task` tool (to delegate) and reading the Task's returned findings. All code understanding must come from the deep-review skill's output. You do NOT evaluate fixability yourself — that is the remediation Task's job.
 11. **TOOL RESTRICTION — Remediation: You MUST NOT read any source files to prepare or verify remediation.** You MUST NOT edit any files directly. You MUST NOT run `git diff` beyond `git diff --stat`. ALL remediation MUST go through a Task subagent.
 12. **TOOL RESTRICTION — Diff: You may only run `git diff --stat` (file names only) to check whether files changed. Never the full diff.**
 

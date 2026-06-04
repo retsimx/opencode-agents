@@ -21,9 +21,9 @@ Spawn `debug-investigator` when:
 - Similar pattern scan scope is 10+ files
 - Deep dependency tracing is needed for diagnosis
 
-### Spawning via OpenCode Task tool
+### Spawning via OpenCode `task` tool
 
-When a subagent is needed (per criteria above), use the OpenCode Task tool:
+When a subagent is needed (per criteria above), use the OpenCode `task` tool:
 - `subagent_type="general"` for debug investigation
 - Include diagnosis results and scan scope in the prompt
 

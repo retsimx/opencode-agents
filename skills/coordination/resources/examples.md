@@ -10,20 +10,20 @@
 Step 1: PM Agent plans the project
   -> 5 tasks: auth API, CRUD API, login UI, todo UI, QA review
 
-Step 2: Spawn Priority 1 agents via OpenCode Task tool
-  # Run in parallel using multiple Task tool calls in one message
-  Task tool: subagent_type="general", description="JWT auth API + TODO CRUD"
-  Task tool: subagent_type="general", description="Login/Register UI"
+Step 2: Spawn Priority 1 agents via OpenCode `task` tool
+  # Run in parallel using multiple `task` tool calls in one message
+  `task` tool: subagent_type="general", description="JWT auth API + TODO CRUD"
+  `task` tool: subagent_type="general", description="Login/Register UI"
 
 Step 3: Monitor progress
   - Use memory read tool to poll progress-{agent}.md files
   - Verify API contracts align between backend/frontend
 
 Step 4: Spawn Priority 2 after P1 completes
-  Task tool: subagent_type="general", description="TODO List UI"
+  `task` tool: subagent_type="general", description="TODO List UI"
 
 Step 5: Spawn Priority 3
-  Task tool: subagent_type="general", description="Security + Performance review"
+  `task` tool: subagent_type="general", description="Security + Performance review"
 
 Step 6: Address QA findings
   - Re-spawn agents for CRITICAL/HIGH issues
@@ -41,14 +41,14 @@ Step 1: PM Agent analyzes existing codebase and plans
   -> 2 tasks: Comments API, Comment Section UI
 
 Step 2: Spawn Backend Agent first (API-first)
-  Task tool: subagent_type="general", description="Comments API with nested replies, pagination"
+  `task` tool: subagent_type="general", description="Comments API with nested replies, pagination"
 
 Step 3: After backend completes, spawn Frontend Agent
-  Task tool: subagent_type="general", description="Comment section UI using the new API endpoints"
+  `task` tool: subagent_type="general", description="Comment section UI using the new API endpoints"
   (Sequential because frontend depends on API contracts)
 
 Step 4: QA review
-  Task tool: subagent_type="general", description="Security: XSS in comments, rate limiting; Performance: Pagination, N+1 queries"
+  `task` tool: subagent_type="general", description="Security: XSS in comments, rate limiting; Performance: Pagination, N+1 queries"
 ```
 
 ## Example 3: When to Use Orchestrator Instead
@@ -60,7 +60,7 @@ Step 4: QA review
 ```
 "You want fully automated execution. Let me switch to the
 orchestrator skill instead, which will:
-1. Spawn agents automatically via the OpenCode Task tool
+1. Spawn agents automatically via the OpenCode `task` tool
 2. Coordinate via progress files
 3. Monitor progress and handle retries
 4. Return unified results

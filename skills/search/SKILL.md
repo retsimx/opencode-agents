@@ -164,7 +164,7 @@ See `resources/examples.md` for input/output examples.
 Use `resources/intent-rules.md` for intent classification reference.
 Use `resources/trust-registry.md` for domain trust scoring reference.
 Before submitting, run `resources/checklist.md`.
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 - Execution steps: `resources/execution-protocol.md`
 - Intent classification: `resources/intent-rules.md`

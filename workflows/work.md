@@ -68,12 +68,12 @@ Present the PM Agent's task breakdown to the user:
 Spawn agents for each task by priority tier (P0 first, then P1, etc.).
 Spawn all same-priority tasks in parallel. Assign separate workspaces to avoid file conflicts.
 
-### Dispatch via OpenCode Task tool
+### Dispatch via OpenCode `task` tool
 
-Spawn agents using the OpenCode Task tool:
+Spawn agents using the OpenCode `task` tool:
 - Use `subagent_type="general"` for implementation agents
 - Use `subagent_type="explore"` for research/analysis agents
-- Spawn all same-priority tasks in parallel (multiple Task tool calls in one message)
+- Spawn all same-priority tasks in parallel (multiple `task` tool calls in one message)
 - Assign clear task descriptions in the prompt
 - Include execution protocol instructions in the prompt
 
@@ -89,7 +89,7 @@ Spawn agents using the OpenCode Task tool:
 
 ## Step 6: Run QA Agent Review
 
-After all implementation agents complete, use the OpenCode Task tool to spawn a QA agent to review all deliverables:
+After all implementation agents complete, use the OpenCode `task` tool to spawn a QA agent to review all deliverables:
 
 - Security (OWASP Top 10)
 - Performance

@@ -1,6 +1,6 @@
 # Execution Protocol (Vendor-Agnostic)
 
-When spawned via the OpenCode Task tool, follow this protocol for shared state coordination.
+When spawned via the OpenCode `task` tool, follow this protocol for shared state coordination.
 
 ## Key Practices
 

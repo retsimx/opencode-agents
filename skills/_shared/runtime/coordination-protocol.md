@@ -1,13 +1,13 @@
 # Coordination Protocol (File-Based)
 
-When spawned as a subagent via the OpenCode Task tool, use this protocol for
+When spawned as a subagent via the OpenCode `task` tool, use this protocol for
 shared state coordination using the project's built-in `read`, `write`, `edit`
 tools against `.agents/results/`.
 
 ## Guiding Principles
 
 ### Prefer Task subagents for isolated work
-Delegate distinct subtasks to sub-subagents via the Task tool rather than doing
+Delegate distinct subtasks to sub-subagents via the `task` tool rather than doing
 everything inline. Each subagent gets a focused context, reducing dilution and
 preventing scope creep. Subagents are cheap — use them liberally.
 

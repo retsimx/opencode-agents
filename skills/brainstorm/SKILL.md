@@ -139,7 +139,7 @@ Follow the brainstorm workflow step by step:
 - **Skipping confirmation**: Moving forward without explicit user approval on design decisions
 
 ## References
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 - Context loading: `../_shared/core/context-loading.md`
 - Reasoning templates: `../_shared/core/reasoning-templates.md`

@@ -330,7 +330,7 @@ Follow the core workflow step by step:
 
 ### Execution Protocol (CLI Mode)
 
-Execution protocol instructions are included in the Task tool prompt.
+Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `../_shared/runtime/execution-protocol.md`.
 
 ## References

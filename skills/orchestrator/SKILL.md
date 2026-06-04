@@ -36,7 +36,7 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 - Review history and retry/remediation status when loops fail
 
 ### Dependencies
-- OpenCode Task tool (built-in)
+- OpenCode `task` tool (built-in)
 - Memory provider config, subagent prompt template, scripts, task templates, verify script, and session metrics
 
 ### Control-flow features
@@ -81,7 +81,7 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 | Read config and task context | `READ` | config, routing, request |
 | Select dispatch path | `SELECT` | Native vs fallback |
 | Write session state | `WRITE` | task board and memory files |
-| Spawn agents | `CALL_TOOL` | OpenCode Task tool (subagent_type="general") |
+| Spawn agents | `CALL_TOOL` | OpenCode `task` tool (subagent_type="general") |
 | Poll progress | `READ` | progress/result files |
 | Run verification | `CALL_TOOL` | `verify`, tests, QA |
 | Update retry state | `UPDATE_STATE` | loop counters and CD metrics |
@@ -92,7 +92,7 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 - Session metrics, prompt templates, task templates
 
 ### Canonical command path
-Task tool invocation:
+`task` tool invocation:
   subagent_type: "general"
   description: "<short task label>"
   prompt: "<full task prompt with execution instructions>"
@@ -115,7 +115,7 @@ Task tool invocation:
 - May trigger iterative review and retries.
 
 ### Guardrails
-1. Use the OpenCode Task tool with subagent_type="general" for all agent spawning.
+1. Use the OpenCode `task` tool with subagent_type="general" for all agent spawning.
 2. Never exceed the configured parallelism or retry limits.
 3. Keep session state, task-board state, progress files, and result files aligned throughout the run.
 
