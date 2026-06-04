@@ -5,6 +5,8 @@ description: PM planning workflow that gathers requirements, decomposes them int
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 1 in order.
+- **Use Task subagents for isolated work** — delegate in-depth analysis of specific areas to exploration subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about requirements. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for codebase exploration.
   - Use `write` and `edit` to record planning results.

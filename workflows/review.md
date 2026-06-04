@@ -5,6 +5,8 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 1 in order.
+- **Use Task subagents for isolated work** — delegate review focus areas (security, performance, etc.) to separate review subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about code intent. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for code analysis and review.
   - Use `write` and `edit` to record review results.

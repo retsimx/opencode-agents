@@ -6,6 +6,8 @@ description: Design-first ideation workflow that explores user intent, clarifies
 
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **Do NOT write any code.** This workflow produces a design document, not implementation.
+- **Use Task subagents for isolated work** — delegate exploration of specific areas or approaches to subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about user intent. Ask if you need clarification.
 - **Use the OpenCode Task tool (subagent_type="explore") for codebase exploration.**
   - Use glob/grep/read tools for code analysis.
   - Use file write tools to record design results.

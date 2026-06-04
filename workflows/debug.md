@@ -5,6 +5,8 @@ description: Structured bug diagnosis and fixing workflow that reproduces, diagn
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 1 in order.
+- **Use Task subagents for isolated work** — delegate investigation subtasks (e.g. trace through a specific module) to subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about the bug. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for bug investigation.
   - Use `write` and `edit` to record debugging results.

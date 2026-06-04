@@ -5,6 +5,8 @@ description: Automated parallel agent execution that spawns subagents via OpenCo
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
+- **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
+- **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
   - Use `.agents/results/` for all coordination and progress files

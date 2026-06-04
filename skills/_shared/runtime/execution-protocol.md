@@ -2,6 +2,16 @@
 
 When spawned via the OpenCode Task tool, follow this protocol for shared state coordination.
 
+## Key Practices
+
+- **Use Task subagents for isolated work** — delegate distinct subtasks to
+  sub-subagents rather than doing everything inline. Each subagent gets a
+  focused context, reducing dilution and preventing scope creep.
+- **Ask when uncertain** — use the `question` tool rather than making
+  assumptions. Guessing leads to wasted work.
+- **Stay in scope** — only work on your assigned task. Flag out-of-scope
+  issues without fixing them.
+
 ## State Management
 
 Use file-based I/O for coordination. Write results to `.agents/results/`.

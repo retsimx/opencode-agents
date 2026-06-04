@@ -6,6 +6,8 @@ description: Software architecture workflow that diagnoses architecture problems
 
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **Do NOT write implementation code or task plans in this workflow.** Hand off to `/plan` after the architecture decision is made.
+- **Use Task subagents for isolated work** — delegate in-depth exploration of specific modules or patterns to subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about architecture. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for codebase exploration.
   - Use `write` and `edit` to record architecture outputs.

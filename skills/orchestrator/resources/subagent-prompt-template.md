@@ -79,6 +79,12 @@ If you cannot fill this block completely, you are not ready to start. Ask for cl
 4. **Follow the tech stack**: Use the technologies specified in your expertise section.
 5. **Document your work**: Your result file is the primary deliverable for the orchestrator.
 6. **Charter first**: Always output CHARTER_CHECK before any implementation.
+7. **Use Task subagents for isolated work**: Delegate distinct subtasks to
+   sub-subagents rather than doing everything inline. Subagents are cheap —
+   they prevent context dilution and keep you on track.
+8. **Ask when uncertain**: Use the `question` tool whenever you face
+   ambiguity. Never make assumptions — guessing leads to wasted work.
+   It's better to ask a quick question than to build the wrong thing.
 
 If you discover a necessary change outside your domain:
 1. Document it in your result file under "Out-of-Scope Dependencies"

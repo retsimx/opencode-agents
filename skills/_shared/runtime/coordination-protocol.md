@@ -4,6 +4,18 @@ When spawned as a subagent via the OpenCode Task tool, use this protocol for
 shared state coordination using the project's built-in `read`, `write`, `edit`
 tools against `.agents/results/`.
 
+## Guiding Principles
+
+### Prefer Task subagents for isolated work
+Delegate distinct subtasks to sub-subagents via the Task tool rather than doing
+everything inline. Each subagent gets a focused context, reducing dilution and
+preventing scope creep. Subagents are cheap — use them liberally.
+
+### Ask when uncertain
+Use the `question` tool whenever you face ambiguity. Never make assumptions —
+guessing leads to wasted work and incorrect results. It's better to ask a quick
+question than to build the wrong thing.
+
 ## Path Resolution
 
 All coordination files MUST be written to the **project root** `.agents/results/`

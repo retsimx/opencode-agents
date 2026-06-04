@@ -11,7 +11,7 @@
 ### Application
 - List assumptions explicitly
 - Present 2+ alternatives for architecture decisions
-- Stop and clarify when confused
+- Ask using the `question` tool when uncertain — never assume
 - Push back on unclear requirements
 
 ### Anti-patterns

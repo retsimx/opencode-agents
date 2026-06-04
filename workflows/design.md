@@ -6,6 +6,8 @@ description: Design workflow that creates design systems, DESIGN.md, and design 
 
 - **NEVER skip phases.** Execute from Phase 1 in order.
 - **Do NOT write implementation code.** This workflow produces DESIGN.md, design tokens, and design guidance, not application code.
+- **Use Task subagents for isolated work** — delegate analysis of specific design areas (typography, color, accessibility) to subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about design direction. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for codebase exploration.
   - Use `write` and `edit` to record design results.

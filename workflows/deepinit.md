@@ -5,6 +5,8 @@ description: Initialize project harness with AGENTS.md as table of contents, ARC
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
+- **Use Task subagents for isolated work** — delegate deep exploration of specific project areas to subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about project structure or intent. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for codebase exploration.
   - Use `write` and `edit` for all output files.

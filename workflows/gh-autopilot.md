@@ -10,6 +10,8 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
 - **Run ALL CI steps locally before ANY commit or push.** Phase 5 (CI Verify) MUST complete successfully before Phase 6 (Ship) begins. Never commit first and verify later.
 - **Strictly follow ALL rules in the project's `AGENTS.md` and `TESTING.md` (if they exist).** These project-level rules override any general coding assumptions.
 - **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases. Each phase depends on the previous.
+- **Use Task subagents for isolated work** — spawn focused investigation or fix agents rather than doing everything inline. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions. Ask if you need clarification before proceeding.
 
 ---
 
