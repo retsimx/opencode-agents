@@ -107,10 +107,12 @@ handled_issues := []
 while clean_review_streak < 3:
 
     # ── Phase A: Review ──────────────────────────────────────────
-    # Use the `task` tool. Do NOT read files or run git diff yourself.
+    # Do NOT read files or run git diff. Delegate to the `task` tool.
 
-    Use the `task` tool (subagent_type="general") with this exact prompt:
-
+    Invoke the `task` tool with these parameters:
+      subagent_type: "general"
+      description: "deep-review"
+      prompt: >
         "Load the deep-review skill and review the recent uncommitted
          changes in this project. Provide scope as: DIFF (uncommitted
          changes). Return findings in the format specified by the
@@ -119,29 +121,27 @@ while clean_review_streak < 3:
          Previously handled issues — do NOT re-report these:
          <handled_issues>"
 
-    Wait for the Task subagent to return.
+    Wait for the subagent to return.
     Collect findings.
 
     # ── Phase B: Evaluate ─────────────────────────────────────────
     # If deep-review returned nothing, this iteration is clean.
-    # If it returned findings, compare against handled_issues to
-    # filter out anything already dealt with.
+    # If it returned findings, compare against handled_issues.
 
     new_findings = [f for f in findings if f not in handled_issues]
 
     if new_findings:
 
         # ── Phase C: Remediation ─────────────────────────────────
-        # YOU MUST use the `task` tool here. Do NOT read any source
-        # files. Do NOT edit any files. ALL remediation must be
-        # delegated to this Task.
-        #
-        # The remediation Task evaluates each finding in context
-        # and reports back which were fixed vs skipped (intentional,
-        # not practical, by design, etc.).
+        # Do NOT read files or edit files yourself. Delegate to the
+        # `task` tool. The remediation subagent evaluates each finding,
+        # fixes fixable ones, and reports back which were fixed vs
+        # skipped (intentional, not practical, by design, etc.).
 
-        Use the `task` tool (subagent_type="general") with this exact prompt:
-
+        Invoke the `task` tool with these parameters:
+          subagent_type: "general"
+          description: "remediation"
+          prompt: >
             "Review the following findings against the actual code.
              For each one, determine if it is:
                - FIXABLE — a real issue that should be fixed now
