@@ -11,7 +11,7 @@ The ledger follows the file-based coordination protocol (see `coordination-proto
 
 - **File-based mode**: `.agents/results/experiment-ledger.md`
 
-Both modes use the same format. The orchestrator creates the ledger; agents append via memory tools.
+Both modes use the same format. The orchestrate creates the ledger; agents append via memory tools.
 
 ---
 
@@ -71,7 +71,7 @@ See `coordination-protocol.md` → "Experiment Tracking" section for recorder as
 
 ## Session-End Analysis
 
-At session completion, the orchestrator generates a summary:
+At session completion, the orchestrate generates a summary:
 
 ```markdown
 ## Ledger Analysis
@@ -107,7 +107,7 @@ Format (matches `lessons-learned.md` RCA format):
 - **Source**: Experiment Ledger #{experiment_number}, Session {session_id}
 ```
 
-The orchestrator appends these to the relevant domain section in `lessons-learned.md`.
+The orchestrate appends these to the relevant domain section in `lessons-learned.md`.
 
 ---
 

@@ -15,7 +15,7 @@ QA Agent and Orchestrator add new lessons after session completion.
 | debug-agent | Debug | Relevant domain (Backend/Frontend/Mobile) |
 | qa-agent | QA / Security | Relevant domain being reviewed |
 | pm-agent | Cross-Domain | All sections (for planning awareness) |
-| orchestrator | Cross-Domain | All sections (for coordination) |
+| orchestrate | Cross-Domain | All sections (for coordination) |
 
 ---
 

@@ -1,37 +1,109 @@
 ---
 name: review
-description: >
-  Full QA review pipeline covering security audit (OWASP Top 10), performance
-  analysis, accessibility checks (WCAG 2.1 AA), and code quality review.
-  Use for pre-ship code review, PR review, branch review, or security audit
-  of any codebase.
+description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility checks (WCAG 2.1 AA), and code quality review. Use for pre-ship code review, PR review, branch review, or security audit of any codebase.
 ---
 
-# QA Review Pipeline (`review`)
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
-## Scheduling
+- **NEVER skip steps.** Execute from Step 1 in order.
+- **Use Task subagents for isolated work** — delegate review focus areas (security, performance, etc.) to separate review subagents. Subagents are cheap; they prevent context dilution.
+- **Use the `question` tool when uncertain** — never make assumptions about code intent. Ask if you need clarification.
+- **You MUST use OpenCode's built-in tools for the workflow.**
+  - Use `grep`, `glob`, `read` for code analysis and review.
+  - Use `write` and `edit` to record review results.
+  - Use `.agents/results/` for output files.
 
-### Goal
-Run a comprehensive review of code changes: automated security scanning, manual OWASP Top 10 review, performance analysis, accessibility checks, code quality review, and a prioritized findings report.
+---
 
-### Intent signature
-- User says "review", "audit", "QA", "security review", "check code quality"
-- User wants a pre-ship review or PR review
-- User asks about OWASP, vulnerabilities, performance issues, or accessibility
+## Step 1: Identify Review Scope
 
-### When to use
-Use before shipping any changes, after receiving code from implementation agents, or on explicit request. Can delegate to a QA subagent for large scopes.
+Ask the user what to review: specific files, a feature branch, or the entire project.
+If a PR or branch is provided, diff against the base branch to scope the review.
 
-## Structural Flow
+---
 
-Execute `.agents/workflows/review.md` which covers the full 7-step pipeline: scope identification, automated security scanning, OWASP manual review, performance analysis, accessibility review, code quality review, and QA report generation with fix-verify loop.
+## Step 2: Run Automated Security Checks
 
-## Logical Operations
+// turbo
+Run available security tools: `npm audit` (Node.js), `bandit` (Python), or equivalent.
+Check for known vulnerabilities in dependencies. Flag any CRITICAL or HIGH findings.
 
-All logic is defined in the workflow file at `.agents/workflows/review.md`. Load and follow it step-by-step without deviation.
+---
 
-## References
+## Step 3: Manual Security Review (OWASP Top 10)
 
-- Workflow: `.agents/workflows/review.md`
-- QA skill: `.agents/skills/qa/SKILL.md`
-- Coordination skill: `.agents/skills/coordination/SKILL.md`
+Use `grep` and `read` to review code for:
+- Injection (SQL, XSS, command)
+- Broken auth, sensitive data exposure
+- Broken access control, security misconfig
+- Insecure deserialization
+- Known vulnerable components
+- Insufficient logging
+
+---
+
+## Step 4: Performance Analysis
+
+Use `grep` to check for:
+- N+1 queries, missing indexes
+- Unbounded pagination, memory leaks
+- Unnecessary re-renders (React)
+- Missing lazy loading
+- Large bundle sizes, unoptimized images
+
+---
+
+## Step 5: Accessibility Review (WCAG 2.1 AA)
+
+Check for:
+- Semantic HTML, ARIA labels
+- Keyboard navigation, color contrast
+- Focus management, screen reader compatibility
+- Image alt text
+
+---
+
+## Step 6: Code Quality Review
+
+Use `grep`/`glob` and `read` to check for:
+- Consistent naming, proper error handling
+- Test coverage, TypeScript strict mode compliance
+- Unused imports/variables
+- Proper async/await usage
+- Public API documentation
+
+---
+
+## Step 7: Generate QA Report
+
+Compile all findings into a prioritized report:
+- **CRITICAL**: Security breaches, data loss risks
+- **HIGH**: Blocks launch
+- **MEDIUM**: Fix this sprint
+- **LOW**: Backlog
+
+Each finding must include: `file:line`, description, and remediation code.
+Use memory write tool to record the final report.
+
+---
+
+## Agent Delegation: Spawn QA Agent
+
+For large review scopes, delegate Steps 2-7 to a QA agent via the OpenCode `task` tool:
+- Use `subagent_type="general"`
+- Include the file list and review standards from the qa skill in the prompt
+
+---
+
+## Fix-Verify Loop (with --fix option)
+
+When user wants fixes too, execute review then fix then re-review loop:
+
+1. Spawn QA agent (via OpenCode `task` tool) to get issue list.
+2. If CRITICAL/HIGH issues exist:
+   - Spawn domain agent(s) to fix issues via OpenCode `task` tool:
+     - `subagent_type="general"` with fix instructions and file list in prompt
+     - For multi-domain fixes, spawn separate tasks per domain
+
+3. Re-spawn QA agent (via OpenCode `task` tool) to re-review fixed code.
+4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.

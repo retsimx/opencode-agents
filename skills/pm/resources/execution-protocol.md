@@ -52,7 +52,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Check: Is security considered from the start (not deferred)?
 - Check: Are API contracts defined before frontend/mobile tasks?
 - Check: Are major risks, owners, and approval points explicit when needed?
-- Output task-board.md format for orchestrator compatibility
+- Output task-board.md format for orchestrate compatibility
 
 ## On Error
 See `resources/error-playbook.md` for recovery steps.

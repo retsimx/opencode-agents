@@ -75,7 +75,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 1. **Stop immediately**; do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
-4. Specify remaining tasks so orchestrator can retry later
+4. Specify remaining tasks so orchestrate can retry later
 
 ---
 

@@ -42,7 +42,7 @@ Hypothesis B: ...
 
 Execute each hypothesis **in isolation**.
 
-**In multi-agent mode** (`/orchestrate`, `/work`):
+**In multi-agent mode** (`the orchestrate skill`, `/work`):
 - Spawn the **same agent type** (e.g., `backend-engineer`) multiple times with different prompts
 - Each spawn includes the hypothesis context in the task description:
   ```
@@ -127,7 +127,7 @@ VERIFY_GATE fails (2nd time, same issue)
   → Resume gate evaluation with winning approach
 ```
 
-### In `/orchestrate`
+### In `the orchestrate skill`
 
 Triggered when agent verification fails after max retries:
 

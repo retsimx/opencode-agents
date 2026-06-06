@@ -1,38 +1,105 @@
 ---
 name: stack-set
-description: >
-  Auto-detect a project's tech stack by scanning manifests
-  (Cargo.toml, package.json, pyproject.toml, go.mod, etc.) and generate
-  stack-specific language/framework references — stack.yaml, tech-stack.md,
-  snippets.md, and API boilerplate — into the backend skill's stack/
-  directory. Use when setting up or updating a project's tech stack
-  configuration for AI tooling.
+description: Auto-detect a project's tech stack by scanning manifests (Cargo.toml, package.json, pyproject.toml, go.mod, etc.) and generate stack-specific language/framework references — stack.yaml, tech-stack.md, snippets.md, and API boilerplate — into the backend skill's stack/ directory. Use when setting up or updating a project's tech stack configuration for AI tooling.
 ---
 
-# Stack Configuration (`stack-set`)
+# Stack Configuration
 
-## Scheduling
+## Goal
+Analyze project files to detect the tech stack, then generate language-specific references in the domain skill's `stack/` directory.
 
-### Goal
-Detect the project's language, framework, ORM, validation, migration, and test tools from manifests, then generate stack-specific reference files for consistent AI-generated code.
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native file reading tools for manifest detection and file writing tools for stack generation.
 
-### Intent signature
-- User says "set up stack", "detect tech stack", "configure stack"
-- Project needs stack-specific code patterns generated
-- Backend skill's stack/ directory is missing or out of date
+---
 
-### When to use
-On initial project setup, after adding new dependencies, or when stack-specific code generation produces incorrect patterns.
+## Step 1: Detect
 
-## Structural Flow
+Scan project root for package manifests:
 
-Execute `.agents/workflows/stack-set.md` which covers the full 4-step sequence: manifest detection, confirmation, file generation (stack.yaml, tech-stack.md, snippets.md, api-template), and verification.
+| File | Detection |
+|:---|:---|
+| `pyproject.toml`, `requirements.txt`, `Pipfile` | Python |
+| `package.json`, `tsconfig.json` | Node.js/TypeScript |
+| `Cargo.toml` | Rust |
+| `pom.xml`, `build.gradle`, `build.gradle.kts` | Java/Kotlin |
+| `go.mod` | Go |
+| `mix.exs` | Elixir |
+| `Gemfile` | Ruby |
+| `*.csproj`, `*.sln` | C#/.NET |
 
-## Logical Operations
+Read manifest contents to detect framework:
+- Python: FastAPI? Django? Flask?
+- Node.js: NestJS? Express? Hono?
+- Rust: Axum? Actix-web? Rocket?
+- Java: Spring Boot? Quarkus?
 
-All logic is defined in the workflow file at `.agents/workflows/stack-set.md`. Load and follow it step-by-step without deviation.
+## Step 2: Confirm
 
-## References
+Present detection results and ask for confirmation:
+```
+Detected backend stack:
+  Language: {language}
+  Framework: {framework}
+  ORM: {orm}
+  Validation: {validation}
+  Migration: {migration}
+  Test: {test framework}
 
-- Workflow: `.agents/workflows/stack-set.md`
-- Backend skill: `.agents/skills/backend/SKILL.md`
+Correct? (Y/n) or modify:
+```
+
+## Step 3: Generate
+
+Create files in `.agents/skills/backend/stack/`:
+
+### stack.yaml
+```yaml
+language: {language}
+framework: {framework}
+orm: {orm}
+validation: {validation}
+migration: {migration}
+test: {test_framework}
+source: detected
+detected_from:
+  - {manifest_file}
+```
+
+### tech-stack.md
+Generate tech stack reference with these MANDATORY sections:
+- Framework version and core API
+- ORM/DB library and usage
+- Validation library
+- Migration tool
+- Test framework
+- Linter/formatter
+
+### snippets.md
+Generate copy-paste code patterns. MANDATORY patterns (all 8 required):
+- [ ] Route/Handler + Auth example
+- [ ] Validation Schema example
+- [ ] ORM Model/Entity example
+- [ ] DI (Dependency Injection) example
+- [ ] Repository pattern example
+- [ ] Paginated Query example
+- [ ] Migration example
+- [ ] Test example
+
+### api-template.*
+Generate CRUD endpoint boilerplate in the detected language.
+
+## Step 4: Verify
+
+Confirm generated files meet requirements:
+- [ ] stack.yaml has language, framework, orm, validation fields
+- [ ] snippets.md contains all 8 mandatory patterns
+- [ ] tech-stack.md contains all 6 mandatory sections
+- [ ] api-template file uses correct language extension
+- [ ] Code follows existing project conventions
+
+## Constraints
+
+- Do NOT modify `.agents/skills/backend/SKILL.md` (abstract interface is protected)
+- Do NOT modify `resources/` common files
+- Only create/modify files in `stack/` directory
+- If `stack/` already exists, ask before overwriting

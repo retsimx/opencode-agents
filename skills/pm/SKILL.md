@@ -12,7 +12,7 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 
 ### Intent signature
 - User asks for planning, requirements, specification, scope, prioritization, task breakdown, roadmap, or implementation plan.
-- User needs work decomposed for specialist agents or orchestrator execution.
+- User needs work decomposed for specialist agents or orchestrate execution.
 
 ### When to use
 - Breaking down complex feature requests into tasks
@@ -63,7 +63,7 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 - If requirements are ambiguous, clarify before decomposition.
 - If tasks are tightly coupled, refine contracts or sequencing.
 - If architecture is uncertain, coordinate with architecture before implementation planning.
-- If the user needs automated execution, hand off to orchestrator after plan approval.
+- If the user needs automated execution, hand off to orchestrate after plan approval.
 
 ### Failure and recovery
 - If scope is too broad, split into phases.
@@ -71,7 +71,7 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 - If dependencies block parallel execution, surface sequencing explicitly.
 
 ### Exit
-- Success: plan is actionable, testable, prioritized, and compatible with orchestrator execution.
+- Success: plan is actionable, testable, prioritized, and compatible with orchestrate execution.
 - Partial success: unresolved assumptions or dependencies are explicit.
 
 ## Logical Operations
@@ -119,7 +119,7 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 3. Minimize dependencies for maximum parallel execution
 4. Security and testing are part of every task (not separate phases)
 5. Tasks should be completable by a single agent
-6. Output JSON plan + task-board.md for orchestrator compatibility
+6. Output JSON plan + task-board.md for orchestrate compatibility
 7. When relevant, structure plans using ISO 21500 concepts, risk prioritization using ISO 31000 thinking, and responsibility/governance suggestions inspired by ISO 38500
 
 ### Common Pitfalls

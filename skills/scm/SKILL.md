@@ -164,7 +164,101 @@ Use this when the user asks about branching strategy, merges, rebase/cherry-pick
 1. Run CM workflows in order (Planning -> Identification -> Control -> Status accounting -> Verification)
 2. Add onboarding risk scan when inheriting or auditing a repository
 3. Include commit governance from Conventional Commits when creating commits
-4. For large-scope merge operations, use risk scoring and Ask Gate criteria from `../../workflows/scm.md`
+4. For large-scope merge operations, use the risk scoring and Ask Gate criteria below.
+
+#### Conflict-Risk Triage (for large-scope merges)
+
+Trigger when merge scope is large by change footprint, not PR count.
+Read thresholds from `config/cm-config.yaml` `large_merge_thresholds.*` first.
+If config values are missing, use these defaults:
+- combined changed files >= 150
+- combined additions+deletions >= 3000 lines
+- touching >= 3 high-churn/hotspot paths
+- any candidate has `risk_score >= 60`
+
+Use these signals:
+- file overlap across PRs (same files)
+- line-range overlap when available
+- branch age and divergence from base
+- hotspot files (high churn/recent edits)
+- ownership spread (many authors/teams touching same area)
+- semantic flags (API contract/interface/schema changes)
+
+Risk score formula (0-100):
+
+`risk_score = overlap(0-40) + divergence(0-20) + hotspot(0-15) + ownership(0-15) + semantic(0-10)`
+
+Bucket thresholds:
+- **LOW**: 0-29
+- **MEDIUM**: 30-59
+- **HIGH**: 60-100
+
+Scoring guidance:
+- `overlap`: 0 (none), 20 (same file only), 40 (same file + overlapping lines)
+- `divergence`: 0 (<24h and <=10 commits behind), 10 (1-3 days or <=50 behind), 20 (>3 days or >50 behind)
+- `hotspot`: 0 (stable), 8 (moderate churn), 15 (top churn paths touched)
+- `ownership`: 0 (single owner/team), 8 (2-3 owners), 15 (cross-team and unclear ownership)
+- `semantic`: 0 (none), 5 (minor contract touch), 10 (API/schema/interface breaking risk)
+
+Data sources (preferred order):
+1. PR metadata/diff from GitHub CLI or API
+2. Line-overlap detectors
+3. Merge simulation (GitHub mergeability/queue simulation when available)
+4. Local git history for churn/hotspot and ownership hints
+
+Recommended risk buckets:
+- **LOW**: no overlap, low divergence, no semantic flags
+- **MEDIUM**: partial overlap or moderate divergence
+- **HIGH**: line overlap, repeated hotspot collisions, or semantic flags
+
+For large-scope merges, propose merge order as:
+1. LOW in small batches
+2. MEDIUM in smaller batches
+3. HIGH one-by-one with explicit checkpoints
+
+#### Ask Gate (must ask before risky operations)
+
+Stop and ask user confirmation if any of these are true:
+- merge conflicts are already present
+- history rewrite is required (`--force`, `reset --hard`, destructive restore/clean)
+- required checks, required reviews, or CODEOWNERS conditions are not satisfied
+- protected/main branch policy could be violated
+- release-critical paths are involved and rollback plan is unclear
+
+Additional Ask Gate triggers:
+- `risk_score >= 60`
+- batch failure repeated 2+ times
+- merge queue is unavailable and manual direct-merge is requested
+
+#### Merge Operation Report Template
+
+```markdown
+## Merge Operation Report
+- Target branch:
+- PRs analyzed:
+- Inputs:
+  - changed_files:
+  - changed_lines:
+  - hotspot_paths_touched:
+  - overlap_pairs:
+  - line_overlap_pairs:
+  - semantic_flags:
+- Risk summary: LOW {n} / MEDIUM {n} / HIGH {n}
+- Batch plan:
+  - Batch 1:
+  - Batch 2:
+- Ask-Gate decisions taken:
+- Conflicts encountered:
+- CI/check status:
+- Rollback actions (if any):
+- Remaining risks:
+```
+
+Failure handling and rollback for merges:
+- On batch failure, bisect once and retry with smaller batch.
+- If the second attempt fails, stop and escalate with Ask Gate.
+- Never continue high-risk merges after repeated failures without explicit approval.
+- For protected/main branches, prefer revert-based rollback over history rewrite.
 
 ### CM process map (software)
 

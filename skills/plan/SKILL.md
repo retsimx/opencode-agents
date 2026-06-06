@@ -1,4 +1,5 @@
 ---
+name: plan
 description: PM planning workflow that gathers requirements, decomposes them into prioritized tasks, defines API contracts, and produces both a machine-readable plan and a human-readable tracker in docs/plans/
 ---
 
@@ -14,17 +15,17 @@ description: PM planning workflow that gathers requirements, decomposes them int
 
 ---
 
-> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native code analysis tools. Plan artifacts (`.agents/results/plan-{sessionId}.json` and `docs/plans/work/{NNN}-{name}.md`) are consumed by `/orchestrate` or `/work`, which handle their own vendor detection.
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native code analysis tools. Plan artifacts (`.agents/results/plan-{sessionId}.json` and `docs/plans/work/{NNN}-{name}.md`) are consumed by the orchestrate or work skills, which handle their own vendor detection.
 
 ---
 
 ## Core Philosophy
 
-**Plans are first-class artifacts**: structured, templated, and consumed by other workflows. They are local working artifacts (not committed to the repo; `docs/plans/` is gitignored), but they follow strict conventions so any agent can read and update them.
+**Plans are first-class artifacts**: structured, templated, and consumed by other skills. They are local working artifacts (not committed to the repo; `docs/plans/` is gitignored), but they follow strict conventions so any agent can read and update them.
 
 Two artifacts per plan:
 
-1. **Machine-readable**: `.agents/results/plan-{sessionId}.json` consumed by `/orchestrate` and `/work`.
+1. **Machine-readable**: `.agents/results/plan-{sessionId}.json` consumed by orchestrate and work.
 2. **Human-readable**: `docs/plans/work/{NNN}-{name}.md` with task table, decision log, and progress notes. Lifecycle is tracked via the `Status` field in the file header (`Active` → `Completed`); no folder moves required.
 
 ### Layout
@@ -41,7 +42,6 @@ docs/plans/
 - Folder = type (designs vs work). Status field = lifecycle.
 - Filename always uses 3-digit zero-padded sequential prefix (`001-`, `002-`, …) per folder.
 - Determine the next number with `ls docs/plans/{designs,work}/ | grep -E '^[0-9]{3}-' | tail -1`.
-- Plan content follows the user's prompt language. Mixed-language guidance lives in `.agents/rules/i18n-guide.md`.
 
 ---
 
@@ -58,8 +58,8 @@ Ask the user to describe what they want to build. Clarify:
 ## Step 2: Analyze Technical Feasibility
 
 // turbo
-If an existing codebase exists, use MCP code analysis tools to scan:
-- Use `grep`/`glob` to analyze the codebase:
+If an existing codebase exists:
+- Use `grep`/`glob` to analyze the codebase.
 
 Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references. Reuse patterns from similar work.
 
@@ -67,9 +67,9 @@ Also search `docs/plans/work/` for related past or in-progress plans, and `docs/
 
 ## Step 3: Assess Complexity
 
-Use `_shared/core/difficulty-guide.md` to classify:
+Use the difficulty-guide skill to classify:
 
-- **Simple** → no plan artifact needed; execute directly via `/work`.
+- **Simple** → no plan artifact needed; execute directly via work skill.
 - **Medium** → produce both JSON and a lightweight markdown tracker (skip Step 4 API contracts if not cross-boundary).
 - **Complex** → produce both artifacts with all sections plus API contracts.
 
@@ -82,10 +82,10 @@ Report scope assessment to the user. Get confirmation before proceeding.
 // turbo
 If the plan involves cross-boundary work (frontend ↔ backend, service ↔ service):
 
-1. Design API contracts using `_shared/core/api-contracts/template.md`. Per endpoint:
+1. Design API contracts using the api-contracts template. Per endpoint:
    - Method, path, request/response schemas
    - Auth requirements, error responses
-2. Save to `.agents/skills/_shared/core/api-contracts/{contract-name}.md`.
+2. Save to `api-contracts/{contract-name}.md`.
 3. Reference from the markdown tracker generated in Step 6.
 
 ---
@@ -172,13 +172,13 @@ Generate `docs/plans/work/{NNN}-{name}.md` using this template (replace `{NNN}` 
 - `{kebab-name}` describes the feature; do **not** append `-design` or `-plan` (the folder already encodes type).
 - Lifecycle is tracked via the `Status` header in the file, not via folder moves.
 
-The plan is now ready for `/work` or `/orchestrate` to execute.
+The plan is now ready for the work or orchestrate skills to execute.
 
 ---
 
 ## Lifecycle Updates (during execution)
 
-`/orchestrate` and `/work` update the markdown tracker as work progresses:
+The orchestrate and work skills update the markdown tracker as work progresses:
 
 - Task status: `TODO` → `WIP` → `DONE` or `BLOCKED`
 - Append timestamped entries to **Progress Notes**

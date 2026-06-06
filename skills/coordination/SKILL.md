@@ -23,7 +23,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 ### When NOT to use
 
 - Simple single-domain task -> use the specific agent directly
-- User wants automated execution -> use orchestrator
+- User wants automated execution -> use orchestrate
 - Quick bug fixes or minor changes
 
 ### Expected inputs
@@ -37,7 +37,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 - API/data contract alignment checkpoints
 
 ### Dependencies
-- PM, frontend, backend, mobile, QA, and orchestrator skills
+- PM, frontend, backend, mobile, QA, and orchestrate skills
 - `resources/examples.md`
 - OpenCode `task` tool and progress/result memory conventions
 
@@ -61,7 +61,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 
 ### Transitions
 - If task is simple, route to one specialist.
-- If user wants automated execution, use orchestrator.
+- If user wants automated execution, use orchestrate.
 - If QA finds CRITICAL issues, re-spawn responsible agents.
 
 ### Failure and recovery
@@ -150,7 +150,7 @@ Spawn QA Agent last to review all deliverables. Address CRITICAL issues by re-sp
 
 ### Automated Alternative
 
-For fully automated execution without manual spawning, use the **orchestrator** skill instead.
+For fully automated execution without manual spawning, use the **orchestrate** skill instead.
 
 ## References
 

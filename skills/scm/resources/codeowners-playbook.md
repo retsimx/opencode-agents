@@ -25,7 +25,7 @@ cli/commands/migrations/* @org/release-engineering
 
 # Agent system and governance
 .agents/hooks/** @org/agent-platform
-.agents/workflows/** @org/agent-platform
+.agents/skills/** @org/agent-platform
 
 # Product docs/content
 web/content/** @org/docs

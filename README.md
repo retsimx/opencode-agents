@@ -1,8 +1,8 @@
-# `.agents/` — Agent Skills, Workflows & Configuration
+# `.agents/` — Agent Skills & Configuration
 
 > **Adapted fork of [oh-my-agent](https://github.com/first-fluke/oh-my-agent).**
-> This directory provides a structured skill library, workflow definitions, and
-> coding rules for the OpenCode agent framework.
+> This directory provides a structured skill library and coding rules for the
+> OpenCode agent framework. All skills are self-contained under `skills/`.
 
 ## Quick Start (New Project)
 
@@ -41,57 +41,57 @@ OpenCode loads skills from `.agents/skills/` on startup — no additional config
 ├── rules/                 # Domain-specific coding rules (i18n, etc.)
 ├── skills/                # Agent skill library (34 skills)
 │   ├── _shared/           # Shared runtime protocols and core resources
-│   ├── agenthelp/         # Help desk — list all skills/workflows on request
+│   ├── agenthelp/         # Help desk — list all skills on request
 │   ├── backend/           # Backend API & server implementation
 │   ├── frontend/          # Frontend UI implementation
 │   ├── ...                # (see full list below)
 │   └── work/              # Multi-agent coordination
-└── workflows/             # Executable workflow definitions
 ```
 
 ## Initial Setup
 
-Before using the agent system, consider running these setup workflows:
+Before using the agent system, consider running these setup skills:
 
-| Workflow | Purpose | When |
-|----------|---------|------|
+| Skill | Purpose | When |
+|-------|---------|------|
 | `deepinit` | Initialize AI harness: AGENTS.md, ARCHITECTURE.md, structured docs/ | First time setting up a project |
 | `stack-set` | Auto-detect tech stack, generate stack.yaml, snippets, API boilerplate | After deepinit, or when stack changes |
 
-## Standard Workflows
+## Core Skills
 
-Invoke workflows directly by name (e.g. `/brainstorm "Load the brainstorm skill and..."`).
+Load skills via the `skill` tool by name (e.g., `skill "brainstorm"`).
 
 ### Planning & Design
-| Workflow | What it does |
-|----------|-------------|
+| Skill | What it does |
+|-------|-------------|
 | `brainstorm` | Design-first ideation — explores intent, constraints, approaches |
 | `plan` | PM-driven task breakdown with priorities and dependencies |
 
 ### Multi-Agent Execution
-| Workflow | What it does |
-|----------|-------------|
-| `orchestrate` | Spawns parallel subagents, coordinates via MCP memory |
+| Skill | What it does |
+|-------|-------------|
+| `orchestrate` | Spawns parallel subagents, file-based progress tracking |
 | `work` | PM plan + parallel agents + QA review |
 | `ultrawork` | 5-phase process with 11+ review steps |
 
 ### Review & Quality
-| Workflow | What it does |
-|----------|-------------|
-| `ralph` | Iterative deep-review loop until 3 clean passes |
+| Skill | What it does |
+|-------|-------------|
+| `ralph` | Execution loop: ultrawork + independent verifier verification |
+| `ralphreview` | Iterative deep-review loop until 3 clean passes |
 | `review` | Full QA: security (OWASP), performance, accessibility, code quality |
 
 ### Operations
-| Workflow | What it does |
-|----------|-------------|
+| Skill | What it does |
+|-------|-------------|
 | `scm` | Branch, merge, commit with Conventional Commits |
 | `debug` | Structured diagnosis: reproduce → root cause → fix → regression test |
 | `docs` | Documentation drift detection and sync |
 | `recap` | Session recap from multi-tool conversation histories |
 
-### Full workflow list
+### Full skill list
 
-Run `agenthelp` or check `.agents/workflows/` for all workflows listed above.
+Run the `agenthelp` skill for a complete listing with descriptions.
 
 ## Skills — When to Use Which
 
@@ -114,7 +114,7 @@ All 34 skills can be loaded via the `skill` tool. The main categories:
 - **pm** — Product management, requirement decomposition, task breakdown
 - **architecture** — Software design, tradeoff analysis, ADR records
 - **design** — AI design systems, typography, color, motion
-- **orchestrator** — Multi-agent spawning and coordination
+- **orchestrate** — Multi-agent spawning and coordination
 
 ### Specialized
 - **scholar** — Academic research, paper sidecar generation
@@ -134,9 +134,9 @@ All 34 skills can be loaded via the `skill` tool. The main categories:
 - **recap** — Conversation history analysis and summaries
 
 ### Meta
-- **agenthelp** — Help desk: lists all skills and workflows on request
+- **agenthelp** — Help desk: lists all skills on request
 - **coordination** — Manual step-by-step multi-agent coordination
-- **work** — Multi-domain feature orchestration
+- **work** — Multi-domain feature coordination
 - **ultrawork** — High-stakes 5-phase development
 - **brainstorm** — Design-first ideation
 - **academic-writer** — Publication-grade English prose
@@ -159,4 +159,4 @@ The agent environment provides these built-in tools:
 | **todowrite** | Track task progress |
 | **question** | Ask the user for input |
 
-Run `agenthelp` to get a full listing of all skills and workflows with descriptions.
+Load the `agenthelp` skill to get a full listing of all available skills with descriptions.

@@ -1,6 +1,6 @@
 # Skill Routing Map
 
-Routing rules for orchestrator and coordination to assign tasks to the correct agent.
+Routing rules for orchestrate and coordination to assign tasks to the correct agent.
 
 ## Progressive Disclosure
 
@@ -30,7 +30,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | UI design, design system, landing page, DESIGN.md, color palette, typography, glassmorphism, responsive design | **design** | |
 | brainstorm, ideate, design, explore, idea, concept | **brainstorm** | Run before pm |
 | plan, breakdown, task, sprint | **pm** | |
-| automatic, parallel, orchestrate | **orchestrator** | |
+| automatic, parallel, orchestrate | **orchestrate** | |
 | workflow, guide, manual, step-by-step | **coordination** | |
 | configuration management, SCM, CM, git, commit, gitflow, GitHub Flow, GitLab Flow, trunk-based branching, merge conflict, rebase, worktree, baseline, tag, release branch, signed commits, merge queue, conventional commits | **scm** | SCM + Conventional Commits in one skill |
 
@@ -49,7 +49,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | "Add feature and test" | pm → relevant agent → qa |
 | "I have an idea for a feature" | brainstorm → pm → relevant agents → qa |
 | "Let's design something new" | brainstorm → pm → relevant agents → qa |
-| "Do everything automatically" | orchestrator (internally pm → agents → qa) |
+| "Do everything automatically" | orchestrate (internally pm → agents → qa) |
 | "I'll manage manually" | coordination |
 | "Design and build a landing page" | design → frontend |
 | "Design, build, and review" | design → frontend → qa |
@@ -86,7 +86,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | QA finds CRITICAL issue | Re-run relevant domain agent |
 | Architecture change needed | architecture → pm |
 | Performance issue found (during implementation) | Current agent fixes, debug if severe |
-| API contract mismatch | orchestrator re-runs backend |
+| API contract mismatch | orchestrate re-runs backend |
 
 ---
 

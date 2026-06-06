@@ -1,4 +1,5 @@
 ---
+name: ralph
 description: Ralph - persistent self-referential execution loop wrapping ultrawork with independent verifier verification
 ---
 
@@ -12,19 +13,17 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
   - Use `.agents/results/` for all coordination and progress files
   - Do NOT rely on MCP-specific tools or memory providers
 - **This workflow does NOT stop until all completion criteria pass or safeguards trigger.**
-- **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
+- **Follow the context-loading guide.** Load the context-loading skill and load only task-relevant resources.
 
 ---
-
-
 
 ## Phase 0: INIT (DO NOT SKIP)
 
 ### Step 0.1: Load Prerequisites
 
-1. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
-2. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
-3. Read `.agents/workflows/ralph/resources/judge-protocol.md` for JUDGE rules.
+1. Load the context-loading skill for resource loading strategy.
+2. Load the coordination-protocol skill for the coordination protocol.
+3. Read `resources/judge-protocol.md` for JUDGE rules.
 
 ### Step 0.2: Define Completion Criteria
 
@@ -40,7 +39,7 @@ criteria:
     previous_status: null           # last non-null status from prior iteration
     regressed_at_iteration: null    # iteration number when PASS → FAIL transition was detected
     affected_paths: []              # optional glob list — only set when verification takes >30s
-                                    # used by judge-protocol's cache rules; see judge-protocol.md § "Caching for Heavy Verification"
+                                    # used by judge-protocol's cache rules
 ```
 
 **Rules:**
@@ -74,9 +73,9 @@ Compose the ultrawork input based on current iteration:
 
 ### Step 1.2: Execute Ultrawork
 
-Delegate to the ultrawork workflow:
+Delegate to the ultrawork skill:
 
-1. Read and follow `.agents/workflows/ultrawork.md` step by step.
+1. Load the ultrawork skill and follow it step by step.
 2. Pass the prepared input as the task description.
 3. Ultrawork handles all vendor-specific agent spawning internally.
 4. Wait for ultrawork to complete all 5 phases (PLAN, IMPL, VERIFY, REFINE, SHIP).
@@ -103,9 +102,9 @@ For **EVERY criterion regardless of current status** (including PASS from prior 
 
 **Why re-verify PASS criteria**: ultrawork modifies shared code (utils, configs, migrations, dependencies). A PASS in iteration N may regress in iteration N+1 when fixing other criteria. Without re-verification, "DONE" can ship silent regressions.
 
-**Heavy verification caching**: For verifications that take >30 seconds (e2e tests, integration suites), apply the caching rules in `judge-protocol.md` § "Caching for Heavy Verification" to skip re-runs when no relevant files changed.
+**Heavy verification caching**: For verifications that take >30 seconds (e2e tests, integration suites), apply the caching rules in `resources/judge-protocol.md` to skip re-runs when no relevant files changed.
 
-**Follow `.agents/workflows/ralph/resources/judge-protocol.md` for the full protocol.**
+**Follow `resources/judge-protocol.md` for the full protocol.**
 
 ### Step 2.2: Produce JUDGE Result
 
@@ -213,7 +212,7 @@ From the JUDGE result, collect criteria with status `FAIL` or `REGRESSED`. Treat
 
 ### Step 3.2: Narrow Scope
 
-Compose a focused task description containing the remaining work, separating regressions from first-fail items so ultrawork's reasoning differs:
+Compose a focused task description containing the remaining work, separating regressions from first-fail items:
 
 ```markdown
 ## Ralph Iteration {N+1} — Remaining Work
@@ -238,7 +237,7 @@ Compose a focused task description containing the remaining work, separating reg
   - Suggested action: <action>
 ```
 
-**Why separate Regressed from To Fix**: ultrawork prompts that frame work as "fix from scratch" vs "diagnose a regression" produce different reasoning paths. Regressed items should trigger diff-based investigation, not greenfield re-implementation.
+**Why separate Regressed from To Fix**: Prompts that frame work as "fix from scratch" vs "diagnose a regression" produce different reasoning paths. Regressed items should trigger diff-based investigation, not greenfield re-implementation.
 
 ### Step 3.3: Loop Back
 
@@ -271,3 +270,8 @@ Phase 3: REPLAN → Extract remaining, narrow scope
 | EXEC    | Implementation             | Delegate to ultrawork             |
 | JUDGE   | Independent verification   | Evidence-based pass/fail per criterion |
 | REPLAN  | Scope narrowing            | Extract FAIL + REGRESSED items, separated by class |
+
+## References
+- Judge protocol: `resources/judge-protocol.md`
+- Context loading: context-loading skill
+- Coordination protocol: coordination-protocol skill
