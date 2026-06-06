@@ -61,9 +61,9 @@ Automatically orchestrate multi-agent execution with task decomposition, paralle
 
 ### Step 0: Preparation (DO NOT SKIP)
 
-1. Read `.agents/skills/coordination/SKILL.md` and confirm Core Rules.
-2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
-3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
+1. Load the coordination skill and confirm Core Rules.
+2. Load the context-loading skill for resource loading strategy.
+3. Load the coordination-protocol skill for the coordination protocol.
 
 ---
 

@@ -22,7 +22,7 @@ ownership:
   codeowners_file: ".github/CODEOWNERS"
   critical_paths:
     - ".agents/hooks/**"
-    - ".agents/workflows/**"
+    - ".agents/skills/**"
 
 status_accounting:
   changelog: CHANGELOG.md
