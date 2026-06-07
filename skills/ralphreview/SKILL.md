@@ -227,8 +227,12 @@ while clean_review_streak < 3:
                     - INTENTIONAL: by design or conscious tradeoff
                     - NOT_PRACTICAL: disproportionate effort required
 
-                  If FIXABLE: make the minimal targeted fix.
+                  If FIXABLE:
+                    1. Use the `edit` tool to apply the minimal targeted fix.
+                    2. Use `read` to verify the change was applied.
                   If INTENTIONAL or NOT_PRACTICAL: do not modify code.
+
+                  CRITICAL: Do NOT return FIXED unless you actually called `edit` and confirmed the fix was applied.
 
                   Return exactly ONE line:
                     FIXED|<SEVERITY>|<file:line>|<description>
