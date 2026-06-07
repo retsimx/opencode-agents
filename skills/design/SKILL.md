@@ -28,9 +28,9 @@ DESIGN.md is the central artifact; all design work revolves around it.
 
 ### When NOT to use
 - Implementing frontend components or application UI -> use `frontend`
-- Planning product scope or task breakdown -> use `pm`
+- Planning product scope or task breakdown -> use `plan`
 - Backend, database, infrastructure, or mobile implementation -> use the relevant specialist skill
-- General quality/security review outside visual, interaction, and accessibility concerns -> use `qa`
+- General quality/security review outside visual, interaction, and accessibility concerns -> use `review`
 
 ### Expected inputs
 - Product, brand, audience, platform, and UI/design problem

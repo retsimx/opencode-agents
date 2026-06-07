@@ -713,8 +713,8 @@ flutter build apk --analyze-size
 | Frontend crash | debug-agent | Specializes in bug diagnosis |
 | Backend API error | debug-agent | Can trace through stack |
 | Complex multi-domain | coordination | Coordinates multiple agents |
-| Security vulnerability | qa-agent | Security expertise |
-| Performance issue | qa-agent | Performance profiling tools |
+| Security vulnerability | review-agent | Security expertise |
+| Performance issue | review-agent | Performance profiling tools |
 | New feature needed | Specialist agent | Not a bug, it's a feature |
 
 ---

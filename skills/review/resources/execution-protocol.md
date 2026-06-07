@@ -36,7 +36,7 @@ When applicable, map findings and gaps to:
 - **ISO/IEC 25010** quality characteristics
 - **ISO/IEC 29119** test planning, design, traceability, and exit criteria
 
-Use `resources/checklist.md` (renamed qa-checklist) as the comprehensive review guide.
+Use `resources/checklist.md` (renamed review-checklist) as the comprehensive review guide.
 
 ## Step 2.5: Runtime Verification
 
@@ -56,11 +56,11 @@ at runtime. This step requires interacting with the running application.
 1. Start the application (`bun run dev`, `uv run manage.py runserver`, etc.)
 2. Open the app in an **isolated browser context** to avoid contaminating the user's session:
    ```
-   new_page(url: "http://localhost:PORT", isolatedContext: "qa-test")
+   new_page(url: "http://localhost:PORT", isolatedContext: "review-test")
    ```
    - Pages in the same `isolatedContext` share cookies/storage
    - Pages in different contexts are fully isolated
-   - Always use `isolatedContext: "qa-test"` for QA verification
+   - Always use `isolatedContext: "review-test"` for QA verification
 3. Navigate and inspect:
    ```
    navigate_page(url)            → navigate within the isolated context (SPA routes, sub-pages)

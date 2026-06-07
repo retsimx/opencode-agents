@@ -62,7 +62,7 @@
     },
     {
       "id": "task-5",
-      "agent": "qa",
+      "agent": "review",
       "title": "Security & Performance Review",
       "priority": 3,
       "dependencies": ["task-1", "task-2", "task-3", "task-4"],

@@ -13,8 +13,8 @@ QA Agent and Orchestrator add new lessons after session completion.
 | frontend-agent | Frontend | Cross-Domain |
 | mobile-agent | Mobile | Cross-Domain |
 | debug-agent | Debug | Relevant domain (Backend/Frontend/Mobile) |
-| qa-agent | QA / Security | Relevant domain being reviewed |
-| pm-agent | Cross-Domain | All sections (for planning awareness) |
+| review-agent | QA / Security | Relevant domain being reviewed |
+| plan-agent | Cross-Domain | All sections (for planning awareness) |
 | orchestrate | Cross-Domain | All sections (for coordination) |
 
 ---
@@ -76,7 +76,7 @@ Add in the following format after session completion:
 
 ## QA / Security Lessons
 
-> This section is referenced by qa-agent.
+> This section is referenced by review-agent.
 
 ### Initial Lessons
 - **Rate limiting verification method**: Send continuous requests with `curl` to verify 429 response. Code review alone is insufficient.
@@ -98,7 +98,7 @@ Add in the following format after session completion:
 
 ## QA Evaluation Lessons
 
-> Referenced by qa-agent. Tracks patterns where QA judgment failed or succeeded.
+> Referenced by review-agent. Tracks patterns where QA judgment failed or succeeded.
 > Unlike other sections (which track implementation mistakes), this section tracks
 > the evaluator's own blind spots and strengths.
 

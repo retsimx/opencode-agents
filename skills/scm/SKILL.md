@@ -27,8 +27,8 @@ This skill is the **single** place for **configuration management (CM)** on a so
 
 - Implementing product or application code -> use the relevant domain skill
 - Debugging runtime failures without a Git or CM operation -> use `debug`
-- Security, performance, or accessibility review -> use `qa`
-- Planning feature requirements or decomposing work -> use `pm`
+- Security, performance, or accessibility review -> use `review`
+- Planning feature requirements or decomposing work -> use `plan`
 
 ### Expected inputs
 - Git task, desired branch/commit/release operation, and affected files

@@ -19,11 +19,11 @@ Consult 1-3 agents when:
 - specific specialist input is needed
 
 Typical pairings:
-- pm: business constraints, scope, product priorities
+- plan: business constraints, scope, product priorities
 - backend: service/API/domain concerns
 - db: data ownership, schema, consistency
 - tf-infra: deployment and operational architecture
-- qa: risk, performance, security, testability
+- review: risk, performance, security, testability
 - frontend / mobile: client integration and complexity costs
 
 ### Full Stakeholder Sweep

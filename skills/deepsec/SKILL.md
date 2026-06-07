@@ -39,8 +39,8 @@ Operate Vercel's `deepsec` security scanner inside a target repository safely an
 - Diagnosing deepsec failures: missing credentials, AI Gateway quota stops, refusals, sandbox auth.
 
 ### When NOT to use
-- Generic OWASP / lint-style review without deepsec → use `qa`.
-- Generic CVE / dependency advisories → use `qa` or `search`.
+- Generic OWASP / lint-style review without deepsec → use `review`.
+- Generic CVE / dependency advisories → use `review` or `search`.
 - Architecting a brand-new SAST pipeline that is not deepsec → use `architecture`.
 - Writing or auditing application code itself → route to `backend` / `frontend` / `mobile`.
 - Cloud / IAM / Terraform hardening → use `tf-infra` (deepsec only scans the IaC; remediation lives there).

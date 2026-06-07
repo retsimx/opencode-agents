@@ -314,7 +314,7 @@
 
 - Run automated tools FIRST: `npm audit`, `bandit`, `lighthouse`
 - Use grep/glob/read for code analysis patterns
-- Use Chrome DevTools MCP (`new_page` with `isolatedContext: "qa-test"`) for runtime verification and E2E testing
+- Use Chrome DevTools MCP (`new_page` with `isolatedContext: "review-test"`) for runtime verification and E2E testing
 - Document all findings with file:line references
 - Provide remediation code examples
 - Estimate fix time for each issue

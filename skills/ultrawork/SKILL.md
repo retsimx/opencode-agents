@@ -132,8 +132,8 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 
 **Wait for QA Agent to complete verification before proceeding.**
 
-1. Read `.agents/results/progress-qa-agent[-{sessionId}].md`
-2. Check for `.agents/results/result-qa-agent[-{sessionId}].md` to confirm completion
+1. Read `.agents/results/progress-review-agent[-{sessionId}].md`
+2. Check for `.agents/results/result-review-agent[-{sessionId}].md` to confirm completion
 3. Update `.agents/results/session-ultrawork.md` with QA results
 
 **Continue polling until QA Agent reports completion.**
@@ -262,8 +262,8 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 
 **Wait for QA Agent to complete final review before proceeding.**
 
-1. Read `.agents/results/progress-qa-agent[-{sessionId}].md`
-2. Check for `.agents/results/result-qa-agent[-{sessionId}].md` to confirm completion
+1. Read `.agents/results/progress-review-agent[-{sessionId}].md`
+2. Check for `.agents/results/result-review-agent[-{sessionId}].md` to confirm completion
 3. Update `.agents/results/session-ultrawork.md` with final QA results
 
 **Continue polling until QA Agent reports completion.**

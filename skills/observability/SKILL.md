@@ -262,7 +262,7 @@ Before submitting, run `resources/checklist.md`.
 | Skill | Integration point | Reciprocal link status |
 |-------|------------------|-------|
 | `debug` | On failure: pull traces + logs by `request_id` → trigger `resources/incident-forensics.md` 6-dim localization playbook | ⏳ pending (v1.1) |
-| `qa` | Canary post-deploy loop via chrome-devtools MCP: console errors + Core Web Vitals trend; INP/LCP/CLS from `layers/L7-application/web-rum.md` | ⏳ pending (v1.1) |
+| `review` | Canary post-deploy loop via chrome-devtools MCP: console errors + Core Web Vitals trend; INP/LCP/CLS from `layers/L7-application/web-rum.md` | ⏳ pending (v1.1) |
 | `tf-infra` | Terraform modules for OTel Collector, Grafana, and Loki stack provisioning | ⏳ pending (v1.1) |
 | `scm` | Deployment SHA → `service.version` OTel attribute + release marker events; see `boundaries/release.md` | ⏳ pending (v1.1) |
 | `backend` | Propagator and baggage rules cross-referenced in `backend.md` ruleset; DB N+1 + Kafka patterns in `signals/traces.md` | ⏳ pending (v1.1) |

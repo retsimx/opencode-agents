@@ -25,10 +25,10 @@ Analyze, compare, and document software architecture decisions with explicit tra
 
 ### When NOT to use
 - Visual design, design systems, branding, or landing pages -> use design
-- Feature planning and task decomposition -> use pm
+- Feature planning and task decomposition -> use plan
 - Infrastructure provisioning or Terraform implementation -> use tf-infra
 - Bug diagnosis and code fixes -> use debug
-- Security/performance/accessibility review -> use qa
+- Security/performance/accessibility review -> use review
 
 ### Expected inputs
 - Architecture question, pain point, or decision context

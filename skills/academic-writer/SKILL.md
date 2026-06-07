@@ -37,7 +37,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 ### When NOT to use
 - Translation tasks → use `translator`
 - Source discovery, citation gathering, or scholarly literature search → use `scholar`
-- Rubric / assignment-spec parsing and task decomposition → use `pm`
+- Rubric / assignment-spec parsing and task decomposition → use `plan`
 - Code documentation, README, or API reference text → use the relevant domain skill (`frontend`, `backend`, `mobile`, `db`, etc.)
 - Informal communication, chat, or marketing copy → no skill needed
 - Non-English academic writing → call `translator` for the target language after drafting in English
@@ -124,7 +124,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 | Compare original vs revised (revise mode) | `COMPARE` | Diff block |
 | Hand off non-English target | `NOTIFY` | `translator` |
 | Hand off citation gap | `NOTIFY` | `scholar` |
-| Hand off ambiguous rubric / spec | `NOTIFY` | `pm` |
+| Hand off ambiguous rubric / spec | `NOTIFY` | `plan` |
 | Emit per mode output format | `WRITE` | Final artifact |
 | Report compliance status | `NOTIFY` | PASS/FAIL summary or Writing Notes block |
 

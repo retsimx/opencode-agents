@@ -86,7 +86,7 @@ understand their assignment but never write to it.
   - JWT token storage and auto-refresh
 
 ### task-3
-- **Agent**: qa
+- **Agent**: review
 - **Title**: Security and performance review
 - **Status**: blocked
 - **Priority**: 2

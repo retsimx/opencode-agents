@@ -102,7 +102,7 @@ Provide a quick-reference listing of all available agent skills with description
 | **architecture** | Software/system design: module boundaries, tradeoff analysis, ATAM, CBAM, ADR decision records |
 | **backend** | APIs, databases, auth: clean architecture (Repository/Service/Router pattern), REST, GraphQL |
 | **brainstorm** | Design-first ideation: explore intent, constraints, approaches before planning |
-| **coordination** | Multi-agent coordination: step-by-step PM/Frontend/Backend/Mobile/QA coordination |
+| **coordination** | Multi-agent coordination: step-by-step Plan/Frontend/Backend/Mobile/Review coordination |
 | **db** | SQL, NoSQL, vector DB: schema design, normalization, indexing, RAG retrieval, migration, capacity planning |
 | **debug** | Bug diagnosis & fix: reproduce, root cause, minimal fix, regression tests, pattern scan |
 | **deep-review** | Deterministic code review: correctness, regressions, system-level impact (analysis only, no QA checklist) |
@@ -118,13 +118,11 @@ Provide a quick-reference listing of all available agent skills with description
 | **observability** | Traceability across layers: telemetry, APM, RUM, metrics, logs, SLO, incident forensics |
 | **orchestrate** | Automated parallel agent execution: spawns subagents via task tool, file-based progress tracking |
 | **pdf** | PDF → Markdown: opendataloader-pdf with text, tables, headings, images |
-| **plan** | PM planning: requirements → prioritized tasks → machine-readable plan + human tracker |
-| **pm** | Product management: requirement decomposition, task breakdown, API contracts, prioritization |
-| **qa** | Quality assurance: OWASP Top 10, performance, WCAG 2.1 AA, code quality, test coverage |
+| **plan** | Product-management planning: requirements → prioritized tasks → machine-readable plan + human tracker; ISO 21500 / 31000 / 38500-aligned planning |
 | **ralph** | Persistent execution loop: wraps ultrawork with independent verifier verification per iteration |
 | **ralphreview** | Iterative deep-review loop: runs deep-review until 3 consecutive clean passes |
 | **recap** | Session recap: analyze multi-tool conversation histories, generate themed summaries |
-| **review** | Full QA pipeline: security, performance, accessibility, code quality pre-ship review |
+| **review** | Full QA review pipeline: security (OWASP Top 10), performance, accessibility (WCAG 2.1 AA), code quality; ISO/IEC 25010 / 29119-aligned quality framing |
 | **scholar** | Academic research: Knows sidecar (.knows.yaml) generation, validation, paper authoring |
 | **scm** | Git/SCM: branching, merges, conflicts, worktrees, Conventional Commits, commit governance |
 | **search** | Intent-based search router: Context7 docs, web search, gh/glab code search, local file search |
@@ -132,4 +130,4 @@ Provide a quick-reference listing of all available agent skills with description
 | **stack-set** | Tech stack detection: scan manifests, generate stack.yaml, snippets, API boilerplate |
 | **translator** | Context-aware translation: preserves tone, style, natural word order |
 | **ultrawork** | 5-phase high-quality dev: PLAN → IMPL → VERIFY → REFINE → SHIP (11 review steps) |
-| **work** | Multi-domain coordination: PM plan + parallel agents + QA review |
+| **work** | Multi-domain coordination: plan + parallel agents + review |

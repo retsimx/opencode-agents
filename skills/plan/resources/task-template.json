@@ -18,7 +18,7 @@
   "tasks": [
     {
       "id": "task-1",
-      "agent": "backend|frontend|mobile|qa",
+      "agent": "backend|frontend|mobile|review",
       "title": "",
       "description": "",
       "priority": 1,

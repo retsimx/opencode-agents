@@ -65,7 +65,7 @@ Load skills via the `skill` tool by name (e.g., `skill "brainstorm"`).
 | Skill | What it does |
 |-------|-------------|
 | `brainstorm` | Design-first ideation — explores intent, constraints, approaches |
-| `plan` | PM-driven task breakdown with priorities and dependencies |
+| `plan` | Product-management planning: requirements → prioritized tasks → machine-readable plan + human tracker; ISO 21500 / 31000 / 38500-aligned planning |
 
 ### Multi-Agent Execution
 | Skill | What it does |
@@ -79,7 +79,7 @@ Load skills via the `skill` tool by name (e.g., `skill "brainstorm"`).
 |-------|-------------|
 | `ralph` | Execution loop: ultrawork + independent verifier verification |
 | `ralphreview` | Iterative deep-review loop until 3 clean passes |
-| `review` | Full QA: security (OWASP), performance, accessibility, code quality |
+| `review` | Full QA review pipeline: security (OWASP), performance, accessibility, code quality; ISO/IEC 25010 / 29119-aligned quality framing |
 
 ### Operations
 | Skill | What it does |
@@ -105,13 +105,12 @@ All 34 skills can be loaded via the `skill` tool. The main categories:
 
 ### Quality & Analysis
 - **debug** — Bug diagnosis, root cause analysis, regression tests
-- **qa** — Security, performance, accessibility, code quality
-- **review** — Full pre-ship QA pipeline
+- **review** — Full pre-ship QA pipeline: security, performance, accessibility, code quality
 - **deep-review** — Deterministic code correctness analysis
 - **ralphreview** — Iterative review loop
 
 ### Process & Management
-- **pm** — Product management, requirement decomposition, task breakdown
+- **plan** — Product-management planning: requirements, task breakdown, API contracts, prioritization, ISO-aligned delivery framing
 - **architecture** — Software design, tradeoff analysis, ADR records
 - **design** — AI design systems, typography, color, motion
 - **orchestrate** — Multi-agent spawning and coordination

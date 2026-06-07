@@ -106,9 +106,9 @@ Spawn agents using the OpenCode `task` tool. All same-priority tasks should be s
 | frontend | general |
 | mobile | general |
 | db | general |
-| qa | general |
+| review | general |
 | debug | general |
-| pm | general |
+| plan | general |
 | architecture | general |
 | tf-infra | general |
 | docs | explore |
@@ -255,7 +255,7 @@ Reason: Self-evaluation bias causes agents to consistently overrate their own ou
 When feeding review results back to the implementation agent:
 ```
 ## Review Feedback (iteration {n}/{max})
-**Reviewer**: {self / verify / qa-agent}
+**Reviewer**: {self / verify / review-agent}
 **Verdict**: FAIL
 **Issues**:
 1. {specific issue with file and line reference}
@@ -286,7 +286,7 @@ When user sends feedback during session:
 ### Threshold Actions
 | CD Score | Action |
 |----------|--------|
-| CD >= 50 | **RCA Required**: QA agent must add entry to `lessons-learned.md` |
+| CD >= 50 | **RCA Required**: review-agent must add entry to `lessons-learned.md` |
 | CD >= 80 | **Session Pause**: Request user to re-specify requirements |
 | `redo` >= 2 | **Scope Lock**: Request explicit allowlist confirmation before continuing |
 
@@ -295,7 +295,7 @@ After each user correction event, append event to `session-metrics.md` Events ta
 
 At session end, if CD >= 50:
 1. Include CD summary in final report
-2. Trigger QA agent RCA generation
+2. Trigger review-agent RCA generation
 3. Update `lessons-learned.md` with prevention measures
 
 ---
@@ -308,8 +308,8 @@ At session end, if CD >= 50:
 | MAX_RETRIES | 2 | Retry attempts per failed task |
 | POLL_INTERVAL | 30s | Status check interval |
 | MAX_TURNS (impl) | 20 | Turn limit for backend/frontend/mobile |
-| MAX_TURNS (review) | 15 | Turn limit for qa/debug |
-| MAX_TURNS (plan) | 10 | Turn limit for pm |
+| MAX_TURNS (review) | 15 | Turn limit for review/debug |
+| MAX_TURNS (plan) | 10 | Turn limit for plan |
 
 ---
 

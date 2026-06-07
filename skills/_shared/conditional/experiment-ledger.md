@@ -27,7 +27,7 @@ Request: "{original user request, first 100 chars}..."
 | # | Phase | Agent | Hypothesis | Score Before | Score After | Delta | Decision | Files Changed |
 |---|-------|-------|-----------|-------------|------------|-------|----------|---------------|
 | 1 | IMPL | backend | REST API with pagination | — | 72 | — | BASELINE | 3 |
-| 2 | VERIFY | qa | Add input validation | 72 | 78 | +6 | KEEP | 2 |
+| 2 | VERIFY | review | Add input validation | 72 | 78 | +6 | KEEP | 2 |
 | 3 | REFINE | debug | Extract shared util | 78 | 80 | +2 | KEEP | 4 |
 | 4 | REFINE | debug | Redis caching layer | 80 | 76 | -4 | DISCARD | 3 |
 | 5 | REFINE | backend | Simpler in-memory cache | 80 | 84 | +4 | KEEP | 1 |

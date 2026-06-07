@@ -1,6 +1,6 @@
 ---
 name: coordination
-description: Guide for coordinating PM, Frontend, Backend, Mobile, and QA agents on complex projects via CLI. Use for manual step-by-step coordination and workflow guidance.
+description: Guide for coordinating Plan, Frontend, Backend, Mobile, and Review agents on complex projects via CLI. Use for manual step-by-step coordination and workflow guidance.
 ---
 
 # Multi-Agent Workflow Guide
@@ -33,11 +33,11 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 
 ### Expected outputs
 - Manual coordination sequence
-- PM task decomposition, agent spawn order, monitoring guidance, and QA review step
+- Plan task decomposition, agent spawn order, monitoring guidance, and review step
 - API/data contract alignment checkpoints
 
 ### Dependencies
-- PM, frontend, backend, mobile, QA, and orchestrate skills
+- Plan, frontend, backend, mobile, review, and orchestrate skills
 - `resources/examples.md`
 - OpenCode `task` tool and progress/result memory conventions
 
@@ -93,7 +93,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 ### Canonical task pattern
 ```
 `task` tool invocation pattern:
-- PM: Call Task with subagent_type="general", prompt=<PM task>, and workdir=<workspace>/pm
+- Plan: Call Task with subagent_type="general", prompt=<plan task>, and workdir=<workspace>/plan
 - Backend: Call Task with subagent_type="general", prompt=<backend task>, and workdir=<workspace>/backend (run in parallel)
 - Frontend: Call Task with subagent_type="general", prompt=<frontend task>, and workdir=<workspace>/frontend (run in parallel)
 ```

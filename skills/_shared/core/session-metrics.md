@@ -244,10 +244,10 @@ Use proxy metrics that are always measurable.
 
 | Agent | Turns | Wall-Clock (min) | Sprint Resets | Retries |
 |-------|-------|-------------------|---------------|---------|
-| pm | 6 | 2.1 | 0 | 0 |
+| plan | 6 | 2.1 | 0 | 0 |
 | backend | 18 | 8.4 | 1 | 0 |
 | frontend | 15 | 6.7 | 0 | 0 |
-| qa | 10 | 4.2 | 0 | 0 |
+| review | 10 | 4.2 | 0 | 0 |
 | **Total** | **49** | **21.4** | **1** | **0** |
 ```
 
