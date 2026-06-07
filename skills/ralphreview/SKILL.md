@@ -30,6 +30,7 @@ Iteratively review and remediate the current implementation until review stabili
 ### Expected inputs
 - A codebase with changes to review
 - An optional scope string (DIFF, COMMIT:<hash>, FILES:<list>, FEATURE:<desc>, etc.)
+- An optional `WORKTREE` (absolute path from the caller, e.g. gh-autopilot)
 - A `clean_review_streak` variable initialized to 0
 
 ### Expected outputs
@@ -38,8 +39,8 @@ Iteratively review and remediate the current implementation until review stabili
 - A `.ralphreview-state-<hash>` file documenting every finding and its disposition
 
 ### Dependencies
-- OpenCode `task` tool — for delegating review and remediation
-- `deep-review` skill — performs the actual deep code review inside the Task subagent
+- OpenCode `task` tool — for delegating review and remediation, and for nested delegation inside each coordinator subagent
+- `deep-review` skill — performs the actual deep code review inside a nested Task subagent spawned by the review coordinator
 
 ### Control-flow features
 - Loops until 3 consecutive clean reviews or failure escalation
@@ -55,18 +56,20 @@ Iteratively review and remediate the current implementation until review stabili
 2. Accept the answer and store as `SCOPE`.
 3. Generate a short (3–4 character) unique identifier — e.g. via `date +%s | tail -c 5` or `openssl rand -hex 2`.
 4. Define `STATE_FILE = .ralphreview-state-<unique_id>`.
-5. Initialize `clean_review_streak := 0`.
-6. Create/truncate `STATE_FILE` with a header line:
+5. If `WORKTREE` was not provided by the caller, set `WORKTREE` to the current working directory (use `bash` with `pwd`).
+6. Initialize `clean_review_streak := 0`.
+7. Create/truncate `STATE_FILE` with header:
    ```
+   WORKTREE=<absolute_path>
    # RalphReview State — STATUS|SEVERITY|file:line|description
    # Statuses: NEW, FIXED, SKIPPED
    ```
 
 ### Scenes
 1. **PREPARE**: Initialize state and ask for scope if needed.
-2. **REVIEW**: Invoke a Task subagent with the `deep-review` skill. The subagent reads `STATE_FILE` to dedup, runs deep-review, **appends NEW findings to `STATE_FILE`**, and returns only a signal (`NEW_FOUND` or `NO_NEW_FINDINGS`).
+2. **REVIEW**: Invoke a Task subagent (the review coordinator). The coordinator reads `STATE_FILE` for WORKTREE and dedup context, **delegates the deep-review analysis to a nested Task subagent** that loads the `deep-review` skill and returns findings as plain text, then the coordinator **parses that text and appends NEW findings to `STATE_FILE`** itself. Returns only a signal (`NEW_FOUND` or `NO_NEW_FINDINGS`).
 3. **EVALUATE**: If `NO_NEW_FINDINGS`, increment streak and loop. Otherwise invoke remediation.
-4. **REMEDIATE**: Invoke a Task subagent that reads `STATE_FILE` (finds `NEW` entries), evaluates each finding, fixes FIXABLE ones, **appends FIXED/SKIPPED entries to `STATE_FILE`**, and returns ONLY what was fixed.
+4. **REMEDIATE**: Invoke a Task subagent (the remediation coordinator). The coordinator reads `STATE_FILE` for WORKTREE and `NEW` entries, then **spawns a separate nested Task subagent for each individual finding** that examines that one issue, classifies fixability, and applies a fix if FIXABLE. The coordinator collects per-finding results and **appends FIXED/SKIPPED entries to `STATE_FILE`** itself. Returns ONLY what was fixed.
 5. **STREAK**: If anything was fixed, reset streak to 0. If all were skipped (or no findings), increment streak.
 6. **FINALIZE**: Exit when streak == 3. Optionally read `STATE_FILE` and report a summary to the user.
 
@@ -96,9 +99,10 @@ Iteratively review and remediate the current implementation until review stabili
 |--------|---------------|----------|
 | Ask for scope | `REQUEST` | Clarification phase |
 | Generate state file path | `UPDATE_STATE` | Unique session ID |
-| Invoke review | `CALL_TOOL` | OpenCode `task` with STATE_FILE path; returns NEW_FOUND / NO_NEW_FINDINGS |
+| Write WORKTREE to state file | `UPDATE_STATE` | First line of STATE_FILE |
+| Invoke review coordinator | `CALL_TOOL` | OpenCode `task` with SCOPE and STATE_FILE path; returns NEW_FOUND / NO_NEW_FINDINGS |
 | Inspect review signal | `READ` | Boolean signal from `task` return |
-| Invoke remediation | `CALL_TOOL` | OpenCode `task` with STATE_FILE path; remediator reads NEW entries from file |
+| Invoke remediation coordinator | `CALL_TOOL` | OpenCode `task` with STATE_FILE path; remediation coordinator reads NEW entries and delegates per-finding fix subagents |
 | Parse remediation result | `READ` | Extract fixed list from Task output |
 | Update streak | `UPDATE_STATE` | Reset if fixed found, increment if all skipped/none |
 | Read summary | `READ` | Optional STATE_FILE read on exit |
@@ -119,7 +123,11 @@ Iteratively review and remediate the current implementation until review stabili
 SCOPE = <from user or default to "DIFF">
 STATE_FILE = .ralphreview-state-$(date +%s | tail -c 5)
 clean_review_streak = 0
-Create STATE_FILE with header
+WORKTREE = <from caller, or use `pwd` if not provided>
+Create STATE_FILE:
+    WORKTREE=<absolute_path>
+    # RalphReview State — STATUS|SEVERITY|file:line|description
+    # Statuses: NEW, FIXED, SKIPPED
 
 while clean_review_streak < 3:
 
@@ -129,19 +137,51 @@ while clean_review_streak < 3:
 
     Call the `task` tool with these parameters:
       subagent_type: "general"
-      description: "deep-review"
+      description: "review-coordinator"
       prompt:
-        "Load the deep-review skill and review scope: <SCOPE>.
+        "You are the review coordinator. Your job is to run a deep code review
+         and record any NEW findings to the state file.
 
-         READ <STATE_FILE> first. Any issue already listed in that
-         file (regardless of status) must NOT be re-reported. Only
-         report genuinely NEW issues not present in the state file.
+         SCOPE: <SCOPE>
+         STATE_FILE: <STATE_FILE>
 
-         APPEND each new finding to <STATE_FILE> in this format:
-           NEW|<SEVERITY>|<file:line>|<description>
+         1. READ <STATE_FILE>. The first line is WORKTREE=<path>.
+            Parse all existing entries (NEW, FIXED, SKIPPED) to build a set of
+            already-reported issues for deduplication.
 
-         If you appended any findings, return exactly: NEW_FOUND
-         If no new findings, return exactly:     NO_NEW_FINDINGS"
+         2. DELEGATE: Use the built-in `task` tool to spawn a nested subagent
+            that loads the `deep-review` skill and reviews the scope.
+
+            Call `task` with:
+              subagent_type: \"general\"
+              description: \"deep-review-analysis\"
+              prompt:
+                \"WORKTREE: <path from STATE_FILE line 1>
+
+                Load the deep-review skill and review scope: <SCOPE>.
+
+                IGNORE any issues matching these already-reported items:
+                <list of file:line|description from STATE_FILE>
+
+                Return findings ONLY in this format, one per line:
+                  SEVERITY|file:line|description|execution_path_reasoning
+
+                If no issues found, return exactly: NO_ISSUES_FOUND\"
+
+         3. WAIT for the nested subagent to return its findings text.
+
+         4. PARSE the returned text. If \"NO_ISSUES_FOUND\", return exactly:
+              NO_NEW_FINDINGS
+
+            Otherwise, for each finding line:
+              - APPEND to <STATE_FILE> in this format:
+                  NEW|<SEVERITY>|<file:line>|<description>
+
+         5. If you appended any findings, return exactly: NEW_FOUND
+
+         IMPORTANT: You (the review coordinator) MUST write to STATE_FILE.
+         The nested deep-review subagent ONLY returns text findings — it does
+         NOT touch the state file."
 
     Wait for the subagent to return.
     signal = result  # either "NEW_FOUND" or "NO_NEW_FINDINGS"
@@ -157,28 +197,57 @@ while clean_review_streak < 3:
 
     Call the `task` tool with these parameters:
       subagent_type: "general"
-      description: "remediation"
+      description: "remediation-coordinator"
       prompt:
-        "Read <STATE_FILE>. Find all entries with status NEW.
+        "You are the remediation coordinator. Your job is to triage and fix
+         each NEW finding individually, then record dispositions to the state file.
 
-         For each NEW entry, examine the actual code and determine:
-           - FIXABLE — a real issue that should be fixed now
-           - INTENTIONAL — by design or conscious tradeoff
-           - NOT PRACTICAL — would require disproportionate effort
+         STATE_FILE: <STATE_FILE>
 
-         Fix FIXABLE ones. Leave INTENTIONAL and NOT PRACTICAL alone.
+         1. READ <STATE_FILE>. The first line is WORKTREE=<path>.
+            Find all entries with status NEW.
 
-         APPEND each finding to <STATE_FILE> in this format:
-           FIXED|<SEVERITY>|<file:line>|<description>
-           SKIPPED|<SEVERITY>|<file:line>|<description> — reason: <why>
+         2. FOR EACH NEW entry (file:line, severity, description):
+              - DELEGATE: Use the built-in `task` tool to spawn a dedicated
+                fix subagent for THIS ONE finding.
 
-         Do NOT re-write the entire file — only APPEND new lines.
-         Do NOT remove or modify the existing NEW lines.
+              Call `task` with:
+                subagent_type: \"general\"
+                description: \"fix-single-<file:line>\"
+                prompt:
+                  \"WORKTREE: <path from STATE_FILE line 1>
 
-         Return ONLY what was FIXED, one per line:
-           FIXED|<SEVERITY>|<file:line>|<description>
+                  Examine the code at <file:line> related to:
+                  <description>
 
-         If nothing was fixed, return exactly: NO_FIXES"
+                  SEVERITY: <SEVERITY>
+
+                  Determine:
+                    - FIXABLE: real issue that should be fixed now
+                    - INTENTIONAL: by design or conscious tradeoff
+                    - NOT_PRACTICAL: disproportionate effort required
+
+                  If FIXABLE: make the minimal targeted fix.
+                  If INTENTIONAL or NOT_PRACTICAL: do not modify code.
+
+                  Return exactly ONE line:
+                    FIXED|<SEVERITY>|<file:line>|<description>
+                    SKIPPED|<SEVERITY>|<file:line>|<description> — reason: <why>\"
+
+              - WAIT for the fix subagent to return its result line.
+
+              - APPEND that result line to <STATE_FILE> exactly as returned.
+
+              - If the result starts with FIXED, add to your fixed-list.
+
+         3. AFTER processing all NEW entries:
+              - If fixed-list is empty, return exactly: NO_FIXES
+              - Otherwise, return the fixed-list lines joined by newlines
+                (one FIXED|... per line).
+
+         IMPORTANT: You (the remediation coordinator) MUST write FIXED/SKIPPED
+         entries to STATE_FILE. Each nested fix subagent handles exactly ONE
+         finding and returns its disposition — it does NOT touch the state file."
 
     Wait for remediation to complete.
     result = output
@@ -220,15 +289,16 @@ exit  # clean_review_streak == 3
 5. **Foreground context is orchestration only** — no review or remediation inline.
 6. **Prefer minimal targeted fixes over broad refactors.**
 7. **Exit immediately when `clean_review_streak == 3`.**
-8. **Reviewer writes NEW findings to STATE_FILE.** The review subagent reads STATE_FILE for dedup, runs deep-review, and appends any NEW findings to STATE_FILE. It returns only `NEW_FOUND` or `NO_NEW_FINDINGS` — never the findings themselves.
-9. **Remediation agent triages fixability.** The remediation subagent reads STATE_FILE to find NEW entries, examines the actual code, fixes FIXABLE ones, and appends FIXED/SKIPPED entries. Streak only resets when something was actually fixed.
-10. **State file is the single source of truth.** The orchestrator does NOT maintain `handled_issues` in memory. All findings (NEW, FIXED, SKIPPED) live in STATE_FILE. The only orchestrator state is `clean_review_streak` and `STATE_FILE` path.
-11. **Orchestrator never reads STATE_FILE during the loop.** The orchestrator only reads the task return signal (`NEW_FOUND` / `NO_NEW_FINDINGS` from reviewer; `FIXED|...` / `NO_FIXES` from remediator). It does NOT read the state file to check what findings exist — that's the subagents' job. The optional exit-time read for a summary is the sole exception.
-12. **Every task invocation receives the STATE_FILE path** so subagents can read/write it. The path includes a unique session ID so concurrent ralphreview loops don't collide.
-13. **TOOL RESTRICTION — Review: You MUST NOT read any source files in the foreground.** You MUST NOT run `git diff` (full diff). Your only tool for Phase A is the built-in `task` tool (used via your tool-calling interface, NOT bash). Do NOT try to run `$ task` as a shell command. All code understanding must come from the deep-review skill's output.
-14. **TOOL RESTRICTION — Remediation: You MUST NOT read any source files to prepare or verify remediation.** You MUST NOT edit any files directly. You MUST NOT run `git diff` beyond `git diff --stat`. ALL remediation MUST go through a `task` tool invocation.
+8. **Review coordinator writes NEW findings to STATE_FILE.** The review coordinator reads STATE_FILE (first line = WORKTREE, then dedup entries), delegates deep-review analysis to a nested subagent (passing WORKTREE in the prompt), receives findings as text, parses them, and appends NEW entries to STATE_FILE. The nested deep-review subagent ONLY returns findings text — it never touches the state file.
+9. **Remediation coordinator delegates per-finding fix subagents.** The remediation coordinator reads STATE_FILE (first line = WORKTREE, then NEW entries), spawns a dedicated fix subagent for EACH finding (passing WORKTREE in each prompt), collects dispositions, and appends FIXED/SKIPPED entries to STATE_FILE. Each fix subagent handles exactly ONE issue and returns its disposition — it never touches the state file.
+10. **State file is the single source of truth.** The orchestrator does NOT maintain `handled_issues` in memory. All findings (NEW, FIXED, SKIPPED) and the WORKTREE live in STATE_FILE. The only orchestrator state is `clean_review_streak` and `STATE_FILE` path.
+11. **Orchestrator never reads STATE_FILE during the loop.** The orchestrator only reads the task return signal (`NEW_FOUND` / `NO_NEW_FINDINGS` from review coordinator; `FIXED|...` / `NO_FIXES` from remediation coordinator). It does NOT read the state file — that's the coordinators' job. The optional exit-time read for a summary is the sole exception.
+12. **Every task invocation receives the STATE_FILE path** so subagents can read WORKTREE, dedup data, and findings from it. The path includes a unique session ID so concurrent ralphreview loops don't collide.
+13. **TOOL RESTRICTION — Review: You (orchestrator) MUST NOT read any source files in the foreground.** You MUST NOT run `git diff` (full diff). Your only tool for Phase A is the built-in `task` tool (used via your tool-calling interface, NOT bash). Do NOT try to run `$ task` as a shell command.
+14. **TOOL RESTRICTION — Remediation: You (orchestrator) MUST NOT read any source files to prepare or verify remediation.** You MUST NOT edit any files directly. You MUST NOT run `git diff` beyond `git diff --stat`. ALL remediation MUST go through a `task` tool invocation.
 15. **TOOL RESTRICTION — Diff: You may only run `git diff --stat` (file names only) to check whether files changed. Never the full diff.**
 16. **CRITICAL: The `task` tool is a built-in agent function call, the same as `read`, `write`, or `grep`. It is NOT a bash command. Never run `$ task ...` in a shell — use the agent's tool-calling interface instead.**
+17. **Nested delegation is required for review and remediation.** The review coordinator MUST delegate deep-review to a nested subagent. The remediation coordinator MUST spawn one fix subagent per NEW finding. Do NOT load deep-review skill or perform fixes directly in the coordinator.
 
 ## References
 
