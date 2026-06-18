@@ -148,8 +148,6 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
    - Log suspicious activity
 
    Closes #234
-
-   Co-Authored-By: First Fluke <our.first.fluke@gmail.com>
    EOF
    )"
    ```

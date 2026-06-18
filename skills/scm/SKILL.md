@@ -350,8 +350,6 @@ Read thresholds from `cm-config.yaml` `onboarding_metrics` when present and cite
 <type>(<scope>): <description>
 
 [optional body]
-
-Co-Authored-By: First Fluke <our.first.fluke@gmail.com>
 ```
 
 ### Commit workflow

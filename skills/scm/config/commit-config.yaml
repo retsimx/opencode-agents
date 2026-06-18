@@ -38,12 +38,6 @@ scope:
   # Allowed scopes list (empty means all allowed)
   allowed: []
 
-# Co-Author settings
-co_author:
-  enabled: true
-  name: "First Fluke"
-  email: "our.first.fluke@gmail.com"
-
 # Forbidden file patterns (commit warnings)
 forbidden_patterns:
   - "*.env"
