@@ -62,14 +62,14 @@ Iteratively review and remediate the current implementation until review stabili
    ```
    WORKTREE=<absolute_path>
    # RalphReview State — STATUS|SEVERITY|file:line|description
-   # Statuses: NEW, FIXED, SKIPPED
+   # Statuses: NEW, FIXED, SKIPPED — NEW transitions to FIXED or SKIPPED in place
    ```
 
 ### Scenes
 1. **PREPARE**: Initialize state and ask for scope if needed.
-2. **REVIEW**: Invoke a Task subagent (the review coordinator). The coordinator reads `STATE_FILE` for WORKTREE and dedup context, **delegates the deep-review analysis to a nested Task subagent** that loads the `deep-review` skill and returns findings as plain text, then the coordinator **parses that text and appends NEW findings to `STATE_FILE`** itself. Returns only a signal (`NEW_FOUND` or `NO_NEW_FINDINGS`).
+2. **REVIEW**: Invoke a Task subagent (the review coordinator). The coordinator **delegates the deep-review analysis to a nested Task subagent** (passing `STATE_FILE` path so the subagent reads WORKTREE and dedup context directly), receives findings as plain text, then the coordinator **parses that text and appends NEW findings to `STATE_FILE`** itself. Returns only a signal (`NEW_FOUND` or `NO_NEW_FINDINGS`).
 3. **EVALUATE**: If `NO_NEW_FINDINGS`, increment streak and loop. Otherwise invoke remediation.
-4. **REMEDIATE**: Invoke a Task subagent (the remediation coordinator). The coordinator reads `STATE_FILE` for WORKTREE and `NEW` entries, then **spawns a separate nested Task subagent for each individual finding** that examines that one issue, classifies fixability, and applies a fix if FIXABLE. The coordinator collects per-finding results and **appends FIXED/SKIPPED entries to `STATE_FILE`** itself. Returns ONLY what was fixed.
+4. **REMEDIATE**: Invoke a Task subagent (the remediation coordinator). The coordinator reads `STATE_FILE` for WORKTREE and `NEW` entries, then **spawns separate nested Task subagents in parallel for each individual finding** that examine each issue, classify fixability, and apply fixes if FIXABLE. The coordinator collects per-finding results and **updates matching NEW entries to FIXED/SKIPPED in-place** in `STATE_FILE`. Returns ONLY what was fixed.
 5. **STREAK**: If anything was fixed, reset streak to 0. If all were skipped (or no findings), increment streak.
 6. **FINALIZE**: Exit when streak == 3. Optionally read `STATE_FILE` and report a summary to the user.
 
@@ -127,7 +127,7 @@ WORKTREE = <from caller, or use `pwd` if not provided>
 Create STATE_FILE:
     WORKTREE=<absolute_path>
     # RalphReview State — STATUS|SEVERITY|file:line|description
-    # Statuses: NEW, FIXED, SKIPPED
+    # Statuses: NEW, FIXED, SKIPPED — NEW transitions to FIXED or SKIPPED in place
 
 while clean_review_streak < 3:
 
@@ -145,39 +145,37 @@ while clean_review_streak < 3:
          SCOPE: <SCOPE>
          STATE_FILE: <STATE_FILE>
 
-         1. READ <STATE_FILE>. The first line is WORKTREE=<path>.
-            Parse all existing entries (NEW, FIXED, SKIPPED) to build a set of
-            already-reported issues for deduplication.
-
-         2. DELEGATE: Use the built-in `task` tool to spawn a nested subagent
+         1. DELEGATE: Use the built-in `task` tool to spawn a nested subagent
             that loads the `deep-review` skill and reviews the scope.
 
             Call `task` with:
-              subagent_type: \"general\"
-              description: \"deep-review-analysis\"
+              subagent_type: "general"
+              description: "deep-review-analysis"
               prompt:
-                \"WORKTREE: <path from STATE_FILE line 1>
+                "STATE_FILE: <STATE_FILE>
 
                 Load the deep-review skill and review scope: <SCOPE>.
 
-                IGNORE any issues matching these already-reported items:
-                <list of file:line|description from STATE_FILE>
+                Read <STATE_FILE>:
+                - Line 1 is WORKTREE=<path> — the working tree to review
+                - All existing entries (NEW, FIXED, SKIPPED) are
+                  already-reported issues that should be ignored for dedup
 
                 Return findings ONLY in this format, one per line:
                   SEVERITY|file:line|description|execution_path_reasoning
 
-                If no issues found, return exactly: NO_ISSUES_FOUND\"
+                If no issues found, return exactly: NO_ISSUES_FOUND"
 
-         3. WAIT for the nested subagent to return its findings text.
+         2. WAIT for the nested subagent to return its findings text.
 
-         4. PARSE the returned text. If \"NO_ISSUES_FOUND\", return exactly:
-              NO_NEW_FINDINGS
+         3. PARSE the returned text. If "NO_ISSUES_FOUND", return exactly:
+               NO_NEW_FINDINGS
 
             Otherwise, for each finding line:
               - APPEND to <STATE_FILE> in this format:
                   NEW|<SEVERITY>|<file:line>|<description>
 
-         5. If you appended any findings, return exactly: NEW_FOUND
+         4. If you appended any findings, return exactly: NEW_FOUND
 
          IMPORTANT: You (the review coordinator) MUST write to STATE_FILE.
          The nested deep-review subagent ONLY returns text findings — it does
@@ -207,11 +205,11 @@ while clean_review_streak < 3:
          1. READ <STATE_FILE>. The first line is WORKTREE=<path>.
             Find all entries with status NEW.
 
-         2. FOR EACH NEW entry (file:line, severity, description):
-              - DELEGATE: Use the built-in `task` tool to spawn a dedicated
-                fix subagent for THIS ONE finding.
+         2. DISPATCH: For each NEW entry, launch a fix subagent. You may
+            launch all fix subagents in parallel — they are independent of
+            each other. Use multiple `task` tool calls in a single message.
 
-              Call `task` with:
+            For each NEW entry (file:line, severity, description), call `task` with:
                 subagent_type: \"general\"
                 description: \"fix-single-<file:line>\"
                 prompt:
@@ -238,19 +236,16 @@ while clean_review_streak < 3:
                     FIXED|<SEVERITY>|<file:line>|<description>
                     SKIPPED|<SEVERITY>|<file:line>|<description> — reason: <why>\"
 
-              - WAIT for the fix subagent to return its result line.
+         3. COLLECT: Wait for all fix subagents to return. As each returns:
+               - UPDATE <STATE_FILE>: find the matching NEW entry (by file:line and description) and replace its status from NEW to FIXED or SKIPPED. Do NOT append a new line.
+               - If the result starts with FIXED, add to your fixed-list.
 
-              - APPEND that result line to <STATE_FILE> exactly as returned.
+         4. AFTER collecting all results:
+               - If fixed-list is empty, return exactly: NO_FIXES
+               - Otherwise, return the fixed-list lines joined by newlines
+                 (one FIXED|... per line).
 
-              - If the result starts with FIXED, add to your fixed-list.
-
-         3. AFTER processing all NEW entries:
-              - If fixed-list is empty, return exactly: NO_FIXES
-              - Otherwise, return the fixed-list lines joined by newlines
-                (one FIXED|... per line).
-
-         IMPORTANT: You (the remediation coordinator) MUST write FIXED/SKIPPED
-         entries to STATE_FILE. Each nested fix subagent handles exactly ONE
+         IMPORTANT: You (the remediation coordinator) MUST update NEW entries in-place in STATE_FILE. Find the matching entry by file:line and description, then rewrite its status from NEW to FIXED or SKIPPED. Do not append new lines to the file. Each nested fix subagent handles exactly ONE
          finding and returns its disposition — it does NOT touch the state file."
 
     Wait for remediation to complete.
@@ -293,8 +288,8 @@ exit  # clean_review_streak == 3
 5. **Foreground context is orchestration only** — no review or remediation inline.
 6. **Prefer minimal targeted fixes over broad refactors.**
 7. **Exit immediately when `clean_review_streak == 3`.**
-8. **Review coordinator writes NEW findings to STATE_FILE.** The review coordinator reads STATE_FILE (first line = WORKTREE, then dedup entries), delegates deep-review analysis to a nested subagent (passing WORKTREE in the prompt), receives findings as text, parses them, and appends NEW entries to STATE_FILE. The nested deep-review subagent ONLY returns findings text — it never touches the state file.
-9. **Remediation coordinator delegates per-finding fix subagents.** The remediation coordinator reads STATE_FILE (first line = WORKTREE, then NEW entries), spawns a dedicated fix subagent for EACH finding (passing WORKTREE in each prompt), collects dispositions, and appends FIXED/SKIPPED entries to STATE_FILE. Each fix subagent handles exactly ONE issue and returns its disposition — it never touches the state file.
+8. **Review coordinator writes NEW findings to STATE_FILE.** The review coordinator delegates deep-review analysis to a nested subagent (passing STATE_FILE path), receives findings as text, parses them, and appends NEW entries to STATE_FILE. The nested deep-review subagent reads STATE_FILE for WORKTREE and dedup context, performs the review, and returns findings text — it never writes to the state file.
+9. **Remediation coordinator dispatches fix subagents in parallel.** The remediation coordinator reads STATE_FILE (first line = WORKTREE, then NEW entries), spawns dedicated fix subagents for ALL NEW findings in parallel (passing WORKTREE in each prompt), collects dispositions as they return, and updates matching NEW entries to FIXED/SKIPPED in-place. Each fix subagent handles exactly ONE issue and returns its disposition — it never touches the state file.
 10. **State file is the single source of truth.** The orchestrator does NOT maintain `handled_issues` in memory. All findings (NEW, FIXED, SKIPPED) and the WORKTREE live in STATE_FILE. The only orchestrator state is `clean_review_streak` and `STATE_FILE` path.
 11. **Orchestrator never reads STATE_FILE during the loop.** The orchestrator only reads the task return signal (`NEW_FOUND` / `NO_NEW_FINDINGS` from review coordinator; `FIXED|...` / `NO_FIXES` from remediation coordinator). It does NOT read the state file — that's the coordinators' job. The optional exit-time read for a summary is the sole exception.
 12. **Every task invocation receives the STATE_FILE path** so subagents can read WORKTREE, dedup data, and findings from it. The path includes a unique session ID so concurrent ralphreview loops don't collide.

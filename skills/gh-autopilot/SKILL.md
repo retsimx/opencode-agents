@@ -5,31 +5,32 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
-- **NEVER skip phases.** Execute from Phase 0 through Phase 7 in strict order. Each phase has a GATE ENTRY check and GATE EXIT check — both must pass before proceeding.
-- **Do NOT modify files outside the worktree.** All code changes happen inside the worktree directory.
-- **Ralph Review (Phase 4) is the most critical quality gate. NEVER skip or shortcut it.** It verifies the implementation is correct and not nonsense. Bypassing Ralph Review is an automatic FAIL.
-- **Run ALL CI steps locally before ANY commit or push.** Phase 5 (CI Verify) MUST complete successfully before Phase 6 (Ship) begins. Never commit first and verify later.
-- **Strictly follow ALL rules in the project's `AGENTS.md` and `TESTING.md` (if they exist).** These project-level rules override any general coding assumptions.
-- **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases. Each phase depends on the previous.
-- **MUST use the `question` tool to ask the user anything.** Never ask questions in plain text output. Always invoke the built-in `question` tool (not bash, not inline text). This includes: asking for the issue number, asking which workflow to use, getting confirmations, requesting clarification.
-- **MUST use the `task` tool to spawn subagents.** Never run `$ task ...` in bash — the `task` tool is a built-in agent function call, the same as `read`, `write`, or `grep`. All Task subagent delegations (Phase 4 review, Phase 6 commit messages, Phase 7 issue comment, and any exploration/fix agents) must use the `task` tool via your tool-calling interface.
-- **Subagents are cheap; use them aggressively.** Spawn focused investigation or fix agents rather than doing everything inline. They prevent context dilution.
+- **Never skip phases.** Execute Phase 0 through Phase 8 in order. Each phase has a GATE ENTRY and GATE EXIT — both must pass before proceeding.
+- **Do not modify files outside the worktree.**
+- **Ralph Review (Phase 5) is the critical quality gate. Never skip or shortcut it.** Bypassing is an automatic FAIL.
+- **Run ALL CI steps locally before ANY commit or push.** Phase 4 (CI Pre-Review) must pass once before review. Phase 6 (CI Post-Review) must pass twice in a row before Phase 7 (Ship).
+- **Strictly follow ALL rules in the project's `AGENTS.md` and `TESTING.md`** (if they exist).
+- **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases.
+- **MUST use the `question` tool to ask the user anything.** Never use plain text output. Always invoke the built-in `question` tool.
+- **MUST use the `task` tool to spawn subagents.** Never run `$ task ...` in bash — the `task` tool is a built-in agent function call, the same as `read`, `write`, or `grep`. All Task subagent delegations (Phase 5 review, Phase 7 commit messages, Phase 8 issue comment, and any exploration/fix agents) must use the `task` tool via your tool-calling interface.
+- **Subagents are cheap; use them aggressively.** Spawn focused investigation or fix agents rather than doing everything inline.
 
 ---
 
 ## Phase Delegation Strategy
 
-| Phase | Who Runs | Why |
-|:------|:---------|:----|
-| 0 (Init) | Orchestrator inline | User input needed (issue number), worktree creation |
-| 1 (Brainstorm) | Orchestrator inline | Heavy user interaction — clarifying questions, approach selection, design approval |
-| 2 (Plan) | Orchestrator inline | User must review and confirm the plan |
-| 3 (Implement) | Orchestrator inline | User picks skill (orchestrate/work/ultrawork); chosen skill spawns its own task subagents |
-| 4 (Review) | **Task subagent** | Fully autonomous review loop — no user interaction. Ralph Review is designed for task delegation |
-| 5 (CI Verify) | Orchestrator inline | CI runs in worktree; requires local bash access |
-| 6 (Ship) — commit msg & PR body | **Task subagent** | Content generation only — no side effects. Reads diff, follows scm format |
-| 6 (Ship) — git/gh commands | Orchestrator inline | Must run in worktree with local git state |
-| 7 (Issue Comment) | **Task subagent** | Fully autonomous — reads issue context, writes plain-English comment, posts it |
+| Phase | Who Runs |
+|:------|:---------|
+| 0 (Init) | Orchestrator inline |
+| 1 (Brainstorm) | Orchestrator inline |
+| 2 (Plan) | Orchestrator inline |
+| 3 (Implement) | Orchestrator inline |
+| 4 (CI Pre-Review) | Orchestrator inline |
+| 5 (Review) | **Task subagent** |
+| 6 (CI Post-Review) | Orchestrator inline |
+| 7 (Ship) — commit msg & PR body | **Task subagent** |
+| 7 (Ship) — git/gh commands | Orchestrator inline |
+| 8 (Issue Comment) | **Task subagent** |
 
 ---
 
@@ -152,56 +153,11 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
 
 ---
 
-## Phase 4: Review — TASK SUBAGENT
-
-**This phase is the most important quality gate in the entire workflow. Never bypass it, never shortcut it, never "trust" that the implementation is correct without it.**
+## Phase 4: CI Verify — Pre-Review
 
 ### GATE ENTRY
 - [ ] Phase 3 gate exit conditions satisfied
 - [ ] Implementation is complete in `$WORKTREE`
-
-### Procedure
-
-**CRITICAL: You MUST delegate this entire phase to a Task subagent using the built-in `task` tool (NOT bash). Do NOT review code yourself. Do NOT read source files to verify correctness. Do NOT run git diff yourself. The Task subagent handles everything.**
-
-1. `cd $WORKTREE`
-2. Use the built-in `task` tool to spawn a ralphreview subagent (invoke via your tool-calling interface, same as `read`/`write`/`grep`):
-   - `subagent_type`: `"general"`
-   - `description`: `"ralphreview"`
-   - `prompt`:
-     ```
-     Load the ralphreview skill and execute it step by step. Scope: DIFF (all uncommitted changes in this worktree).
-
-     IMPORTANT: Follow every rule in the ralphreview skill EXACTLY:
-     - Use the task tool for all review and remediation (never review or fix code yourself)
-     - Loop until 3 consecutive clean review streaks
-     - Track state in .ralphreview-state-<id> file
-     - Return a clear summary: number of issues found, fixed, skipped, and final streak count
-
-     If you hit the loop limit, return a quality warning with the current state.
-     ```
-
-3. **Wait for the subagent to complete. Do NOT intervene.** The subagent returns a summary.
-4. If the subagent reports loop-limit exceeded, present the quality warning to the user. The PR will remain draft. Proceed only with user acknowledgment.
-5. Verify no files outside `$WORKTREE` were modified during review remediation.
-
-### GATE EXIT
-- [ ] Ralph Review subagent completed and returned a result
-- [ ] Result shows either 3 clean streaks, or user acknowledged loop-limit warning
-- [ ] No files were modified outside `$WORKTREE`
-- [ ] All review findings are tracked in `.ralphreview-state-*` file inside `$WORKTREE`
-
-**You CANNOT proceed to Phase 5 without satisfying ALL gate exit items.**
-
----
-
-## Phase 5: CI Verify — MUST pass before ANY commit or push
-
-**Do NOT proceed to Phase 6 (Ship) until all steps in this phase pass. Running CI after committing defeats the purpose of verification and is forbidden.**
-
-### GATE ENTRY
-- [ ] Phase 4 gate exit conditions satisfied
-- [ ] Ralph review is complete
 
 ### Procedure
 
@@ -212,40 +168,106 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
    - Run lint, type-check, format-check, and any other static analysis steps.
    - Run the full test suite.
    - Run any coverage checks specified in the project's CI configuration.
-4. For CI steps that require secrets or services unavailable locally:
-   - Stage and commit changes temporarily.
-   - Push to the remote branch.
-   - Run `gh run watch` to wait for remote CI to complete.
-   - If remote CI fails, uncommit, re-enter Phase 3 with CI error context.
-5. If any step fails, report to the user with the failure output. Ask whether to re-enter Phase 3 or abort.
+4. If any step fails, report to the user with the failure output. Ask whether to re-enter Phase 3 or abort.
 
 ### GATE EXIT
-- [ ] All local CI steps passed (lint, typecheck, format, tests, coverage)
-- [ ] Any remote-only CI steps passed OR user acknowledged they are unavailable
+- [ ] All CI steps passed (lint, typecheck, format, tests, coverage)
 - [ ] Zero failing checks
 - [ ] No files were modified outside `$WORKTREE`
 
-**You CANNOT proceed to Phase 6 without satisfying ALL gate exit items.** If any check fails, you MUST loop back to Phase 3 — never skip ahead.
+**You CANNOT proceed to Phase 5 without satisfying ALL gate exit items.**
 
 ---
 
-## Phase 6: Ship
+## Phase 5: Review — TASK SUBAGENT
 
-**GUARD: Do NOT enter this phase unless Phase 5 (CI Verify) passed. If you have not completed Phase 5, go back immediately.**
+**This is the critical quality gate. Never bypass or shortcut it.**
+
+### GATE ENTRY
+- [ ] Phase 4 gate exit conditions satisfied
+- [ ] Implementation is complete in `$WORKTREE`
+
+### Procedure
+
+**CRITICAL: Delegate this entire phase to a Task subagent using the built-in `task` tool (NOT bash). Do not review code yourself. Do not read source files or run git diff.**
+
+1. `cd $WORKTREE`
+2. Use the built-in `task` tool to spawn a ralphreview subagent:
+   - `subagent_type`: `"general"`
+   - `description`: `"ralphreview"`
+   - `prompt`:
+     ```
+     Load the ralphreview skill and execute it step by step. Scope: DIFF (all uncommitted changes in this worktree).
+
+     IMPORTANT: Follow every rule in the ralphreview skill EXACTLY:
+     - Use the task tool for all review and remediation
+     - Loop until 3 consecutive clean review streaks
+     - Track state in .ralphreview-state-<id> file
+     - Return a clear summary: number of issues found, fixed, skipped, and final streak count
+
+     If you hit the loop limit, return a quality warning with the current state.
+     ```
+
+3. Wait for the subagent to return a summary.
+4. If the subagent reports loop-limit exceeded, present the quality warning to the user. Proceed only with user acknowledgment.
+5. Verify no files outside `$WORKTREE` were modified.
+
+### GATE EXIT
+- [ ] Ralph Review subagent completed and returned a result
+- [ ] Result shows either 3 clean streaks, or user acknowledged loop-limit warning
+- [ ] No files were modified outside `$WORKTREE`
+- [ ] All review findings are tracked in `.ralphreview-state-*` file inside `$WORKTREE`
+
+**You CANNOT proceed to Phase 6 without satisfying ALL gate exit items.**
+
+---
+
+## Phase 6: CI Verify — MUST pass twice in a row
+
+**Do NOT proceed to Phase 7 (Ship) until CI passes twice in a row.**
 
 ### GATE ENTRY
 - [ ] Phase 5 gate exit conditions satisfied
+- [ ] Ralph review is complete
+
+### Procedure
+
+1. `cd $WORKTREE`
+2. Read `.github/workflows/ci.yml` from the repository root.
+3. **RUN 1**: Run ALL CI steps locally inside `$WORKTREE`:
+   - Install dependencies if needed.
+   - Run lint, type-check, format-check, and any other static analysis steps.
+   - Run the full test suite.
+   - Run any coverage checks specified in the project's CI configuration.
+4. If Run 1 fails: auto-fix mechanical issues (e.g. `ruff format`, `prettier --write`), then re-run from step 3. If tests or type errors fail, report to the user with the failure output. Ask whether to re-enter Phase 3 or abort.
+5. **RUN 2**: Repeat step 3. Run 1 and Run 2 must both pass clean. If Run 2 fails, fix and repeat Run 1 + Run 2 until two consecutive passes are achieved.
+
+### GATE EXIT
+- [ ] Run 1 and Run 2 passed all CI steps (lint, typecheck, format, tests, coverage)
+- [ ] Zero failing checks on final run
+- [ ] No files were modified outside `$WORKTREE`
+
+**You CANNOT proceed to Phase 7 without satisfying ALL gate exit items.**
+
+---
+
+## Phase 7: Ship
+
+**GUARD: Do not enter this phase unless Phase 6 (CI Verify) passed.**
+
+### GATE ENTRY
+- [ ] Phase 6 gate exit conditions satisfied
 - [ ] All CI checks passed
-- [ ] `$WORKTREE` contains uncommitted changes that need to be shipped
+- [ ] `$WORKTREE` contains uncommitted changes
 
 ### Procedure
 
 #### Part A: Generate commit message and PR body (TASK SUBAGENT)
 
-**CRITICAL: Generate commit message and PR body via the built-in `task` tool (NOT bash). Do NOT write them inline. The subagent reads the diff and follows scm format rules.**
+**CRITICAL: Generate commit message and PR body via the built-in `task` tool (NOT bash). Do not write them inline.**
 
 1. `cd $WORKTREE`
-2. Use the built-in `task` tool to generate the commit message and PR body (invoke via your tool-calling interface, same as `read`/`write`/`grep`):
+2. Use the built-in `task` tool to generate the commit message and PR body:
    - `subagent_type`: `"general"`
    - `description`: `"scm-commit-msg"`
    - `prompt`:
@@ -272,7 +294,7 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
        SCOPE: <scope>
      ```
 
-3. **Wait for the subagent to return.** Record the commit title, type, scope, and file paths.
+3. Wait for the subagent to return the commit title, type, scope, and file paths.
 
 #### Part B: Execute git/gh commands (ORCHESTRATOR INLINE)
 
@@ -305,53 +327,61 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
 - [ ] Draft PR created and URL reported to user
 - [ ] Returned to main branch
 
-**Do NOT proceed to Phase 7 if PR creation failed. Report the error and give the user the manual `gh pr create` command.**
+**Do NOT proceed to Phase 8 if PR creation failed. Report the error and give the user the manual `gh pr create` command.**
 
 ---
 
-## Phase 7: Issue Comment — TASK SUBAGENT
+## Phase 8: Issue Comment — TASK SUBAGENT
 
 **If the original GitHub issue number is unknown, skip this phase and report to the user.**
 
 ### GATE ENTRY
-- [ ] Phase 6 gate exit conditions satisfied
+- [ ] Phase 7 gate exit conditions satisfied
 - [ ] PR created successfully
 - [ ] Original GitHub issue number is known
 
 ### Procedure
 
-**CRITICAL: Delegate this entire phase to a Task subagent using the built-in `task` tool (NOT bash). Do NOT write the comment inline. The subagent reads issue context, crafts a plain-English comment, and posts it.**
+**CRITICAL: Delegate this entire phase to a Task subagent using the built-in `task` tool (NOT bash). Do not write the comment inline.**
 
-1. Use the built-in `task` tool to write and post the issue comment (invoke via your tool-calling interface, same as `read`/`write`/`grep`):
+1. `cd $WORKTREE`
+2. Get the branch name: `git branch --show-current`
+3. Use the built-in `task` tool to write and post the issue comment:
    - `subagent_type`: `"general"`
    - `description`: `"issue-comment"`
    - `prompt`:
      ```
      Write and post a plain-English summary comment on GitHub issue #<number>.
 
-     The comment must be written for the END USER who reported the issue — someone who may not be technically competent. Follow these rules STRICTLY:
+     WORKTREE: <$WORKTREE>
+     BRANCH: <branch-name>
+     SCOPE: all changes from the fork point of this branch to HEAD.
 
-     1. NO code references — never mention file names, function names, variable names, line numbers, or any implementation detail.
-     2. NO technical jargon — avoid terms like "API", "endpoint", "database query", "regression test", "CI/CD", "decorator", "middleware", etc. Describe technical things in everyday language.
-     3. COVER these topics:
-        - Problem: What was wrong, from the user's perspective. Restate the issue to confirm understanding.
-        - Decisions made: Why a particular approach was chosen.
-        - Assumptions made: Any assumptions about the user's environment or usage that might not hold in all cases.
-        - What was done: A high-level description of the fix, in plain language. What the user will notice changing.
-        - Possible side effects: Any behavior changes the user should be aware of. Be honest about trade-offs.
-     4. TONE: Helpful, transparent, and humble. If there are trade-offs or uncertainties, say so.
-     5. FORMAT: One short paragraph per topic. No headings, no bullet points. Reads as a friendly, concise message.
+     First, understand what was changed:
+       cd <WORKTREE>
+       git diff $(git merge-base main HEAD)..HEAD
 
-     First fetch the issue to understand context:
+     Then write a comment following these rules:
+     1. NO code references — no file names, function names, line numbers, or implementation details.
+     2. NO technical jargon — describe technical things in everyday language.
+     3. COVER:
+        - What was wrong (restate the issue).
+        - Decisions made and why.
+        - What was done, in plain language.
+        - Side effects or behavior changes the user will notice.
+     4. TONE: helpful, transparent, humble.
+     5. FORMAT: short paragraphs, no headings, no bullet points.
+
+     Fetch the issue for context:
        gh issue view <number> --json title,body
 
-     Then write the comment to /tmp/issue-comment.txt and post it:
+     Write the comment to /tmp/issue-comment.txt and post it:
        gh issue comment <number> --body-file /tmp/issue-comment.txt
 
      Return the posted comment text.
      ```
 
-2. **Wait for the subagent to complete.** Report the posted comment to the user.
+4. **Wait for the subagent to complete.** Report the posted comment to the user.
 
 ### GATE EXIT
 - [ ] Comment posted on the issue
@@ -369,17 +399,17 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
 | 1 | User rejects all approaches | Abort, clean up worktree |
 | 2 | User rejects plan | Loop back to Phase 1 |
 | 3 | Implementation fails repeatedly | Report error trail, ask user |
-| 4 | Ralph exceeds loop limits | Quality warning, proceed with draft PR |
-| 4 | Task subagent fails to run | Report error, ask user: skip review (risky) or abort |
-| 5 | CI fails locally | Report output, ask user: re-implement or abort |
-| 5 | Remote CI fails | Report output, ask user: re-implement or abort |
-| 6 | Commit/push fails | Leave worktree intact, report error |
-| 6 | PR creation fails | Branch pushed, give user manual `gh pr create` command |
-| 6 | Task subagent fails to generate messages | Write commit message and PR body inline as fallback |
-| 7 | Issue number unknown | Skip phase, report to user |
-| 7 | Comment post fails | Report error, worktree and PR are intact |
+| 4 | CI fails | Report output, ask user: re-implement or abort |
+| 5 | Ralph exceeds loop limits | Quality warning, proceed with draft PR |
+| 5 | Task subagent fails to run | Report error, ask user: skip review (risky) or abort |
+| 6 | CI fails | Report output, ask user: re-implement or abort |
+| 7 | Commit/push fails | Leave worktree intact, report error |
+| 7 | PR creation fails | Branch pushed, give user manual `gh pr create` command |
+| 7 | Task subagent fails to generate messages | Write commit message and PR body inline as fallback |
+| 8 | Issue number unknown | Skip phase, report to user |
+| 8 | Comment post fails | Report error, worktree and PR are intact |
 
-**Universal rule**: If the workflow errors after Phase 0, leave the worktree intact. Only clean up on successful Phase 7 completion or explicit user instruction.
+**Universal rule**: If the workflow errors after Phase 0, leave the worktree intact. Only clean up on successful Phase 8 completion or explicit user instruction.
 
 ---
 
@@ -389,19 +419,22 @@ description: Fetch a GitHub issue, brainstorm/plan with user input, auto-impleme
 Phase 0 (Init) → Phase 1 (Brainstorm) → Phase 2 (Plan) → Phase 3 (Implement)
                                                                         |
                                                                         v
-                                                               Phase 4 (Review) [TASK]
+                                                               Phase 4 (CI Pre) [local]
                                                                         |
                                                                         v
-                                                               Phase 5 (CI Verify)
+                                                               Phase 5 (Review) [TASK]
+                                                                        |
+                                                                        v
+                                                               Phase 6 (CI Post) [local, 2x]
                                                                         |
                                                         ┌───────────────┤
                                                         │ FAIL          │ PASS
                                                         v               v
-                                                  Phase 3 (loop)  Phase 6 (Ship) [TASK + inline]
+                                                  Phase 3 (loop)  Phase 7 (Ship) [TASK + inline]
                                                                         |
                                                                         v
-                                                               Phase 7 (Comment) [TASK]
+                                                               Phase 8 (Comment) [TASK]
 ```
 
-**TASK** = delegated to a Task subagent. The orchestrator spawns the subagent and waits for the result.
-**inline** = executed directly by the orchestrator in the foreground.
+**TASK** = delegated to a Task subagent. Orchestrator spawns the subagent and waits for the result.
+**inline** = executed directly by the orchestrator.
