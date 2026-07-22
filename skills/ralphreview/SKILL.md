@@ -30,7 +30,7 @@ Iteratively review and remediate the current implementation until review stabili
 ### Expected inputs
 - A codebase with changes to review
 - An optional scope string (DIFF, COMMIT:<hash>, FILES:<list>, FEATURE:<desc>, etc.)
-- An optional `WORKTREE` (absolute path from the caller, e.g. gh-autopilot)
+- An optional `WORKTREE` (absolute path from the caller, e.g. issue-autopilot)
 - A `clean_review_streak` variable initialized to 0
 
 ### Expected outputs

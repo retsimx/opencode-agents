@@ -112,7 +112,7 @@ Provide a quick-reference listing of all available agent skills with description
 | **dev-workflow** | Dev environment: mise tasks, git hooks, CI/CD, migrations, release automation |
 | **docs** | Documentation drift detection: verify refs against codebase, propose sync patches |
 | **frontend** | React, Next.js, TypeScript: FSD-lite architecture, shadcn/ui, design system alignment |
-| **gh-autopilot** | GitHub issue → draft PR: fetch, plan, implement, review, verify CI, open PR from worktree |
+| **issue-autopilot** | Forge issue → draft PR: fetch, plan, implement, verify CI, open PR/MR from worktree (`gh` or `glab`) |
 | **image** | Multi-vendor AI image gen: Codex (gpt-image-2), Pollinations (flux/zimage) |
 | **mobile** | Flutter, React Native: cross-platform mobile, Riverpod, widgets |
 | **observability** | Traceability across layers: telemetry, APM, RUM, metrics, logs, SLO, incident forensics |

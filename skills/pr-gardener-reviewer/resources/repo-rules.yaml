@@ -1,0 +1,67 @@
+# Repository-specific merge guardrails.
+# Used by the pr-gardener-reviewer skill.
+#
+# A PR that touches any path listed in `high_risk_globs` is escalated to ASK
+# immediately and is never eligible for auto-merge, regardless of risk
+# classification, confidence, or CI status.
+#
+# This file is the project's override surface. Edit it to match the stack you
+# actually run. The skill reads this file once per run.
+
+# Glob syntax: gitignore-style. ** matches across directory boundaries.
+high_risk_globs:
+  # CI / workflow configuration
+  - ".github/workflows/**"
+  - ".gitlab-ci.yml"
+  - "azure-pipelines.yml"
+  - ".circleci/config.yml"
+
+  # Build / dependency manifests
+  - "pyproject.toml"
+  - "package.json"
+  - "package-lock.json"
+  - "yarn.lock"
+  - "Cargo.toml"
+  - "Cargo.lock"
+  - "go.mod"
+  - "go.sum"
+  - "Gemfile"
+  - "Gemfile.lock"
+  - "pom.xml"
+  - "build.gradle"
+  - "build.gradle.kts"
+
+  # Django / Python
+  - "**/settings.py"
+  - "**/settings/*.py"
+  - "**/migrations/**"
+  - "**/wsgi.py"
+  - "**/asgi.py"
+  - "**/urls.py"
+  - "**/serializers.py"
+  - "**/models.py"
+  - "**/admin.py"
+
+  # Rails / Ruby
+  - "config/routes.rb"
+  - "db/schema.rb"
+  - "db/structure.sql"
+
+  # Auth / permissions / security-related (generic)
+  - "**/auth*.py"
+  - "**/permissions*.py"
+  - "**/auth/**/*.ts"
+  - "**/auth/**/*.js"
+
+  # Infrastructure
+  - "Dockerfile"
+  - "docker-compose.yml"
+  - "docker-compose.*.yml"
+  - "Terraform/**"
+  - "*.tf"
+
+# Per-project overrides: append or trim this list as needed.
+# Example additions for a Django tutoring project:
+#   - "tutoring_system/settings/*.py"
+#   - "tutoring/xero/*.py"        # Xero integration is sensitive
+#   - "tutoring/models.py"
