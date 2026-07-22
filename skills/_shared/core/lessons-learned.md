@@ -151,7 +151,7 @@ RCA (Root Cause Analysis) entry is **required** when:
 When finding recurring issues during review:
 1. Add lesson to the relevant domain section
 2. Format: `### {date}: {one-line summary}` + problem/cause/solution/prevention
-3. MCP memory tool: `[EDIT]("lessons-learned.md", additional content)`
+3. Edit this file (`.agents/skills/_shared/core/lessons-learned.md`) with the built-in `edit` tool to append the lesson
 
 ### When Orchestrator Adds
 When there are failed tasks at session end:
@@ -161,7 +161,7 @@ When there are failed tasks at session end:
 
 ### Auto-Generation from Experiment Ledger
 
-At session end, the Orchestrator extracts discarded experiments with **delta <= -5** from the Experiment Ledger (see `experiment-ledger.md`) and generates lesson candidates.
+At session end, the Orchestrator extracts discarded experiments with **delta <= -5** from the Experiment Ledger (see `.agents/skills/_shared/conditional/experiment-ledger.md`) and generates lesson candidates.
 
 Auto-generated lessons use the RCA Entry Format above, with these additions:
 - **Root Cause** field specifies which quality dimension regressed and why

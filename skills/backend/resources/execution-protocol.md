@@ -1,13 +1,13 @@
 # Backend Agent - Execution Protocol
 
 ## Step 0: Prepare
-1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons**: read your domain section in `../../_shared/core/lessons-learned.md`
-3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
+2. **Check lessons**: read your domain section in `.agents/skills/_shared/core/lessons-learned.md`
+3. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context**: follow `../../_shared/core/context-budget.md` (read symbols, not whole files)
+4. **Budget context**: follow `.agents/skills/_shared/core/context-budget.md` (read symbols, not whole files)
 
 **Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
 
@@ -17,7 +17,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Read the task requirements carefully
 - Identify which endpoints, models, and services are needed
 - Check existing code: `glob("app/api/**")`, `grep("existing_function")`
-- If the task is ORM-heavy, load `resources/orm-reference.md` before deciding on loading strategy, transaction scope, or client/session lifecycle
+- If the task is ORM-heavy, load `.agents/skills/backend/resources/orm-reference.md` before deciding on loading strategy, transaction scope, or client/session lifecycle
 - List assumptions; ask if unclear
 
 ## Step 2: Plan
@@ -38,10 +38,10 @@ Follow these steps in order (adjust depth by difficulty).
 - Follow clean architecture: router -> service -> repository -> models
 
 ## Step 4: Verify
-- Run `resources/checklist.md` items
-- Run `../../_shared/core/common-checklist.md` items
+- Run `.agents/skills/backend/resources/checklist.md` items
+- Run `.agents/skills/_shared/core/common-checklist.md` items
 - Ensure all tests pass
 - Confirm OpenAPI docs are complete
 
 ## On Error
-See `resources/error-playbook.md` for recovery steps.
+See `.agents/skills/backend/resources/error-playbook.md` for recovery steps.

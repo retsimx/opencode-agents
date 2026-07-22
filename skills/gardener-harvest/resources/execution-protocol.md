@@ -6,8 +6,8 @@ state, batching, parallelism, rate limits, drafts, large diffs, and branch
 verification.
 
 **Forge CLI commands:** use
-[`../../_shared/runtime/providers.md`](../../_shared/runtime/providers.md)
-(also stubbed at `resources/providers.md`). Do not invent provider-specific
+`.agents/skills/_shared/runtime/providers.md`
+(also stubbed at `.agents/skills/gardener-harvest/resources/providers.md`). Do not invent provider-specific
 commands outside that map.
 
 ## State file

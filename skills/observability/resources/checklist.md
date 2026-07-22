@@ -2,7 +2,7 @@
 
 > Consolidated verification checklist. Run before shipping observability changes to production.
 > Each item: action; criterion; priority.
-> Source files live under `resources/` from the skill root.
+> Source files live under `.agents/skills/observability/resources/` from the skill root.
 
 ## Priority legend
 
@@ -128,7 +128,7 @@
 
 - Append items under the section that best fits the intent (setup / pre-prod / ops / forensics / compliance / SLO / recovery)
 - Format: `- [ ] {action verb} {specific target} — {acceptance criterion} (priority: P0/P1/P2)`
-- Include a `cross-ref` comment pointing to the source file using a path relative to the `resources/` root when the item derives from a specific section
+- Include a `cross-ref` comment pointing to the source file using a path relative to the `.agents/skills/observability/resources/` root when the item derives from a specific section
 - Mark priority: P0 (block ship) | P1 (must before prod) | P2 (this sprint)
 - Deduplicate before adding: search existing items by keyword before inserting
 - CTO review required for any change to P0 items in Sections 1, 5, or 6

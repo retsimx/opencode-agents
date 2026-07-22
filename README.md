@@ -30,6 +30,19 @@ opencode "run stack-set"
 
 OpenCode loads skills from `.agents/skills/` on startup — no additional config needed.
 
+## Path convention
+
+Agents run with **cwd = host project root** (the directory that contains `.agents/`). Use these path forms in skills and when instructing agents:
+
+| Kind | Format |
+|------|--------|
+| Shared docs | `.agents/skills/_shared/{core\|conditional\|runtime}/file.md` |
+| Skill files | `.agents/skills/{name}/SKILL.md` or `.../resources/file.md` |
+| Session I/O | `.agents/results/...` |
+| Host project docs | `AGENTS.md`, `docs/...` |
+
+Do not use skill-relative paths (`../_shared/...`) for agent `read`/`write`/`edit` operations.
+
 > **Important:** Add `.agents/` to your host project's `.gitignore`. This directory
 > is its own standalone git repo — it should not be nested inside another.
 

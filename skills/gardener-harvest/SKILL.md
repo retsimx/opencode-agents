@@ -75,50 +75,50 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 - `gh` CLI (GitHub) or `glab` CLI (GitLab), authenticated and on `PATH`
 - `task` tool to spawn subagent assessment tasks
 - `question` tool to batch uncertain PRs to the user
-- How to run (outer loops): `../_shared/runtime/gardener-running.md`
-- `resources/providers.md` — stub → shared provider command map (`../_shared/runtime/providers.md`)
-- `../_shared/runtime/providers.md` — GitHub (`gh`) / GitLab (`glab`) detection and commands
-- `resources/repo-rules.yaml` — high-risk file globs for this project
-- `resources/execution-protocol.md` — state file, batching, rate limits, large diffs
-- `resources/subagent-prompt.md` — exact prompt launched subagents use
+- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
+- `.agents/skills/gardener-harvest/resources/providers.md` — stub → shared provider command map (`.agents/skills/_shared/runtime/providers.md`)
+- `.agents/skills/_shared/runtime/providers.md` — GitHub (`gh`) / GitLab (`glab`) detection and commands
+- `.agents/skills/gardener-harvest/resources/repo-rules.yaml` — high-risk file globs for this project
+- `.agents/skills/gardener-harvest/resources/execution-protocol.md` — state file, batching, rate limits, large diffs
+- `.agents/skills/gardener-harvest/resources/subagent-prompt.md` — exact prompt launched subagents use
 
 ### Control-flow features
 - Sequential merge gates in oldest-first creation-date order
-- Parallel assessment batching (default batch size 5; see `resources/execution-protocol.md`)
+- Parallel assessment batching (default batch size 5; see `.agents/skills/gardener-harvest/resources/execution-protocol.md`)
 - State persistence in `.agents/results/pr-merge-queue.json` for resume
 - Batched ASK presentation in a single `question` call with `multiple: true`
 - Provider abstraction (GitHub `gh` / GitLab `glab`)
-- Repository-specific risk globs loaded from `resources/repo-rules.yaml`
+- Repository-specific risk globs loaded from `.agents/skills/gardener-harvest/resources/repo-rules.yaml`
 - Squash merge + delete source branch (fixed, not configurable)
 - Never mutates a PR — skips on any PR-side issue
 
 ## Structural Flow
 
 ### Entry
-1. Detect provider from `git remote get-url origin` per `resources/providers.md`. Abort if neither `gh` nor `glab` is authenticated for the resolved provider.
-2. Load (or create) `.agents/results/pr-merge-queue.json` per `resources/execution-protocol.md`.
-3. Load `resources/repo-rules.yaml` and prepare the high-risk glob list.
+1. Detect provider from `git remote get-url origin` per `.agents/skills/gardener-harvest/resources/providers.md`. Abort if neither `gh` nor `glab` is authenticated for the resolved provider.
+2. Load (or create) `.agents/results/pr-merge-queue.json` per `.agents/skills/gardener-harvest/resources/execution-protocol.md`.
+3. Load `.agents/skills/gardener-harvest/resources/repo-rules.yaml` and prepare the high-risk glob list.
 4. Confirm at least one open PR exists after draft and resume filtering.
 
 ### Scenes
-1. **LIST**: Fetch ALL open PRs via the provider's list command with an explicit `--limit` (GitHub: `--limit 1000`, or paginate via `gh api search/issues` above 1000 — see `resources/providers.md`). Capture `number`, `title`, `headRefName`, `createdAt`, `isDraft`. The `gh pr list` default limit of 30 is NEVER acceptable. Re-sort client-side by `createdAt` ascending. Filter drafts (`isDraft == false`) and any PR number already in the state file's `processed` list. Log the remaining count to the user before proceeding.
+1. **LIST**: Fetch ALL open PRs via the provider's list command with an explicit `--limit` (GitHub: `--limit 1000`, or paginate via `gh api search/issues` above 1000 — see `.agents/skills/gardener-harvest/resources/providers.md`). Capture `number`, `title`, `headRefName`, `createdAt`, `isDraft`. The `gh pr list` default limit of 30 is NEVER acceptable. Re-sort client-side by `createdAt` ascending. Filter drafts (`isDraft == false`) and any PR number already in the state file's `processed` list. Log the remaining count to the user before proceeding.
 2. **PREFILTER**: For each PR in oldest-first order, before spawning any subagent:
    - Skip if the PR number is already in `processed` (state file resume).
    - Fetch `gh pr diff <number>` (or `glab mr diff <number>`). If the diff output exceeds ~50,000 chars, record `skipped: large_diff` and continue. Never attempt to summarize.
-3. **BATCH_ASSESS**: Take the next up-to-5 unprocessed PRs. Spawn one subagent per PR using `resources/subagent-prompt.md`, substituting `<number>`, `<repo_path>`, `<provider>`, and `<high_risk_globs>`. Subagents report raw findings only — no merge recommendation, no decision logic.
+3. **BATCH_ASSESS**: Take the next up-to-5 unprocessed PRs. Spawn one subagent per PR using `.agents/skills/gardener-harvest/resources/subagent-prompt.md`, substituting `<number>`, `<repo_path>`, `<provider>`, and `<high_risk_globs>`. Subagents report raw findings only — no merge recommendation, no decision logic.
 4. **DECIDE**: For each report received (in oldest-first order), apply the decision logic:
    - **MERGE**: risk = LOW AND behavior = NO AND CI = all passed AND filesChanged ≤ 10 AND total lines changed ≤ 300 AND no repository-specific flags AND confidence ≥ 90%
    - **ASK**: risk = MEDIUM OR behavior = UNCLEAR OR confidence < 90% OR any repository-specific flag present OR scope coherence = NO
    - **SKIP**: risk = HIGH OR CI has any failure OR any check pending OR files changed > 20 OR obvious bug visible in diff OR security concern OR merge strategy mismatch
    - CI pending alone is a SKIP (reason `ci_pending`) — never wait, never poll, never re-check. Move on immediately.
-5. **MERGE**: For each MERGE decision, issued SERIALLY in oldest-first order (never parallel — see `resources/execution-protocol.md`):
+5. **MERGE**: For each MERGE decision, issued SERIALLY in oldest-first order (never parallel — see `.agents/skills/gardener-harvest/resources/execution-protocol.md`):
    a. Run `gh pr merge <number> --squash --delete-branch` (GitHub) or `glab mr merge <number> --squash --remove-source-branch` (GitLab).
-   b. If the merge command fails or the subsequent state check is not `MERGED`, apply the Merge Retry Policy in `resources/execution-protocol.md`:
+   b. If the merge command fails or the subsequent state check is not `MERGED`, apply the Merge Retry Policy in `.agents/skills/gardener-harvest/resources/execution-protocol.md`:
       - Transient failures (405, 409 with policy lag, 429, 5xx, "try again" CLI messages, eventual-consistency false negatives): retry up to 3 times with backoff (5s, 15s), re-checking state and head SHA before each retry.
       - Permanent failures (conflict, branch protection rejects squash, PR changed since assessment, PR disappeared): record `skipped: <reason>` and continue. No retry.
    c. `sleep 2` between successful merges to let the provider's branch-protection state machine settle.
    d. Never rebase, push, force-push, edit files, run CI locally, change merge strategy, or delete branches by hand — even during retry. Retrying the same `--squash --delete-branch` command is the only permitted retry action.
-6. **VERIFY**: After a successful merge (or transient retry that succeeds), verify via `resources/execution-protocol.md`:
+6. **VERIFY**: After a successful merge (or transient retry that succeeds), verify via `.agents/skills/gardener-harvest/resources/execution-protocol.md`:
    - PR state is `MERGED`.
    - Branch ref is gone (404). If still present, record `outcome: merged_branch_not_deleted` and continue. **Do not** delete the branch manually.
 7. **BATCH_ASK**: After all MERGE and SKIP decisions in the pass are resolved, collect all ASK-classified PRs. Present them in a single `question` tool call with `multiple: true`, chunked into ≤10 per call if more than 10 accumulate. Each option label is `#<n> <title>` and the description is the subagent report's `Top concerns` + `Confidence` + `Risk` summary. User picks which to proceed with.
@@ -139,7 +139,7 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 | Provider not authenticated | Exit with error before listing |
 | No open PRs | Exit with "no open PRs" message |
 | Subagent task fails or times out | Record `skipped: subagent_failed`, continue |
-| Merge transient failure (405, 409 policy lag, 429 merge-route, 5xx) | Retry merge up to 3 times with backoff (5s, 15s), per `resources/execution-protocol.md`. Re-check state + head SHA before each retry. If state already `MERGED`, treat as success. If head SHA changed, record `skipped: pr_changed_after_assessment`. |
+| Merge transient failure (405, 409 policy lag, 429 merge-route, 5xx) | Retry merge up to 3 times with backoff (5s, 15s), per `.agents/skills/gardener-harvest/resources/execution-protocol.md`. Re-check state + head SHA before each retry. If state already `MERGED`, treat as success. If head SHA changed, record `skipped: pr_changed_after_assessment`. |
 | Merge permanent failure (real conflict, branch protection rejects squash, PR disappeared) | Record `skipped: <specific reason>`, continue. Never rebase. Never edit. Never change merge strategy. |
 | Branch not deleted after merge | Record `merged_branch_not_deleted`, continue. Never delete manually. |
 | CI still pending | Record `skipped: ci_pending`, continue. Never wait. Never re-check. |
@@ -160,23 +160,23 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 |--------|---------------|----------|
 | Detect provider | `READ` | `git remote get-url origin` |
 | Verify CLI auth | `CALL_TOOL` | `gh auth status` / `glab auth status` |
-| List open PRs | `CALL_TOOL` | per `resources/providers.md` |
+| List open PRs | `CALL_TOOL` | per `.agents/skills/gardener-harvest/resources/providers.md` |
 | Filter drafts and large diffs | `SELECT` | client-side predicate on PR metadata |
 | Load state file | `READ` | `.agents/results/pr-merge-queue.json` |
-| Load repo rules | `READ` | `resources/repo-rules.yaml` |
+| Load repo rules | `READ` | `.agents/skills/gardener-harvest/resources/repo-rules.yaml` |
 | Spawn assessment batch | `CALL_TOOL` | `task` subagents (up to 5 parallel) |
 | Collect findings | `INFER` | subagent reports |
 | Apply decision logic | `SELECT` | MERGE / ASK / SKIP classification |
 | Merge PR (serial) | `CALL_TOOL` | `gh pr merge --squash --delete-branch` / `glab mr merge --squash --remove-source-branch`, one at a time, `sleep 2` between merges |
-| Retry transient merge failure | `CALL_TOOL` | up to 3 retries with backoff (5s, 15s), re-check state + head SHA before each, per `resources/execution-protocol.md` |
+| Retry transient merge failure | `CALL_TOOL` | up to 3 retries with backoff (5s, 15s), re-check state + head SHA before each, per `.agents/skills/gardener-harvest/resources/execution-protocol.md` |
 | Verify merge + branch deletion | `CALL_TOOL` | `gh pr view --json state`; `gh api .../branches/{branch}` |
 | Save state | `WRITE` | `.agents/results/pr-merge-queue.json` |
 | Ask user | `REQUEST` | `question` tool, batched, `multiple: true` |
 | Report summary | `NOTIFY` | final outcome table |
 
 ### Tools and instruments
-- `gh` CLI (GitHub) — see `resources/providers.md`
-- `glab` CLI (GitLab) — see `resources/providers.md`
+- `gh` CLI (GitHub) — see `.agents/skills/gardener-harvest/resources/providers.md`
+- `glab` CLI (GitLab) — see `.agents/skills/gardener-harvest/resources/providers.md`
 - `task` tool for parallel subagent assessment
 - `question` tool for batched user confirmation
 - `rg` / `git log --grep` for repository history evidence (inside subagent)
@@ -187,19 +187,19 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 1. Detect provider from `git remote get-url origin`.
 2. Verify CLI auth via `gh auth status` / `glab auth status`.
 3. Load `.agents/results/pr-merge-queue.json` (create if missing).
-4. Load `resources/repo-rules.yaml` and flatten the high_risk_globs list.
+4. Load `.agents/skills/gardener-harvest/resources/repo-rules.yaml` and flatten the high_risk_globs list.
 5. List ALL open PRs via provider's list command. MUST pass an explicit limit:
    - GitHub: `gh pr list --state open --json number,title,headRefName,createdAt,isDraft --limit 1000`
-     (paginate via `gh api search/issues` above 1000 — see `resources/providers.md`)
+     (paginate via `gh api search/issues` above 1000 — see `.agents/skills/gardener-harvest/resources/providers.md`)
    - GitLab: `glab mr list --state opened --output json --per-page 100 --page N` until empty
    Re-sort client-side by `createdAt` ascending. Filter `isDraft == false`.
 6. PREFILTER oldest-first:
    - skip already-processed (state file)
    - skip drafts
    - fetch diff; if > 50k chars, record `skipped: large_diff`
-7. Form a batch of unfiltered PRs (oldest first). See `resources/execution-protocol.md`
+7. Form a batch of unfiltered PRs (oldest first). See `.agents/skills/gardener-harvest/resources/execution-protocol.md`
    for scale rules: 1–100 PRs => batch 5; 101–500 => batch 3; >500 => batch 2.
-8. Spawn one `task` subagent per PR using `resources/subagent-prompt.md`,
+8. Spawn one `task` subagent per PR using `.agents/skills/gardener-harvest/resources/subagent-prompt.md`,
    substituting:
      <number>, <repo_path>, <provider>, <high_risk_globs>
 9. Collect subagent reports. Apply decision logic per the DECIDE scene.
@@ -209,11 +209,11 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
       glab mr merge <n> --squash --remove-source-branch
     Then `sleep 2` before the next merge.
     On transient failure (405/409-lag/429-merge-route/5xx): apply the Merge Retry Policy
-    in `resources/execution-protocol.md` — retry up to 3 times with backoff (5s, 15s),
+    in `.agents/skills/gardener-harvest/resources/execution-protocol.md` — retry up to 3 times with backoff (5s, 15s),
     re-checking state + head SHA before each retry.
     On permanent failure (real conflict, branch protection, PR changed, disappeared):
     record `skipped: <reason>`, continue. No rebase. No edit. No strategy change. No retry.
-11. VERIFY per `resources/execution-protocol.md` (state MERGED + branch 404).
+11. VERIFY per `.agents/skills/gardener-harvest/resources/execution-protocol.md` (state MERGED + branch 404).
 12. Record outcomes in state file. Continue fetching next batch (step 7).
 13. After all batches: collect all ASK PRs. Present them in a single `question`
     call (chunk ≤ 10 each) with `multiple: true`. User selects.
@@ -245,7 +245,7 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 - The skill never: pushes to a PR branch, rebases a branch, force-pushes, edits files in the repo, deletes a branch manually when `--delete-branch` failed, runs CI locally, commits anything.
 
 ### Guardrails
-1. **Never mutate a PR's branch or contents. No rebase. No CI fix. No conflict investigation. No file edits. No retry-on-fix.** A merge retry (re-issuing the same approved `gh pr merge --squash --delete-branch` command after a transient provider failure) is explicitly NOT a mutation and is allowed by the Merge Retry Policy in `resources/execution-protocol.md`. This guardrail overrides any other rule below if they ever conflict.
+1. **Never mutate a PR's branch or contents. No rebase. No CI fix. No conflict investigation. No file edits. No retry-on-fix.** A merge retry (re-issuing the same approved `gh pr merge --squash --delete-branch` command after a transient provider failure) is explicitly NOT a mutation and is allowed by the Merge Retry Policy in `.agents/skills/gardener-harvest/resources/execution-protocol.md`. This guardrail overrides any other rule below if they ever conflict.
 2. **Never wait for pending CI.** CI pending → SKIP with `reason: ci_pending`. Move on immediately.
 3. **Never delete a branch by hand.** Trust `--delete-branch` / `--remove-source-branch`. If the branch is still present after merge, record it and move on.
 4. **Never rely on the provider's default PR list limit.** Always pass `--limit 1000` (or paginate) for GitHub, and explicitly paginate `--per-page 100 --page N` for GitLab. The `gh pr list` default of 30 is a silent failure mode.
@@ -259,17 +259,17 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 12. **Retry only transient merge failures, never permanent ones.** Transient (405, 409-policy-lag, 429-merge-route, 5xx, eventual-consistency false negative): retry up to 3 times with backoff (5s, 15s), re-checking state + head SHA before each retry. Permanent (real conflict, branch protection rejects squash, PR changed since assessment, PR disappeared): skip with `skipped: <reason>`. Never rebase, edit, or change strategy to convert a permanent failure into a retry.
 13. **Scale the batch size with PR count.** 1–100 → 5 parallel; 101–500 → 3 parallel; >500 → 2 parallel. Never spawn hundreds of subagents at once.
 14. **Subagents report raw findings only.** Subagents do not recommend MERGE/ASK/SKIP and do not run decision logic. The parent's DECIDE scene is the only decision-maker.
-15. **Identical subagent prompt.** Every assessment subagent uses `resources/subagent-prompt.md` verbatim with only `<number>`, `<repo_path>`, `<provider>`, and `<high_risk_globs>` substituted.
+15. **Identical subagent prompt.** Every assessment subagent uses `.agents/skills/gardener-harvest/resources/subagent-prompt.md` verbatim with only `<number>`, `<repo_path>`, `<provider>`, and `<high_risk_globs>` substituted.
 16. **State file is the only local write.** No PR-side or branch-side writes beyond the merge itself.
 17. **General rate-limit → stop.** On a 429 from any non-merge API call, finish the in-flight batch, save state, exit. Do not retry within the same run. (A 429 specifically on the merge route is handled by the Merge Retry Policy in guardrail #12, not this one.)
 18. **Resume is opt-in.** If `last_run` is older than 1 hour, ask the user before resuming. Never silently clear `processed`.
 
 ## References
-- How to run (outer loops): `../_shared/runtime/gardener-running.md`
-- Subagent assessment prompt: `resources/subagent-prompt.md`
-- Provider command mappings: `../_shared/runtime/providers.md` (stub at `resources/providers.md`)
-- Repository-specific risk globs: `resources/repo-rules.yaml`
-- Execution protocol (state, batching, rate limits, drafts, verification): `resources/execution-protocol.md`
+- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
+- Subagent assessment prompt: `.agents/skills/gardener-harvest/resources/subagent-prompt.md`
+- Provider command mappings: `.agents/skills/_shared/runtime/providers.md` (stub at `.agents/skills/gardener-harvest/resources/providers.md`)
+- Repository-specific risk globs: `.agents/skills/gardener-harvest/resources/repo-rules.yaml`
+- Execution protocol (state, batching, rate limits, drafts, verification): `.agents/skills/gardener-harvest/resources/execution-protocol.md`
 - Sibling skills: `gardener-sow` (create PRs), `gardener-tend` (maintain PRs)
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`

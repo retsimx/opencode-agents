@@ -47,7 +47,7 @@ Use this checklist after creating or updating a skill.
 ## Reference Checks
 
 - `References` points only to files that exist or are intentionally planned.
-- Long examples and provider-specific variants are in `resources/`, not duplicated inline.
+- Long examples and provider-specific variants are in `.agents/skills/skill-creator/resources/`, not duplicated inline.
 - Reference files are one hop from `SKILL.md`; avoid deep reference chains.
 
 ## Suggested Commands

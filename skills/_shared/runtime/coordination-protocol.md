@@ -29,8 +29,12 @@ question than to build the wrong thing.
 
 ## Path Resolution
 
-All coordination files MUST be written to the **project root** `.agents/results/`
-directory. Session-scoped naming uses a session ID suffix:
+This library lives at `.agents/` inside a **host project**. Agents run with cwd = that host project root.
+
+All coordination files MUST be written to **`.agents/results/`** (host-project-relative).
+Skill and shared docs are loaded from **`.agents/skills/...`** (never skill-relative `../_shared/...`).
+
+Session-scoped naming uses a session ID suffix:
 - `result-{agent-id}-{sessionId}.md`
 - `progress-{agent-id}-{sessionId}.md`
 - Manual (non-orchestrated) runs: no suffix, `result-{agent-id}.md`
@@ -70,4 +74,4 @@ a row:
 | # | Phase | Agent | Hypothesis | Score Before | Score After | Delta | Decision |
 ```
 
-See `../conditional/experiment-ledger.md` for full format and analysis protocol.
+See `.agents/skills/_shared/conditional/experiment-ledger.md` for full format and analysis protocol.

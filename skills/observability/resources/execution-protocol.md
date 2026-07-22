@@ -13,7 +13,7 @@ otel_semconv: "1.27.0 (2024-11)"
    - `--multi-tenant`, `--multi-cloud`: force boundary dimension to `multi-tenant`
    - `--layer=L3|L4|mesh|L7`: force specific layer focus
    - `--signal=metrics|logs|traces|profiles|cost|audit|privacy`: force signal focus
-2. **Detect keywords** (Korean and English) against `resources/intent-rules.md` trigger list
+2. **Detect keywords** (Korean and English) against `.agents/skills/observability/resources/intent-rules.md` trigger list
 3. **Extract ambient context** from user message or project files:
    - Target platform: k8s, serverless (Lambda/Cloud Run), VM, bare metal
    - Scale tier: single-service, multi-service, multi-region
@@ -23,7 +23,7 @@ otel_semconv: "1.27.0 (2024-11)"
 ## Step 1: Classify Intent
 
 1. If a flag is present → use that intent directly; skip keyword matching
-2. If no flag → apply keyword pattern matching from `resources/intent-rules.md`
+2. If no flag → apply keyword pattern matching from `.agents/skills/observability/resources/intent-rules.md`
 3. If ambiguous or no match → default to `investigate + tune` in parallel
 4. **Sparse-context gate**: even when an intent is matched (score ≥ 1), before proceeding to Step 2 check that ambient context is sufficient for the chosen intent. Minimum required context per intent:
    - `investigate`: service name OR symptom category (error code, metric name) OR time window
@@ -50,7 +50,7 @@ Intent vocabulary:
 
 ## Step 2: Matrix Navigation
 
-1. Based on (intent × layer × boundary × signal), identify relevant cells in `resources/matrix.md`
+1. Based on (intent × layer × boundary × signal), identify relevant cells in `.agents/skills/observability/resources/matrix.md`
 2. Collect file references for each cell marked as covered (checkmark) or conditional (warning marker)
 3. Flag any N/A cells the user is asking about; redirect to an alternative dimension rather than producing a stub answer
 4. Record the active (layer, boundary, signal) triple for use in Step 6 output header
@@ -61,59 +61,59 @@ Dispatch based on intent. Use the table below as the primary routing map, then a
 
 | Intent | Primary resource | Fallback |
 |--------|-----------------|---------|
-| `setup` | `resources/vendor-categories.md` → vendor-owned skill | `resources/standards.md` (OTel semconv) |
-| `migrate` | CNCF 2025-10 guide + `resources/vendor-categories.md §(h) Log Pipeline` | OTel Collector bridge config |
-| `investigate` | `resources/incident-forensics.md` (MRA + 6-dim localization) | `resources/signals/traces.md` + `resources/signals/logs.md` |
-| `alert` | `resources/boundaries/slo.md` (burn-rate rules) | `resources/observability-as-code.md` |
-| `trace` | `resources/boundaries/cross-application.md` (propagator matrix) | `resources/layers/mesh.md` (zero-code auto-instr) |
-| `tune` | `resources/transport/` (4 files; see below) | `resources/meta-observability.md` (cardinality guardrails) |
-| `route` | `resources/boundaries/multi-tenant.md` + `resources/transport/collector-topology.md` | `resources/boundaries/cross-application.md` |
+| `setup` | `.agents/skills/observability/resources/vendor-categories.md` → vendor-owned skill | `.agents/skills/observability/resources/standards.md` (OTel semconv) |
+| `migrate` | CNCF 2025-10 guide + `.agents/skills/observability/resources/vendor-categories.md` §(h) Log Pipeline | OTel Collector bridge config |
+| `investigate` | `.agents/skills/observability/resources/incident-forensics.md` (MRA + 6-dim localization) | `.agents/skills/observability/resources/signals/traces.md` + `.agents/skills/observability/resources/signals/logs.md` |
+| `alert` | `.agents/skills/observability/resources/boundaries/slo.md` (burn-rate rules) | `.agents/skills/observability/resources/observability-as-code.md` |
+| `trace` | `.agents/skills/observability/resources/boundaries/cross-application.md` (propagator matrix) | `.agents/skills/observability/resources/layers/mesh.md` (zero-code auto-instr) |
+| `tune` | `.agents/skills/observability/resources/transport/` (4 files; see below) | `.agents/skills/observability/resources/meta-observability.md` (cardinality guardrails) |
+| `route` | `.agents/skills/observability/resources/boundaries/multi-tenant.md` + `.agents/skills/observability/resources/transport/collector-topology.md` | `.agents/skills/observability/resources/boundaries/cross-application.md` |
 
 ### setup intent
-- Consult `resources/vendor-categories.md`: select category based on constraints (OSS vs commercial, high-cardinality, FinOps, profiling)
+- Consult `.agents/skills/observability/resources/vendor-categories.md`: select category based on constraints (OSS vs commercial, high-cardinality, FinOps, profiling)
 - Delegate to vendor-owned skill when one is installed (e.g., getsentry/sentry-sdk-setup, honeycombio/agent-skill, Dash0 otel-instrumentation, Datadog Labs dd-apm)
 - If no matching vendor skill is installed → guide user to `/search --docs` for vendor documentation
 
 ### migrate intent
 - Fluentd as source → apply CNCF 2025-10 deprecation guide; recommend Fluent Bit or OTel Collector
-- Legacy APM as source → provide OTel bridge config patterns; reference `resources/vendor-categories.md §(h)`
+- Legacy APM as source → provide OTel bridge config patterns; reference `.agents/skills/observability/resources/vendor-categories.md` §(h)
 
 ### investigate intent
-- Invoke `resources/incident-forensics.md` full playbook (MRA + 6-dimension narrowing: code / service / layer / host / region / infra)
+- Invoke `.agents/skills/observability/resources/incident-forensics.md` full playbook (MRA + 6-dimension narrowing: code / service / layer / host / region / infra)
 - Cross-reference signal files based on symptom category (latency, error rate, saturation, data loss)
 
 ### alert intent
-- Use `resources/boundaries/slo.md` for burn-rate calculation and multi-window alert rules
-- Use `resources/observability-as-code.md` for PrometheusRule CRD and Alertmanager routing tree
+- Use `.agents/skills/observability/resources/boundaries/slo.md` for burn-rate calculation and multi-window alert rules
+- Use `.agents/skills/observability/resources/observability-as-code.md` for PrometheusRule CRD and Alertmanager routing tree
 
 ### trace intent
-- Use `resources/boundaries/cross-application.md` for W3C Trace Context propagator matrix across cloud providers
-- Use `resources/layers/mesh.md` for zero-code auto-instrumentation via service mesh
+- Use `.agents/skills/observability/resources/boundaries/cross-application.md` for W3C Trace Context propagator matrix across cloud providers
+- Use `.agents/skills/observability/resources/layers/mesh.md` for zero-code auto-instrumentation via service mesh
 
 ### tune intent
-- `resources/transport/udp-statsd-mtu.md`: UDP payload size thresholds and fragmentation risk
-- `resources/transport/otlp-grpc-vs-http.md`: protocol selection by environment and firewall constraints
-- `resources/transport/collector-topology.md`: DaemonSet vs sidecar vs gateway deployment patterns
-- `resources/transport/sampling-recipes.md`: head-based vs tail-based sampling policy selection
+- `.agents/skills/observability/resources/transport/udp-statsd-mtu.md`: UDP payload size thresholds and fragmentation risk
+- `.agents/skills/observability/resources/transport/otlp-grpc-vs-http.md`: protocol selection by environment and firewall constraints
+- `.agents/skills/observability/resources/transport/collector-topology.md`: DaemonSet vs sidecar vs gateway deployment patterns
+- `.agents/skills/observability/resources/transport/sampling-recipes.md`: head-based vs tail-based sampling policy selection
 
 ### route intent
-- `resources/boundaries/multi-tenant.md`: tenant isolation strategies (attribute-based, pipeline-based, storage-based)
-- `resources/transport/collector-topology.md`: routing topology for signal fan-out and load balancing
+- `.agents/skills/observability/resources/boundaries/multi-tenant.md`: tenant isolation strategies (attribute-based, pipeline-based, storage-based)
+- `.agents/skills/observability/resources/transport/collector-topology.md`: routing topology for signal fan-out and load balancing
 
 ## Step 4: Collect Reference Material
 
 1. Pull referenced file sections into working context based on Step 3 routing results
-2. Check `resources/vendor-categories.md` timestamp: if older than one quarter, advise the user to verify against the CNCF landscape at https://landscape.cncf.io
+2. Check `.agents/skills/observability/resources/vendor-categories.md` timestamp: if older than one quarter, advise the user to verify against the CNCF landscape at https://landscape.cncf.io
 3. For commercial vendor references, check whether a vendor-owned skill is installed locally before suggesting manual setup
 
 ## Step 5: Validate Against Constraints
 
-1. Consult `resources/anti-patterns.md`: does the proposed approach violate any of the 18 items?
-2. Consult `resources/checklist.md`: will this pass Pre-prod and Prod gates?
-3. Run `resources/meta-observability.md` cardinality guardrail preview: flag any label dimension that risks unbounded growth
+1. Consult `.agents/skills/observability/resources/anti-patterns.md`: does the proposed approach violate any of the 18 items?
+2. Consult `.agents/skills/observability/resources/checklist.md`: will this pass Pre-prod and Prod gates?
+3. Run `.agents/skills/observability/resources/meta-observability.md` cardinality guardrail preview: flag any label dimension that risks unbounded growth
 4. If `--strict` flag is set → reject any semconv attribute in Development or Experimental stability tier; cite stable alternative
-5. If PII is involved → apply `resources/signals/privacy.md` redaction and sampling-aware baggage rules at collection, not only at storage
-6. If `--multi-tenant` or `--multi-cloud` → apply `resources/boundaries/multi-tenant.md` isolation rules; verify data residency is explicit
+5. If PII is involved → apply `.agents/skills/observability/resources/signals/privacy.md` redaction and sampling-aware baggage rules at collection, not only at storage
+6. If `--multi-tenant` or `--multi-cloud` → apply `.agents/skills/observability/resources/boundaries/multi-tenant.md` isolation rules; verify data residency is explicit
 
 ## Step 6: Present
 
@@ -163,4 +163,4 @@ Checklist items to verify:
 
 ## On Error
 
-See `resources/checklist.md §7 Recovery` for recovery steps.
+See `.agents/skills/observability/resources/checklist.md` §7 Recovery for recovery steps.

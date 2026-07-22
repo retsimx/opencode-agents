@@ -164,7 +164,7 @@ scholar-resolve "<title>"
 scholar-get [--section <one>] "<id>"
 ```
 
-See `resources/fallback-providers.md` for full cascade design.
+See `.agents/skills/scholar/resources/fallback-providers.md` for full cascade design.
 
 ### Manual cascade (raw curl)
 

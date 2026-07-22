@@ -50,7 +50,7 @@ Search, fetch, generate, validate, analyze, review, and compare scholarly paper 
 ### Dependencies
 - `scholar` skill provides the CLI subcommands
 - knows.academy public API and OpenAlex fallback
-- `resources/sidecar-spec.md`, API endpoints, OpenAlex setup, upstream cache, checklist, and execution protocol
+- `.agents/skills/scholar/resources/sidecar-spec.md`, API endpoints, OpenAlex setup, upstream cache, checklist, and execution protocol
 
 ### Control-flow features
 - Branches by mode, source availability, Knows/OpenAlex coverage, strict vs lenient validation, and fetched section
@@ -131,7 +131,7 @@ scholar-lint "<paper.knows.yaml>"
 
 ### Guardrails
 
-1. **Target spec is v0.9.0 / `paper@1` profile**: verified against production sidecars from knows.academy; see `resources/sidecar-spec.md`
+1. **Target spec is v0.9.0 / `paper@1` profile**: verified against production sidecars from knows.academy; see `.agents/skills/scholar/resources/sidecar-spec.md`
 2. **Host LLM generates sidecars**: never shell out to `anthropic` SDK or external LLM CLI; this skill runs inside an agent
 3. **Anti-fabrication**: if DOI/venue/year is not visible in source, **omit the key entirely**; never write `doi: TODO` or guess
 4. **Top-level metadata**: `title`, `authors`, `venue`, `year` live at the top level (no `metadata` wrapper)
@@ -148,7 +148,7 @@ scholar-lint "<paper.knows.yaml>"
 15. **Partial fetch param is `section` (singular)**: fixed enum `statements|evidence|relations|artifacts|citation`
 16. **OpenAlex key is optional**: metadata enrichment only; gracefully degrade when missing
 17. **Sidecar content stays English**: schema fields, IDs, statement text follow upstream convention; user-facing responses stay in English
-18. **Spec drift awareness**: our local rules track v0.9.0 production behavior, which differs from the upstream `knows.md` natural-language description; refresh `resources/upstream-spec-cache.md` periodically
+18. **Spec drift awareness**: our local rules track v0.9.0 production behavior, which differs from the upstream `knows.md` natural-language description; refresh `.agents/skills/scholar/resources/upstream-spec-cache.md` periodically
 
 ### Modes
 
@@ -185,7 +185,7 @@ returned abstract as input to **Mode 1 Generate** to produce a local sidecar.
 
 ### How to Execute
 
-Follow `resources/execution-protocol.md` step by step for the selected mode.
+Follow `.agents/skills/scholar/resources/execution-protocol.md` step by step for the selected mode.
 
 ### Quick Reference
 
@@ -261,18 +261,18 @@ Project-specific settings: `config/scholar-config.yaml`
 | `[WARN] *.predicate: past-tense '...' is suspicious` | Switch to present tense (`evaluated_on` -> `evaluates_on`) |
 | Remote API returns empty results | Try broader query; check `/api/proxy/jobs/stats`; CLI auto-falls-back to OpenAlex |
 | `knows.academy search failed: fetch failed` (stderr) | Platform timeout; fallback to OpenAlex is automatic; retry later for sidecars |
-| OpenAlex 403/429 | Set `OPENALEX_API_KEY` (see `resources/setup-openalex.md`) |
+| OpenAlex 403/429 | Set `OPENALEX_API_KEY` (see `.agents/skills/scholar/resources/setup-openalex.md`) |
 | YAML won't parse | Check indentation; numbers/booleans must be unquoted; strings with `:` need quotes |
 
 ## References
 
-- Execution steps: `resources/execution-protocol.md`
-- Sidecar spec rules: `resources/sidecar-spec.md`
-- API endpoints: `resources/api-endpoints.md`
-- OpenAlex setup: `resources/setup-openalex.md`
-- Upstream spec snapshot: `resources/upstream-spec-cache.md`
-- Post-generation checklist: `resources/checklist.md`
+- Execution steps: `.agents/skills/scholar/resources/execution-protocol.md`
+- Sidecar spec rules: `.agents/skills/scholar/resources/sidecar-spec.md`
+- API endpoints: `.agents/skills/scholar/resources/api-endpoints.md`
+- OpenAlex setup: `.agents/skills/scholar/resources/setup-openalex.md`
+- Upstream spec snapshot: `.agents/skills/scholar/resources/upstream-spec-cache.md`
+- Post-generation checklist: `.agents/skills/scholar/resources/checklist.md`
 - CLI subcommands: `scholar-search|resolve|get|lint` (implementation under `cli/commands/scholar/`)
-- Context loading: `../_shared/core/context-loading.md`
-- Quality principles: `../_shared/core/quality-principles.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Quality principles: `.agents/skills/_shared/core/quality-principles.md`
 - i18n rules: `../../rules/i18n-guide.md`

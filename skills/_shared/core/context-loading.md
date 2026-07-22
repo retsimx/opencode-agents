@@ -3,44 +3,56 @@
 Agents should not read all resources at once. Instead, load only necessary resources based on task type.
 This saves context window and prevents confusion from irrelevant information.
 
+**Path convention (host project root):** Agents run with cwd = the host project that contains `.agents/`. Every load path below is from that root.
+
+| Kind | Format |
+|------|--------|
+| Shared | `.agents/skills/_shared/{core\|conditional\|runtime}/file.md` |
+| Current skill resource | `.agents/skills/<skill-name>/resources/file.md` |
+| Results | `.agents/results/...` |
+
+Short names in the agent mapping tables mean files under that agent's `.agents/skills/<skill>/resources/` directory.
+
 ---
 
 ## Loading Order (Common to All Agents)
 
 ### Always Load (Required)
-1. `SKILL.md`: Auto-loaded (provided by Antigravity)
-2. `resources/execution-protocol.md`: Execution protocol
+1. Skill `SKILL.md`: Auto-loaded by the runtime
+2. Execution protocol: `.agents/skills/<skill>/resources/execution-protocol.md` when present; otherwise `.agents/skills/_shared/runtime/execution-protocol.md`
 
 ### Load at Task Start
-3. `difficulty-guide.md`: Difficulty assessment (Step 0)
+3. `.agents/skills/_shared/core/difficulty-guide.md`: Difficulty assessment (Step 0)
 
 ### Load Based on Difficulty
 4. **Simple**: Proceed to implementation without additional loading
-5. **Medium**: `resources/examples.md` (reference similar examples)
-6. **Complex**: `resources/examples.md` + `stack/tech-stack.md` + `stack/snippets.md`
+5. **Medium**: skill-local `examples.md` under `.agents/skills/<skill>/resources/`
+6. **Complex**: skill-local `examples.md` + stack docs under that skill's `resources/` (e.g. `tech-stack.md`, `snippets.md`)
 
 ### Load During Execution as Needed
-7. `resources/checklist.md`: Load at Step 4 (Verify)
-8. `resources/error-playbook.md`: Load only when errors occur
-9. `common-checklist.md`: For final verification of Complex tasks
-10. `../runtime/coordination-protocol.md`: coordination for multi-agent sessions
+7. skill-local `checklist.md`: Load at Step 4 (Verify)
+8. skill-local `error-playbook.md`: Load only when errors occur
+9. `.agents/skills/_shared/core/common-checklist.md`: For final verification of Complex tasks
+10. `.agents/skills/_shared/runtime/coordination-protocol.md`: coordination for multi-agent sessions
 
 ### Load on Measurement / Exploration (Conditional)
-11. `../conditional/quality-score.md`: Load when Quality Score measurement is needed (VERIFY/SHIP gates)
-12. `../conditional/experiment-ledger.md`: Load when recording experiment results (after implementation changes)
-13. `../conditional/exploration-loop.md`: Load only when a gate fails twice on the same issue
+11. `.agents/skills/_shared/conditional/quality-score.md`: Load when Quality Score measurement is needed (VERIFY/SHIP gates)
+12. `.agents/skills/_shared/conditional/experiment-ledger.md`: Load when recording experiment results (after implementation changes)
+13. `.agents/skills/_shared/conditional/exploration-loop.md`: Load only when a gate fails twice on the same issue
 
 ---
 
 ## Task Type → Resource Mapping by Agent
 
+Unless noted, filenames below are under that agent's `.agents/skills/<skill>/resources/`.
+
 ### Backend Agent
 
 | Task Type                     | Required Resources                          |
 | ----------------------------- | ------------------------------------------- |
-| CRUD API creation             | stack/snippets.md (route, schema, model, test)    |
-| Authentication implementation | stack/snippets.md (JWT, password) + stack/tech-stack.md |
-| DB migration                  | stack/snippets.md (migration)                     |
+| CRUD API creation             | snippets.md (route, schema, model, test)    |
+| Authentication implementation | snippets.md (JWT, password) + tech-stack.md |
+| DB migration                  | snippets.md (migration)                     |
 | Performance optimization      | examples.md (N+1 example)                   |
 | Existing code modification    | examples.md + grep/glob/read                     |
 
@@ -82,7 +94,7 @@ This saves context window and prevents confusion from irrelevant information.
 | Performance review   | checklist.md (Performance section)                  |
 | Accessibility review | checklist.md (Accessibility section)                |
 | Full audit           | checklist.md (full) + self-check.md                 |
-| Quality scoring      | quality-score.md (measurement protocol via Bash)    |
+| Quality scoring      | `.agents/skills/_shared/conditional/quality-score.md` (measurement protocol via Bash)    |
 
 ### Architecture Agent
 
@@ -99,23 +111,23 @@ This saves context window and prevents confusion from irrelevant information.
 
 | Task Type                   | Required Resources                                            |
 | --------------------------- | ------------------------------------------------------------- |
-| API Workflow Setup          | resources/api-workflows.md + resources/validation-pipeline.md |
-| Database Migration Workflow | resources/database-patterns.md                                |
-| Release Coordination        | resources/release-coordination.md                             |
-| Troubleshooting             | resources/troubleshooting.md                                  |
+| API Workflow Setup          | api-workflows.md + validation-pipeline.md |
+| Database Migration Workflow | database-patterns.md                                |
+| Release Coordination        | release-coordination.md                             |
+| Troubleshooting             | troubleshooting.md                                  |
 
 ### TF Infra Agent
 
 | Task Type                   | Required Resources                                                       |
 | --------------------------- | ------------------------------------------------------------------------ |
-| Infrastructure Provisioning | resources/multi-cloud-examples.md + resources/policy-testing-examples.md |
-| Cost Analysis               | resources/cost-optimization.md                                           |
+| Infrastructure Provisioning | multi-cloud-examples.md + policy-testing-examples.md |
+| Cost Analysis               | cost-optimization.md                                           |
 
 ### PM Agent
 
 | Task Type                 | Required Resources                                           |
 | ------------------------- | ------------------------------------------------------------ |
-| New project planning      | examples.md + task-template.json + api-contracts/template.md |
+| New project planning      | examples.md + task-template.json + `.agents/skills/_shared/core/api-contracts/template.md` |
 | Feature addition planning | examples.md + grep/glob/read (understand existing structure)     |
 | Refactoring planning      | grep/glob/read only                                              |
 
@@ -141,10 +153,10 @@ to include only resource paths matching the task type in the prompt.
 ```
 Prompt composition:
 1. Agent SKILL.md's Core Rules section
-2. execution-protocol.md
-3. Resources matching task type (see tables above)
+2. Execution protocol (.agents/skills/<skill>/resources/execution-protocol.md, else .agents/skills/_shared/runtime/execution-protocol.md)
+3. Resources matching task type (resolve under .agents/skills/<skill>/resources/)
 4. error-playbook.md (always include; recovery is essential)
-5. Coordination protocol: `coordination-protocol.md`
+5. Coordination protocol: .agents/skills/_shared/runtime/coordination-protocol.md
 ```
 
 This approach avoids loading unnecessary resources, maximizing subagent context efficiency.
@@ -157,9 +169,9 @@ The following protocols are **NOT** loaded at Phase 0 / Step 0. They are loaded 
 
 | Protocol | Trigger | Loaded By |
 |----------|---------|-----------|
-| `quality-score.md` | VERIFY or SHIP phase begins | Orchestrator (passes to QA agent prompt) |
-| `experiment-ledger.md` | First experiment recorded | Orchestrator (inline, after IMPL baseline) |
-| `exploration-loop.md` | Same gate fails twice on same issue | Orchestrator (inline, before spawning hypothesis agents) |
+| `.agents/skills/_shared/conditional/quality-score.md` | VERIFY or SHIP phase begins | Orchestrator (passes to QA agent prompt) |
+| `.agents/skills/_shared/conditional/experiment-ledger.md` | First experiment recorded | Orchestrator (inline, after IMPL baseline) |
+| `.agents/skills/_shared/conditional/exploration-loop.md` | Same gate fails twice on same issue | Orchestrator (inline, before spawning hypothesis agents) |
 
 **Budget impact**: ~750 tokens total if all 3 loaded, but since loading is conditional, typical sessions load 1-2 only.
 Flash-tier budget remains within ~3,100 token allocation for most sessions.

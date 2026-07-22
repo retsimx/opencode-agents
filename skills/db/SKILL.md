@@ -45,7 +45,7 @@ Design, review, optimize, and document SQL, NoSQL, vector, and retrieval-oriente
 
 ### Dependencies
 - Existing database schemas, migration files, query logs, workload descriptions, and application access paths
-- `resources/document-templates.md`, `resources/anti-patterns.md`, `resources/vector-db.md`, and `resources/iso-controls.md`
+- `.agents/skills/db/resources/document-templates.md`, `.agents/skills/db/resources/anti-patterns.md`, `.agents/skills/db/resources/vector-db.md`, and `.agents/skills/db/resources/iso-controls.md`
 - SQL/NoSQL/vector database tools or project-specific migration toolchains when implementation is requested
 
 ### Control-flow features
@@ -169,25 +169,25 @@ Then run the project's migration, query-plan, or retrieval-quality commands only
 - For vector/RAG systems: embedding version policy, chunking policy, hybrid retrieval strategy, and re-index / re-embedding plan
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for input/output examples.
-Use `resources/document-templates.md` when you need concrete deliverable structure.
-Use `resources/anti-patterns.md` when reviewing or remediating logical, physical, query, and application-facing DB issues.
-Use `resources/vector-db.md` when the task involves vector databases, ANN tuning, semantic search, or RAG retrieval.
-Use `resources/iso-controls.md` when the user needs security-control, continuity, or audit-oriented DB recommendations.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/db/resources/execution-protocol.md` step by step.
+See `.agents/skills/db/resources/examples.md` for input/output examples.
+Use `.agents/skills/db/resources/document-templates.md` when you need concrete deliverable structure.
+Use `.agents/skills/db/resources/anti-patterns.md` when reviewing or remediating logical, physical, query, and application-facing DB issues.
+Use `.agents/skills/db/resources/vector-db.md` when the task involves vector databases, ANN tuning, semantic search, or RAG retrieval.
+Use `.agents/skills/db/resources/iso-controls.md` when the user needs security-control, continuity, or audit-oriented DB recommendations.
+Before submitting, run `.agents/skills/db/resources/checklist.md`.
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
-- Execution steps: `resources/execution-protocol.md`
-- Self-check: `resources/checklist.md`
-- Examples: `resources/examples.md`
-- Deliverable templates: `resources/document-templates.md`
-- Anti-pattern review guide: `resources/anti-patterns.md`
-- Vector DB and RAG guide: `resources/vector-db.md`
-- ISO control guide: `resources/iso-controls.md`
-- Error recovery: `resources/error-playbook.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification: `../_shared/core/clarification-protocol.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Execution steps: `.agents/skills/db/resources/execution-protocol.md`
+- Self-check: `.agents/skills/db/resources/checklist.md`
+- Examples: `.agents/skills/db/resources/examples.md`
+- Deliverable templates: `.agents/skills/db/resources/document-templates.md`
+- Anti-pattern review guide: `.agents/skills/db/resources/anti-patterns.md`
+- Vector DB and RAG guide: `.agents/skills/db/resources/vector-db.md`
+- ISO control guide: `.agents/skills/db/resources/iso-controls.md`
+- Error recovery: `.agents/skills/db/resources/error-playbook.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

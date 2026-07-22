@@ -100,6 +100,6 @@ Confirm generated files meet requirements:
 ## Constraints
 
 - Do NOT modify `.agents/skills/backend/SKILL.md` (abstract interface is protected)
-- Do NOT modify `resources/` common files
+- Do NOT modify `.agents/skills/stack-set/resources/` common files
 - Only create/modify files in `stack/` directory
 - If `stack/` already exists, ask before overwriting

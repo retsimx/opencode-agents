@@ -225,12 +225,12 @@ mise run //apps/web:build
 
 | Topic | Resource File | When to Load |
 |-------|---------------|--------------|
-| Validation Pipeline | `resources/validation-pipeline.md` | Git hooks, CI/CD, change-based testing |
-| Database & Infrastructure | `resources/database-patterns.md` | Migrations, local Docker infra |
-| API Generation | `resources/api-workflows.md` | Generating API clients |
-| i18n Patterns | `resources/i18n-patterns.md` | Internationalization |
-| Release Coordination | `resources/release-coordination.md` | Versioning, changelog, releases |
-| Troubleshooting | `resources/troubleshooting.md` | Debugging issues |
+| Validation Pipeline | `.agents/skills/dev-workflow/resources/validation-pipeline.md` | Git hooks, CI/CD, change-based testing |
+| Database & Infrastructure | `.agents/skills/dev-workflow/resources/database-patterns.md` | Migrations, local Docker infra |
+| API Generation | `.agents/skills/dev-workflow/resources/api-workflows.md` | Generating API clients |
+| i18n Patterns | `.agents/skills/dev-workflow/resources/i18n-patterns.md` | Internationalization |
+| Release Coordination | `.agents/skills/dev-workflow/resources/release-coordination.md` | Versioning, changelog, releases |
+| Troubleshooting | `.agents/skills/dev-workflow/resources/troubleshooting.md` | Debugging issues |
 
 ### Task Dependencies
 
@@ -331,12 +331,12 @@ Follow the core workflow step by step:
 ### Execution Protocol (CLI Mode)
 
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 
 ## References
 
-- Clarification: `../_shared/core/clarification-protocol.md`
-- Difficulty assessment: `../_shared/core/difficulty-guide.md`
+- Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
+- Difficulty assessment: `.agents/skills/_shared/core/difficulty-guide.md`
 
 ### Knowledge Reference
 

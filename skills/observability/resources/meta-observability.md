@@ -22,7 +22,7 @@ that assumption. Four disciplines close the gap:
 | Retention matrix | Compliance violations, over-spend on raw data, data unavailable at audit | D |
 
 Cross-cutting failure modes and recovery paths are in Section E. Alert/dashboard scaffolding
-that feeds `resources/observability-as-code.md` is in Section F.
+that feeds `.agents/skills/observability/resources/observability-as-code.md` is in Section F.
 
 ---
 
@@ -171,7 +171,7 @@ or assume broken instrumentation, losing hours of incident investigation time.
 Typical NTP accuracy on well-connected cloud VMs: < 50 ms. On baremetal with good NTP: < 10 ms.
 PTP (IEEE 1588) achieves sub-millisecond accuracy for financial and telco workloads.
 
-Reference: `resources/standards.md §Clock Discipline` for the span timestamp validation rule.
+Reference: `.agents/skills/observability/resources/standards.md` §Clock Discipline for the span timestamp validation rule.
 
 ### B2. NTP Requirements
 
@@ -319,7 +319,7 @@ Set a per-service series budget. The 5,000-series figure below is an illustrativ
 count({job="my-service"}) > 4000
 ```
 
-Cardinality explosion is an anti-pattern. See `resources/anti-patterns.md §Section B` for
+Cardinality explosion is an anti-pattern. See `.agents/skills/observability/resources/anti-patterns.md` §Section B for
 the full cardinality anti-pattern list.
 
 ---
@@ -446,8 +446,8 @@ processors:
         - 'attributes["request.id"] != nil'   # drop request.id label
 ```
 
-Cross-ref: `resources/checklist.md §7 Recovery` for the full recovery procedure checklist.
-Cross-ref: `resources/anti-patterns.md §Section C Pipeline` for pipeline anti-patterns.
+Cross-ref: `.agents/skills/observability/resources/checklist.md` §7 Recovery for the full recovery procedure checklist.
+Cross-ref: `.agents/skills/observability/resources/anti-patterns.md` §Section C Pipeline for pipeline anti-patterns.
 
 ---
 
@@ -572,7 +572,7 @@ A meta-observability Grafana dashboard MUST include the following panels:
 | Top cardinality metrics | `topk(10, count(...) by (__name__))` | Table (auto-refresh 5m) |
 | Fluent Bit input vs output records | `fluentbit_input_records_total` vs `fluentbit_output_proc_records_total` | Time series |
 
-The full Jsonnet/YAML implementation of this dashboard belongs in `resources/observability-as-code.md`
+The full Jsonnet/YAML implementation of this dashboard belongs in `.agents/skills/observability/resources/observability-as-code.md`
 (Grafana-as-code section). This section provides the blueprint; that file provides the code.
 
 ---
@@ -581,23 +581,23 @@ The full Jsonnet/YAML implementation of this dashboard belongs in `resources/obs
 
 | Topic | File |
 |---|---|
-| Clock discipline normative requirements | `resources/standards.md §Clock Discipline` |
+| Clock discipline normative requirements | `.agents/skills/observability/resources/standards.md` §Clock Discipline |
 | WORM immutable storage for audit logs | `signals/audit.md` |
 | GDPR storage limitation (Art. 5(1)(e)) | `signals/privacy.md` |
-| Cardinality anti-patterns (Section B) | `resources/anti-patterns.md` |
-| Pipeline anti-patterns (Section C) | `resources/anti-patterns.md` |
-| Recovery checklist (§7) | `resources/checklist.md` |
-| Dashboard/alert as code | `resources/observability-as-code.md` |
+| Cardinality anti-patterns (Section B) | `.agents/skills/observability/resources/anti-patterns.md` |
+| Pipeline anti-patterns (Section C) | `.agents/skills/observability/resources/anti-patterns.md` |
+| Recovery checklist (§7) | `.agents/skills/observability/resources/checklist.md` |
+| Dashboard/alert as code | `.agents/skills/observability/resources/observability-as-code.md` |
 | Two-tier Collector topology | `transport/collector-topology.md` |
 | Tail-based sampling configuration | `transport/sampling-recipes.md` |
 | SLO burn-rate alerts | `boundaries/slo.md` |
-| Incident forensics (6-dimension localization) | `resources/incident-forensics.md` |
+| Incident forensics (6-dimension localization) | `.agents/skills/observability/resources/incident-forensics.md` |
 
 ---
 
 ## Review and Maintenance
 
-- **Review cadence**: quarterly, aligned with `resources/standards.md`.
+- **Review cadence**: quarterly, aligned with `.agents/skills/observability/resources/standards.md`.
 - On OTel Collector minor version bump: verify `otelcol_*` metric names have not changed.
   Metric names are stable within a major version but have changed between 0.x and 1.x.
 - On cloud provider NTP endpoint changes: update Section B2 table.

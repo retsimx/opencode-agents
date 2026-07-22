@@ -26,7 +26,7 @@ Do NOT activate for:
 
 ### Step 1: Hypothesize
 
-Generate 2-3 alternative approaches using the **Exploration Decision** reasoning template (see `reasoning-templates.md` #6):
+Generate 2-3 alternative approaches using the **Exploration Decision** reasoning template (see `.agents/skills/_shared/core/reasoning-templates.md` #6):
 
 ```
 === Exploration Decision ===
@@ -60,7 +60,7 @@ Execute each hypothesis **in isolation**.
 
 ### Step 3: Measure
 
-Score each experiment using Quality Score protocol (load `quality-score.md` if not already loaded):
+Score each experiment using Quality Score protocol (load `.agents/skills/_shared/conditional/quality-score.md` in this directory if not already loaded):
 
 ```markdown
 ### Exploration Results
@@ -90,7 +90,7 @@ ELSE:
 
 ### Step 5: Record
 
-Log all experiments in the Experiment Ledger (see `experiment-ledger.md`), including discarded ones:
+Log all experiments in the Experiment Ledger (see `.agents/skills/_shared/conditional/experiment-ledger.md` in this directory), including discarded ones:
 
 ```markdown
 | # | Phase | Agent | Hypothesis | Score Before | Score After | Delta | Decision |
@@ -162,4 +162,4 @@ Same CRITICAL/HIGH issue persists after fix attempt
 | **Phase Gates** | Repeated gate failure triggers exploration |
 | **Reasoning Templates** | #6 Exploration Decision provides structured format |
 | **Context Loading** | Loaded conditionally, only when triggered |
-| **Memory Protocol** | Uses same memory tools for experiment recording |
+| **Coordination Protocol** | Uses `read` / `write` / `edit` against `.agents/results/` for experiment recording |

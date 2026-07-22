@@ -1,16 +1,16 @@
 # DB Agent - Execution Protocol
 
 ## Step 0: Prepare
-1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: small schema adjustment or index review
    - **Medium**: new bounded context, migration, or backup/capacity update
    - **Complex**: engine selection, major redesign, multi-tenant or high-scale workload
 2. **Clarify workload**
    - Functional flows, critical queries, write/read ratio, peak TPS, retention, RPO, RTO
    - Compliance or audit constraints, PII, multi-region, reporting needs
-3. **Budget context**: follow `../../_shared/core/context-budget.md`
-4. **If vector search is involved**, read `resources/vector-db.md`
-5. **If security, audit, backup, or resilience requirements are central**, read `resources/iso-controls.md`
+3. **Budget context**: follow `.agents/skills/_shared/core/context-budget.md`
+4. **If vector search is involved**, read `.agents/skills/db/resources/vector-db.md`
+5. **If security, audit, backup, or resilience requirements are central**, read `.agents/skills/db/resources/iso-controls.md`
 
 ## Step 1: Explore
 - Identify actors and external views that need data
@@ -103,7 +103,7 @@
   - backup volume
 
 ## Step 4: Verify
-- Run `resources/checklist.md`
+- Run `.agents/skills/db/resources/checklist.md`
 - Confirm every schema change updated:
   - glossary
   - standards table
@@ -120,4 +120,4 @@
 - Call out any intentional denormalization or weaker consistency with reason
 
 ## On Error
-See `resources/error-playbook.md` for recovery steps.
+See `.agents/skills/db/resources/error-playbook.md` for recovery steps.

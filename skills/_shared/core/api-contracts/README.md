@@ -5,28 +5,26 @@ This directory contains API contracts created by PM Agent and referenced by back
 ## Usage
 
 ### PM Agent (Author)
-Create API contracts here during the planning phase:
+Create API contracts in this directory during the planning phase using the built-in `write` tool:
 ```
-[WRITE]("api-contracts/{domain}.md", contract content)
+write → api-contracts/{domain}.md
 ```
-
-If MCP memory tool is unavailable, create files directly in this directory.
 
 ### Backend Agent (Implementer)
 Read contract and implement exactly as specified:
 ```
-[READ]("api-contracts/{domain}.md")
+read → api-contracts/{domain}.md
 ```
 
 ### Frontend / Mobile Agent (Consumer)
 Read contract and integrate API client exactly as specified:
 ```
-[READ]("api-contracts/{domain}.md")
+read → api-contracts/{domain}.md
 ```
 
 ## Tool Reference
 
-In OpenCode, use the built-in `read` and `write` tools for contract files.
+Use the built-in `read` and `write` tools for contract files under this directory.
 
 ## Contract Format
 

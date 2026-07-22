@@ -32,7 +32,7 @@ All commands MUST be wrapped with `timeout 300`.
 2. Stage only iteration files (explicit paths).
 3. Commit: `timeout 300 git commit -m "chore(gardener): <description>"` — exactly one commit.
 4. `timeout 300 git push -u origin HEAD`
-5. Create a draft PR with the Create draft PR command for `PROVIDER` in `providers.md`:
+5. Create a draft PR with the Create draft PR command for `PROVIDER` in `.agents/skills/_shared/runtime/providers.md`:
    - title: `chore(gardener): <description>`
    - base/target: `main`
    - body: per `pr-size-limits.md`

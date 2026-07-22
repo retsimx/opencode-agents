@@ -27,7 +27,7 @@ Reasons:
 2. Every project has unique `.design-context.md` inputs (target
    audience, brand personality, accessibility level) that a
    one-size-fits-all vendor template cannot encode.
-3. Our anti-patterns catalog (`resources/anti-patterns.md`) is stricter
+3. Our anti-patterns catalog (`.agents/skills/design/resources/anti-patterns.md`) is stricter
    than some vendor templates (e.g., heavy glassmorphism, purple
    gradients, triple-slop combos). Seeds must be audited before use.
 

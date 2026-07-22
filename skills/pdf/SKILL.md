@@ -149,10 +149,10 @@ uvx opendataloader-pdf --hybrid docling-fast "{input_path}" --format markdown --
 2. Always report garbled text, missing tables, OCR uncertainty, or partial extraction.
 3. Prefer standard conversion first when the text layer is readable.
 4. Use OCR only when the PDF is scanned, image-based, or standard extraction quality is insufficient.
-5. Keep detailed command sequences in `resources/execution-protocol.md` rather than duplicating every variant here.
+5. Keep detailed command sequences in `.agents/skills/pdf/resources/execution-protocol.md` rather than duplicating every variant here.
 
 ## References
-- Execution protocol: `resources/execution-protocol.md`
+- Execution protocol: `.agents/skills/pdf/resources/execution-protocol.md`
 - Configuration: `config/pdf-config.yaml`
-- Context loading: `../_shared/core/context-loading.md`
-- Quality principles: `../_shared/core/quality-principles.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Quality principles: `.agents/skills/_shared/core/quality-principles.md`

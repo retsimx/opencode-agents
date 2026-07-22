@@ -530,5 +530,5 @@ When adding an entry from another doc:
 2. If the same anti-pattern appears in multiple source files, one canonical entry only; list all sources in "See also".
 3. Use the format: `### {Section}.{n} {Pattern name}` / `**Severity**` / `**Why it fails**` / `**Remediation**` / `**See also**`.
 4. Order within each section: CRITICAL → HIGH → MEDIUM → LOW.
-5. All cross-references use relative paths from the `resources/` root.
+5. All cross-references use relative paths from the `.agents/skills/observability/resources/` root.
 6. No forward references to planned but unwritten files.

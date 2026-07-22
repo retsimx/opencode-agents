@@ -7,7 +7,7 @@
    - `--strict`: only verified+ sources (trust score >= 0.85)
    - `--wide`: all sources with trust labels
    - `--gitlab`: force `glab api` for code route
-2. **Classify intent** using `resources/intent-rules.md`:
+2. **Classify intent** using `.agents/skills/search/resources/intent-rules.md`:
    - If flag is present: skip classification, use flag
    - If no flag: apply keyword pattern matching
    - If ambiguous: use `web` + `docs` parallel (default fallback)
@@ -77,7 +77,7 @@ Simply use the available tools.
 ## Step 3: Trust Scoring
 
 1. For each result with a URL, extract the domain
-2. Resolve trust score (see `resources/trust-registry.md`):
+2. Resolve trust score (see `.agents/skills/search/resources/trust-registry.md`):
    a. Check local cache (`trust-registry-cache`)
    b. If cache miss: apply heuristic pattern matching (domain patterns → category + score)
    c. If heuristic returns unknown: call Tranco API (`siterank.redirect2.me`) for validation
@@ -112,4 +112,4 @@ CODE #5  middleware.ts — vercel/next.js         [github]
 ```
 
 ## On Error
-See `resources/error-playbook.md` for recovery steps.
+See `.agents/skills/search/resources/error-playbook.md` for recovery steps.

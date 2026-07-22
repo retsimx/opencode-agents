@@ -38,7 +38,7 @@ Implement or review backend APIs, authentication, database integration, server-s
 
 ### Dependencies
 - Project stack manifests and existing backend conventions
-- `resources/execution-protocol.md`, `resources/checklist.md`, and `resources/orm-reference.md`
+- `.agents/skills/backend/resources/execution-protocol.md`, `.agents/skills/backend/resources/checklist.md`, and `.agents/skills/backend/resources/orm-reference.md`
 - Optional `stack/stack.yaml`, `stack/tech-stack.md`, snippets, and API templates
 - Database, queue, cache, mail, auth, or external API resources configured through environment or secret managers
 
@@ -64,7 +64,7 @@ Implement or review backend APIs, authentication, database integration, server-s
 
 ### Transitions
 - If stack files exist, follow them before generic guidance.
-- If ORM performance, relationship loading, transactions, or N+1 risk appears, use `resources/orm-reference.md`.
+- If ORM performance, relationship loading, transactions, or N+1 risk appears, use `.agents/skills/backend/resources/orm-reference.md`.
 - If database schema impact is primary and API work is secondary, coordinate with `db`.
 - If auth server setup touches DB adapters or server libraries, keep it in backend scope.
 
@@ -181,19 +181,19 @@ Router (HTTP) → Service (Business Logic) → Repository (Data Access) → Mode
 
 ## References
 
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for input/output examples.
-Use `resources/orm-reference.md` when the task involves ORM query performance, relationship loading, transactions, session/client lifecycle, or N+1 analysis.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/backend/resources/execution-protocol.md` step by step.
+See `.agents/skills/backend/resources/examples.md` for input/output examples.
+Use `.agents/skills/backend/resources/orm-reference.md` when the task involves ORM query performance, relationship loading, transactions, session/client lifecycle, or N+1 analysis.
+Before submitting, run `.agents/skills/backend/resources/checklist.md`.
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
-- Execution steps: `resources/execution-protocol.md`
-- Code examples: `resources/examples.md`
-- Checklist: `resources/checklist.md`
-- ORM reference: `resources/orm-reference.md`
-- Error recovery: `resources/error-playbook.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification: `../_shared/core/clarification-protocol.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Execution steps: `.agents/skills/backend/resources/execution-protocol.md`
+- Code examples: `.agents/skills/backend/resources/examples.md`
+- Checklist: `.agents/skills/backend/resources/checklist.md`
+- ORM reference: `.agents/skills/backend/resources/orm-reference.md`
+- Error recovery: `.agents/skills/backend/resources/error-playbook.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

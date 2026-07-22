@@ -22,7 +22,7 @@ Cross-skill entry point: `debug` invokes this playbook on failure, pulling trace
 
 Every span, log record, and metric data point MUST carry the attributes below before reaching production. Missing attributes break the narrowing flow at the step that depends on them.
 
-Semconv stability tiers follow `resources/standards.md §3`. Attributes marked Stable are safe for production SLOs and alerting. Attributes marked Development must not be used as SLO inputs.
+Semconv stability tiers follow `.agents/skills/observability/resources/standards.md` §3. Attributes marked Stable are safe for production SLOs and alerting. Attributes marked Development must not be used as SLO inputs.
 
 ### 2.1 Resource attributes: every signal
 
@@ -71,11 +71,11 @@ Every structured log record MUST carry these correlation keys. Without `trace_id
 | `request_id` | `x-request-id` header (injected at API gateway) | `req_7Kp2mNxQr` |
 | `tenant.id` | W3C Baggage propagation (if multi-tenant) | `tnt_A9cBx3` |
 
-`tenant.id` is required only for multi-tenant services. Propagate via W3C Baggage per `resources/standards.md §W3C Baggage`. Do NOT carry user email or session tokens in baggage; see anti-patterns below.
+`tenant.id` is required only for multi-tenant services. Propagate via W3C Baggage per `.agents/skills/observability/resources/standards.md` §W3C Baggage. Do NOT carry user email or session tokens in baggage; see anti-patterns below.
 
 ### 2.4 Propagation requirement
 
-W3C `traceparent` MUST propagate through every outbound HTTP and gRPC call. Stripping it silently is anti-pattern #1 in `resources/anti-patterns.md`. Verify propagation at every service boundary by checking that `trace_id` is consistent across services in a single request's log stream.
+W3C `traceparent` MUST propagate through every outbound HTTP and gRPC call. Stripping it silently is anti-pattern #1 in `.agents/skills/observability/resources/anti-patterns.md`. Verify propagation at every service boundary by checking that `trace_id` is consistent across services in a single request's log stream.
 
 ---
 
@@ -322,14 +322,14 @@ This file does not operate in isolation. The following skill files provide the d
 | Canary/rollback gates (Scenario C Flagger analysis) | `boundaries/release.md`; Flagger + Argo Rollouts custom metric gates, GitOps |
 | Mobile/native crash OOM forensics | `layers/L7-application/crash-analytics.md`; CFR, symbolication, crash-linked release tracking |
 | Release marker injection | `boundaries/release.md`; deployment SHA → `service.version` + marker event via `scm` |
-| Semconv stability for MRA attributes | `resources/standards.md §3`; stability tier table |
-| Full signal-layer-boundary coverage | `resources/matrix.md`; 112-cell coverage map |
+| Semconv stability for MRA attributes | `.agents/skills/observability/resources/standards.md` §3; stability tier table |
+| Full signal-layer-boundary coverage | `.agents/skills/observability/resources/matrix.md`; 112-cell coverage map |
 
 ---
 
 ## 7. Anti-patterns
 
-Violating these patterns makes the narrowing flow impossible or misleading. Full list lives in `resources/anti-patterns.md`.
+Violating these patterns makes the narrowing flow impossible or misleading. Full list lives in `.agents/skills/observability/resources/anti-patterns.md`.
 
 | Anti-pattern | Consequence | Dimension blocked |
 |---|---|---|
@@ -338,7 +338,7 @@ Violating these patterns makes the narrowing flow impossible or misleading. Full
 | No release markers in log/metric stream | Step 5 release correlation is blind; rollback decision is guesswork | Service / release |
 | NTP drift unmonitored on nodes | Waterfall chart timestamps are wrong; parent-before-child ordering unreliable; Step 3 pivots mislead | Layer / Code |
 | PII in W3C Baggage across trust boundaries | `tenant.id` is acceptable; user email or session token in baggage is a GDPR/PIPA violation that becomes evidence in incident investigation records | All (compliance risk) |
-| `user.id` or `user.email` as a metric label | High-cardinality metric explosion + PII in metric storage; cardinality guardrails in `resources/meta-observability.md` | Service |
+| `user.id` or `user.email` as a metric label | High-cardinality metric explosion + PII in metric storage; cardinality guardrails in `.agents/skills/observability/resources/meta-observability.md` | Service |
 | Canary Flagger analysis missing memory saturation gate | OOMKilled pods do not fail the success rate threshold; auto-rollback never triggers (Scenario C) | Service / infra |
 
-Normative anti-patterns reference: `resources/anti-patterns.md §Section Z` (items 17, 18 directly referenced above).
+Normative anti-patterns reference: `.agents/skills/observability/resources/anti-patterns.md` §Section Z (items 17, 18 directly referenced above).

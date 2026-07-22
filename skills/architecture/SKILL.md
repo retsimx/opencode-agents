@@ -42,10 +42,10 @@ Analyze, compare, and document software architecture decisions with explicit tra
 - Saved architecture artifacts under `.agents/results/architecture/` when producing durable outputs
 
 ### Dependencies
-- `resources/execution-protocol.md` for workflow
-- `resources/methodology-selection.md` for method choice
-- `resources/stakeholder-synthesis.md` when cross-cutting stakeholder consultation is justified
-- `resources/output-templates.md` for final artifact shapes
+- `.agents/skills/architecture/resources/execution-protocol.md` for workflow
+- `.agents/skills/architecture/resources/methodology-selection.md` for method choice
+- `.agents/skills/architecture/resources/stakeholder-synthesis.md` when cross-cutting stakeholder consultation is justified
+- `.agents/skills/architecture/resources/output-templates.md` for final artifact shapes
 
 ### Control-flow features
 - Branches by request clarity, decision materiality, risk level, and need for stakeholder consultation
@@ -144,20 +144,20 @@ Then choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or
 - **ADR Mode**: concise final decision record after analysis
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for output examples.
-Use `resources/methodology-selection.md` to select the right method.
-Use `resources/stakeholder-synthesis.md` when stakeholder consultation is needed.
-Use `resources/output-templates.md` to format the final artifact.
-Before submitting, run `resources/checklist.md`.
-- Execution steps: `resources/execution-protocol.md`
-- Checklist: `resources/checklist.md`
-- Examples: `resources/examples.md`
-- Method selection: `resources/methodology-selection.md`
-- Stakeholder protocol: `resources/stakeholder-synthesis.md`
-- Output templates: `resources/output-templates.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Difficulty guide: `../_shared/core/difficulty-guide.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification protocol: `../_shared/core/clarification-protocol.md`
-- Quality principles: `../_shared/core/quality-principles.md`
+Follow `.agents/skills/architecture/resources/execution-protocol.md` step by step.
+See `.agents/skills/architecture/resources/examples.md` for output examples.
+Use `.agents/skills/architecture/resources/methodology-selection.md` to select the right method.
+Use `.agents/skills/architecture/resources/stakeholder-synthesis.md` when stakeholder consultation is needed.
+Use `.agents/skills/architecture/resources/output-templates.md` to format the final artifact.
+Before submitting, run `.agents/skills/architecture/resources/checklist.md`.
+- Execution steps: `.agents/skills/architecture/resources/execution-protocol.md`
+- Checklist: `.agents/skills/architecture/resources/checklist.md`
+- Examples: `.agents/skills/architecture/resources/examples.md`
+- Method selection: `.agents/skills/architecture/resources/methodology-selection.md`
+- Stakeholder protocol: `.agents/skills/architecture/resources/stakeholder-synthesis.md`
+- Output templates: `.agents/skills/architecture/resources/output-templates.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Difficulty guide: `.agents/skills/_shared/core/difficulty-guide.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
+- Quality principles: `.agents/skills/_shared/core/quality-principles.md`

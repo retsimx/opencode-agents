@@ -110,8 +110,8 @@ Use `### Canonical workflow path` instead when the skill is decision-heavy rathe
 2. {Safety or quality rule}
 
 ## References
-- {Resource label}: `resources/{file}.md`
-- {Shared reference}: `../_shared/core/{file}.md`
+- {Resource label}: `.agents/skills/{skill-name}/resources/{file}.md`
+- {Shared reference}: `.agents/skills/_shared/core/{file}.md`
 ````
 
 ## Mapping To SSL
@@ -138,7 +138,7 @@ Keep inline:
 - Logical actions, resource scope, preconditions, side effects, guardrails
 - One canonical command or workflow path
 
-Move to `resources/`:
+Move to `.agents/skills/skill-creator/resources/`:
 - Long examples
 - Provider-specific variants
 - Detailed protocols

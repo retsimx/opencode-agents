@@ -37,7 +37,7 @@ Agents that frequently require re-direction consume more tokens and user time th
 
 | Threshold | Scope | Action |
 |-----------|-------|--------|
-| CD >= 50 | Single session | **MANDATORY**: Add RCA to `lessons-learned.md` |
+| CD >= 50 | Single session | **MANDATORY**: Add RCA to `.agents/skills/_shared/core/lessons-learned.md` |
 | CD >= 30 | Same agent, 3 consecutive sessions | **REVIEW**: Examine agent prompt template |
 | CD >= 80 | Single session | **ESCALATE**: Halt session, request user re-specification |
 | `redo` count >= 2 | Single session | **PAUSE**: Orchestrator requests explicit scope confirmation |
@@ -81,10 +81,7 @@ When user sends a correction/clarification during session:
    - Is user correcting a misunderstanding? → `correct`
    - Is user rejecting work and asking for restart? → `redo`
 
-2. **Record** via MCP memory:
-   ```
-   [EDIT]("session-metrics.md", append event row)
-   ```
+2. **Record** by appending to `.agents/results/session-metrics.md` with `edit` (see `.agents/skills/_shared/runtime/coordination-protocol.md`).
 
 3. **Check threshold** after each event:
    - If CD >= 80: Pause and request re-specification
@@ -103,7 +100,7 @@ At session end, if total CD >= 50:
    - **Prevention**: {prompt/process change to prevent recurrence}
    ```
 
-2. **Append** to `lessons-learned.md` in the relevant domain section
+2. **Append** to `.agents/skills/_shared/core/lessons-learned.md` (this directory) in the relevant domain section
 
 ---
 
@@ -140,7 +137,7 @@ Total CD: 95 → RCA REQUIRED
 
 ## Quality Score Tracking (Extension)
 
-When Quality Score measurement is active (see `quality-score.md`), the session log includes score progression.
+When Quality Score measurement is active (see `.agents/skills/_shared/conditional/quality-score.md`), the session log includes score progression.
 
 ### Score Progression (appended to session log)
 
@@ -166,7 +163,7 @@ When Quality Score measurement is active (see `quality-score.md`), the session l
 - Net score improvement: {start} → {final} (delta: {+N})
 ```
 
-This data is sourced from the Experiment Ledger at session end (see `experiment-ledger.md`).
+This data is sourced from the Experiment Ledger at session end (see `.agents/skills/_shared/conditional/experiment-ledger.md`).
 
 ---
 

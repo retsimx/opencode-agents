@@ -38,7 +38,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 
 ### Dependencies
 - Plan, frontend, backend, mobile, review, and orchestrate skills
-- `resources/examples.md`
+- `.agents/skills/coordination/resources/examples.md`
 - OpenCode `task` tool and progress/result memory conventions
 
 ### Control-flow features
@@ -154,4 +154,4 @@ For fully automated execution without manual spawning, use the **orchestrate** s
 
 ## References
 
-- Workflow examples: `resources/examples.md`
+- Workflow examples: `.agents/skills/coordination/resources/examples.md`

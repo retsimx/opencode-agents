@@ -69,7 +69,7 @@ Ask the user to describe what they want to build. Clarify:
 - Constraints (tech stack, existing codebase)
 - Deployment target (web, mobile, both)
 
-Follow `../_shared/core/clarification-protocol.md` — check Uncertainty Triggers (business logic, security/auth, existing code conflicts). LOW → proceed, MEDIUM → present options, HIGH → ask immediately.
+Follow `.agents/skills/_shared/core/clarification-protocol.md` — check Uncertainty Triggers (business logic, security/auth, existing code conflicts). LOW → proceed, MEDIUM → present options, HIGH → ask immediately.
 
 ---
 
@@ -81,7 +81,7 @@ If an existing codebase exists:
 
 Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references. Reuse patterns from similar work.
 
-Read cross-domain entries in `../_shared/core/lessons-learned.md` to avoid known traps.
+Read cross-domain entries in `.agents/skills/_shared/core/lessons-learned.md` to avoid known traps.
 
 ---
 
@@ -145,7 +145,7 @@ Generate both artifacts.
 
 ### 7a. Machine-readable plan
 
-Save `.agents/results/plan-{sessionId}.json` (and `.agents/results/result-plan.md` for human consumption). The JSON shape follows `resources/task-template.json`. Write a memory summary via the configured memory tool.
+Save `.agents/results/plan-{sessionId}.json` (and `.agents/results/result-plan.md` for human consumption). The JSON shape follows `.agents/skills/plan/resources/task-template.json`. Write a memory summary via the configured memory tool.
 
 ### 7b. Human-readable tracker (Medium/Complex only)
 
@@ -244,7 +244,7 @@ To list in-progress plans: `grep -l "^\*\*Status\*\*: Active" docs/plans/work/*.
 
 ## Standards-Aligned Planning (Optional)
 
-When the user asks for enterprise delivery structure, risk-aware prioritization, or governance-oriented planning, read `resources/iso-planning.md` and add a **Standards-Aligned Planning Notes** section to the tracker:
+When the user asks for enterprise delivery structure, risk-aware prioritization, or governance-oriented planning, read `.agents/skills/plan/resources/iso-planning.md` and add a **Standards-Aligned Planning Notes** section to the tracker:
 
 ```md
 ## Standards-Aligned Planning Notes
@@ -290,14 +290,14 @@ Apply this lens when the project is enterprise/regulated, many stakeholders are 
 
 ## References
 
-- Task schema: `resources/task-template.json`
-- Plan examples: `resources/examples.md`
-- Execution protocol: `resources/execution-protocol.md`
-- ISO planning guide: `resources/iso-planning.md`
-- Error recovery: `resources/error-playbook.md`
-- API contracts: `../_shared/core/api-contracts/`
-- Context loading: `../_shared/core/context-loading.md`
-- Difficulty guide: `../_shared/core/difficulty-guide.md`
-- Clarification protocol: `../_shared/core/clarification-protocol.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+- Task schema: `.agents/skills/plan/resources/task-template.json`
+- Plan examples: `.agents/skills/plan/resources/examples.md`
+- Execution protocol: `.agents/skills/plan/resources/execution-protocol.md`
+- ISO planning guide: `.agents/skills/plan/resources/iso-planning.md`
+- Error recovery: `.agents/skills/plan/resources/error-playbook.md`
+- API contracts: `.agents/skills/_shared/core/api-contracts/`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Difficulty guide: `.agents/skills/_shared/core/difficulty-guide.md`
+- Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

@@ -8,7 +8,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 - **Never skip phases.** Execute Phase 0 through Phase 6 in order. Each phase has a GATE ENTRY and GATE EXIT — both must pass before proceeding.
 - **Do not modify files outside the worktree.**
 - **Run ALL CI steps locally once before ANY commit or push.** Phase 4 (CI Verify) must pass before Phase 5 (Ship).
-- **Provider-agnostic.** Detect GitHub (`gh`) vs GitLab (`glab`) from `origin` per `../_shared/runtime/providers.md`. Never hardcode one CLI.
+- **Provider-agnostic.** Detect GitHub (`gh`) vs GitLab (`glab`) from `origin` per `.agents/skills/_shared/runtime/providers.md`. Never hardcode one CLI.
 - **Strictly follow ALL rules in the project's `AGENTS.md` and `TESTING.md`** (if they exist).
 - **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases.
 - **MUST use the `question` tool to ask the user anything.** Never use plain text output. Always invoke the built-in `question` tool.
@@ -40,9 +40,9 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 ### Procedure
 
 1. Ask the user for the issue number if not provided. **Use the `question` tool — NOT plain text.**
-2. Detect provider from `git remote get-url origin` per `../_shared/runtime/providers.md`. Record `PROVIDER` (`github`|`gitlab`) and the matching CLI (`gh`|`glab`).
+2. Detect provider from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Record `PROVIDER` (`github`|`gitlab`) and the matching CLI (`gh`|`glab`).
 3. Verify the provider CLI is authenticated (`gh auth status` or `glab auth status`). If not, report error and abort.
-4. Fetch issue details using the Issues table in `providers.md` (normalize title, body, labels, comments, assignees, state).
+4. Fetch issue details using the Issues table in `.agents/skills/_shared/runtime/providers.md` (normalize title, body, labels, comments, assignees, state).
 5. Present the issue to the user: title, body, labels, key comments.
 6. Fetch latest changes to main and ensure local main is up to date:
    ```
@@ -159,7 +159,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 ### Procedure
 
 1. `cd $WORKTREE`
-2. Discover CI config for `$PROVIDER` per Local CI config discovery in `../_shared/runtime/providers.md` (GitHub: `.github/workflows/`; GitLab: `.gitlab-ci.yml`). Also follow any verify commands in `AGENTS.md`.
+2. Discover CI config for `$PROVIDER` per Local CI config discovery in `.agents/skills/_shared/runtime/providers.md` (GitHub: `.github/workflows/`; GitLab: `.gitlab-ci.yml`). Also follow any verify commands in `AGENTS.md`.
 3. Run ALL CI steps locally inside `$WORKTREE`:
    - Install dependencies if needed.
    - Run lint, type-check, format-check, and any other static analysis steps.
@@ -232,7 +232,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
    ```
    git push -u origin <branch>
    ```
-6. Create a draft PR using the Create draft PR row in `../_shared/runtime/providers.md` for `$PROVIDER` (title `"<type>(<scope>): <description>"`, body from `/tmp/pr-body.txt`, base/target `main`).
+6. Create a draft PR using the Create draft PR row in `.agents/skills/_shared/runtime/providers.md` for `$PROVIDER` (title `"<type>(<scope>): <description>"`, body from `/tmp/pr-body.txt`, base/target `main`).
 7. Report the PR URL to the user.
 8. Return to main branch:
    ```
@@ -249,7 +249,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 - [ ] Draft PR created and URL reported to user
 - [ ] Returned to main branch
 
-**Do NOT proceed to Phase 6 if PR creation failed. Report the error and give the user the provider-appropriate create command from `providers.md`.**
+**Do NOT proceed to Phase 6 if PR creation failed. Report the error and give the user the provider-appropriate create command from `.agents/skills/_shared/runtime/providers.md`.**
 
 ---
 
@@ -325,7 +325,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 | 3 | Implementation fails repeatedly | Report error trail, ask user |
 | 4 | CI fails | Report output, ask user: re-implement or abort |
 | 5 | Commit/push fails | Leave worktree intact, report error |
-| 5 | PR creation fails | Branch pushed, give user manual create command from `providers.md` |
+| 5 | PR creation fails | Branch pushed, give user manual create command from `.agents/skills/_shared/runtime/providers.md` |
 | 5 | Task subagent fails to generate messages | Write commit message and PR body inline as fallback |
 | 6 | Issue number unknown | Skip phase, report to user |
 | 6 | Comment post fails | Report error, worktree and PR are intact |
@@ -356,4 +356,4 @@ Phase 0 (Init) → Phase 1 (Brainstorm) → Phase 2 (Plan) → Phase 3 (Implemen
 
 ## References
 
-- Provider CLI map: `../_shared/runtime/providers.md`
+- Provider CLI map: `.agents/skills/_shared/runtime/providers.md`

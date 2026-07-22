@@ -162,7 +162,7 @@ When a trigger fires, the Orchestrator executes:
 ### Standalone Agent Mode (no Orchestrator)
 
 When an agent runs outside orchestration (e.g., direct `/backend` invocation),
-the Sprint Gate in `difficulty-guide.md` serves as the safety net.
+the Sprint Gate in `.agents/skills/_shared/core/difficulty-guide.md` serves as the safety net.
 At each Sprint Gate, the agent checks:
 - [ ] Current sprint deliverable complete
 - [ ] lint/test pass

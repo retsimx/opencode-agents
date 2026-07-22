@@ -40,7 +40,7 @@ Build, modify, and verify React/Next.js/TypeScript user interfaces that follow p
 ### Dependencies
 - React, Next.js, TypeScript, TailwindCSS v4, and `shadcn/ui`
 - Project sources of truth such as `packages/design-tokens`, `packages/i18n`, and shared utilities
-- `resources/execution-protocol.md`, `resources/checklist.md`, examples, snippets, and Tailwind rules
+- `.agents/skills/frontend/resources/execution-protocol.md`, `.agents/skills/frontend/resources/checklist.md`, examples, snippets, and Tailwind rules
 
 ### Control-flow features
 - Branches by server/client component boundary, responsive state, component library availability, and i18n/token requirements
@@ -178,28 +178,28 @@ Project stack conventions live in dedicated files. **Read these before coding**;
 
 | File | Owns |
 |---|---|
-| `resources/tech-stack.md` | Framework versions, Next.js 16 `proxy.ts` conventions, Serena shortcuts |
-| `resources/tailwind-rules.md` | Design tokens, focus states, Tailwind v4 `@theme` syntax |
-| `resources/snippets.md` | React 19 hook patterns, TanStack Query/Form, a11y card |
+| `.agents/skills/frontend/resources/tech-stack.md` | Framework versions, Next.js 16 `proxy.ts` conventions, Serena shortcuts |
+| `.agents/skills/frontend/resources/tailwind-rules.md` | Design tokens, focus states, Tailwind v4 `@theme` syntax |
+| `.agents/skills/frontend/resources/snippets.md` | React 19 hook patterns, TanStack Query/Form, a11y card |
 
-To extend: add `resources/<name>.md` and append a row above.
+To extend: add `.agents/skills/frontend/resources/<name>.md` and append a row above.
 
 ## References
 
-1. Follow `resources/execution-protocol.md` step by step.
-2. Before submitting, run `resources/checklist.md`.
+1. Follow `.agents/skills/frontend/resources/execution-protocol.md` step by step.
+2. Before submitting, run `.agents/skills/frontend/resources/checklist.md`.
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 
 - Project frontend rules (MUST load before review/implementation): `../../rules/frontend.md`
-- Execution steps: `resources/execution-protocol.md`
-- Checklist: `resources/checklist.md`
-- Error recovery: `resources/error-playbook.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification: `../_shared/core/clarification-protocol.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+- Execution steps: `.agents/skills/frontend/resources/execution-protocol.md`
+- Checklist: `.agents/skills/frontend/resources/checklist.md`
+- Error recovery: `.agents/skills/frontend/resources/error-playbook.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
 
 > [!IMPORTANT]
 > Treat `components/ui/*` as read-only. Create wrappers for customization.

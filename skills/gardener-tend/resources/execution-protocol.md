@@ -1,7 +1,7 @@
 # Gardener Tend — Execution Protocol
 
 Provider-agnostic. All forge commands come from
-[`../../_shared/runtime/providers.md`](../../_shared/runtime/providers.md).
+`.agents/skills/_shared/runtime/providers.md`.
 Resolve `PROVIDER` once at Entry and use only that CLI for the run.
 
 ## Entry Gate
@@ -17,7 +17,7 @@ Resolve `PROVIDER` once at Entry and use only that CLI for the run.
 
 ### 1. CHECK_MERGE
 
-Use View single PR and normalize `mergeableState` per the Mergeability table in `providers.md`.
+Use View single PR and normalize `mergeableState` per the Mergeability table in `.agents/skills/_shared/runtime/providers.md`.
 
 | Normalized situation | Action |
 |----------------------|--------|
@@ -56,7 +56,7 @@ Fetch CI / pipeline status for `PROVIDER`.
 
 ### 3. CHECK_COMMENTS
 
-Fetch inline review comments and conversation comments/notes per `providers.md`.
+Fetch inline review comments and conversation comments/notes per `.agents/skills/_shared/runtime/providers.md`.
 
 Filter by specific user login when configured (e.g. `retsimx`).
 

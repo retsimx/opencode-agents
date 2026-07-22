@@ -171,7 +171,7 @@ parent_span.start_time <= child_span.start_time
 child_span.end_time <= parent_span.end_time
 ```
 
-A violation where `child_span.end_time > parent_span.end_time` is a clock-drift indicator, not necessarily a code bug. Flag these in meta-observability pipeline checks (see `resources/meta-observability.md`).
+A violation where `child_span.end_time > parent_span.end_time` is a clock-drift indicator, not necessarily a code bug. Flag these in meta-observability pipeline checks (see `.agents/skills/observability/resources/meta-observability.md`).
 
 ### Anti-pattern
 

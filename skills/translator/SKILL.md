@@ -42,7 +42,7 @@ Translate, review, or adapt multilingual content while preserving meaning, regis
 
 ### Dependencies
 - Existing translations and surrounding code for register and terminology
-- `resources/translation-rubric.md` and `resources/anti-ai-patterns.md`
+- `.agents/skills/translator/resources/translation-rubric.md` and `.agents/skills/translator/resources/anti-ai-patterns.md`
 - Project locale files when translating UI strings
 
 ### Control-flow features
@@ -195,7 +195,7 @@ This stage is mandatory. Skipping any item is a bug, not a shortcut. Before prod
 
 If any mechanical check fails, revise and re-run. Do not proceed to the rubric until all pass.
 
-**B. Translation rubric (see `resources/translation-rubric.md`):**
+**B. Translation rubric (see `.agents/skills/translator/resources/translation-rubric.md`):**
 1. Does it read like it was originally written in the target language?
 2. Are domain terms consistent with existing translations in the project?
 3. Is the register consistent throughout?
@@ -203,7 +203,7 @@ If any mechanical check fails, revise and re-run. Do not proceed to the rubric u
 5. Are cultural references adapted appropriately?
 6. Are emotional connotations preserved (not flattened into neutral descriptions)?
 
-**C. Anti-AI patterns (see `resources/anti-ai-patterns.md`):**
+**C. Anti-AI patterns (see `.agents/skills/translator/resources/anti-ai-patterns.md`):**
 7. No AI vocabulary clustering or inflated significance
 8. No promotional tone upgrade beyond the source
 9. No synonym cycling; use consistent terminology
@@ -286,7 +286,7 @@ Re-read the translation against the source with fresh eyes. Produce a diagnostic
 Start the review by explicitly answering this question first: **"What makes the draft below still feel obviously machine-translated or AI-generated?"** Write 3–7 short bullets naming the remaining tells (e.g., "register suddenly shifts to formal in the final paragraph", "the same connective construction repeats three times", "noun-ending fragments survive in body text outside label/cell positions", "a metaphor was kept literal where the target language would interpret it"). Then continue with the structured checklist:
 
 - **Accuracy**: Compare paragraph by paragraph. Any facts, numbers, or qualifiers altered?
-- **Europeanized language**: Scan for unnecessary connectives, passive voice, noun pile-up, over-nominalization, forced pronouns (see `resources/anti-ai-patterns.md`)
+- **Europeanized language**: Scan for unnecessary connectives, passive voice, noun pile-up, over-nominalization, forced pronouns (see `.agents/skills/translator/resources/anti-ai-patterns.md`)
 - **Figurative language fidelity**: Cross-check metaphor mapping from Stage 1. Were all handled per the classify decision? Any literal calques that sound unnatural?
 - **Emotional fidelity**: Were subjective/emotional word choices flattened into neutral descriptions?
 - **Tone drift**: Does the register stay consistent from start to finish, or does it shift mid-document (e.g., formal intro drifting into casual explanation)?
@@ -404,12 +404,12 @@ Why:
 ### How to Execute
 
 Follow the translation method (Stage 1-4) step by step.
-Before submitting, verify against `resources/translation-rubric.md` and `resources/anti-ai-patterns.md`.
+Before submitting, verify against `.agents/skills/translator/resources/translation-rubric.md` and `.agents/skills/translator/resources/anti-ai-patterns.md`.
 
 ### Execution Protocol (CLI Mode)
 
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 
 ## Logical Operations
 
@@ -433,7 +433,7 @@ Source files live under `../_shared/runtime/execution-protocol.md`.
 ```text
 1. Analyze source register, intent, domain terms, placeholders, and structure.
 2. Reconstruct meaning in the target language, not word-for-word.
-3. Run mechanical checks and `resources/translation-rubric.md` before emitting output.
+3. Run mechanical checks and `.agents/skills/translator/resources/translation-rubric.md` before emitting output.
 ```
 
 For UI files, scan sibling locale files first:
@@ -476,11 +476,11 @@ rg "<source-key-or-term>" .
 13. Never change the meaning to "sound better"
 14. Never skip verification stage for batches > 10 strings
 15. Never modify source file structure (keys, nesting, comments)
-16. Never preserve source-language formatting artifacts that are unnatural in the target language. For CJK targets (Korean, Japanese, Chinese), em dashes (—), title case in headings, and trailing "-ing" participle clauses must be restructured, even when the source uses them. See `resources/anti-ai-patterns.md` rules 13–16.
+16. Never preserve source-language formatting artifacts that are unnatural in the target language. For CJK targets (Korean, Japanese, Chinese), em dashes (—), title case in headings, and trailing "-ing" participle clauses must be restructured, even when the source uses them. See `.agents/skills/translator/resources/anti-ai-patterns.md` rules 13–16.
 
 ## References
 
-- Translation rubric: `resources/translation-rubric.md` (5-criterion scoring: naturalness, accuracy, register, terminology, technical integrity)
-- Anti-AI patterns: `resources/anti-ai-patterns.md` (AI output patterns + Europeanized/translation-ese patterns to avoid)
-- Context loading: `../_shared/core/context-loading.md`
-- Quality principles: `../_shared/core/quality-principles.md`
+- Translation rubric: `.agents/skills/translator/resources/translation-rubric.md` (5-criterion scoring: naturalness, accuracy, register, terminology, technical integrity)
+- Anti-AI patterns: `.agents/skills/translator/resources/anti-ai-patterns.md` (AI output patterns + Europeanized/translation-ese patterns to avoid)
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Quality principles: `.agents/skills/_shared/core/quality-principles.md`

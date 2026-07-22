@@ -55,12 +55,12 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 - `review` mode: PASS/FAIL Compliance Report across Sentence Structure, Verb Quality, Anti-AI, Specificity, Hedging, Paragraph Clarity, Rhythm/Burstiness, Claim-Evidence Alignment, plus recommended fixes
 
 ### Dependencies
-- `resources/anti-ai-checklist.md`: banned vocabulary, banned structural patterns, sentence-level checks
-- `resources/sentence-structure-reference.md`: four sentence types, length targets, common errors
-- `resources/academic-verb-tiers.md`: banned generic verbs and tiered academic-corpus replacements
-- `resources/hedging-guide.md`: calibrated certainty expressions matched to evidence strength
-- `../_shared/core/context-loading.md`: task-relevant resource loading
-- `../_shared/core/quality-principles.md`: shared quality bar
+- `.agents/skills/academic-writer/resources/anti-ai-checklist.md`: banned vocabulary, banned structural patterns, sentence-level checks
+- `.agents/skills/academic-writer/resources/sentence-structure-reference.md`: four sentence types, length targets, common errors
+- `.agents/skills/academic-writer/resources/academic-verb-tiers.md`: banned generic verbs and tiered academic-corpus replacements
+- `.agents/skills/academic-writer/resources/hedging-guide.md`: calibrated certainty expressions matched to evidence strength
+- `.agents/skills/_shared/core/context-loading.md`: task-relevant resource loading
+- `.agents/skills/_shared/core/quality-principles.md`: shared quality bar
 
 ### Control-flow features
 - Mode branching: `draft` vs `revise` vs `review` produce different output formats and pass sequences
@@ -75,13 +75,13 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 1. Identify the mode (`draft`, `revise`, `review`) and the rubric source.
 2. Quote the exact constraint text (word limits, structural requirements, mandatory sections, rubric rows) before applying any rule.
 3. If revising or reviewing, read the existing draft in full first; if drafting, confirm available source data and citations.
-4. Index `resources/` and pre-select the verb tier and sentence mix targets for the section.
+4. Index `.agents/skills/academic-writer/resources/` and pre-select the verb tier and sentence mix targets for the section.
 
 ### Scenes
 1. **PREPARE**: load rubric, existing draft, source data; record quoted constraints; pick sentence mix and 2–3 anchor verbs per paragraph.
-2. **ACQUIRE**: read `resources/sentence-structure-reference.md`, `academic-verb-tiers.md`, and `hedging-guide.md` only for the patterns relevant to the current section.
+2. **ACQUIRE**: read `.agents/skills/academic-writer/resources/sentence-structure-reference.md`, `academic-verb-tiers.md`, and `hedging-guide.md` only for the patterns relevant to the current section.
 3. **ACT**: write or revise prose with the four protocols enforced simultaneously: Sentence Structure (4 types, varied length, varied openers), Verb (no banned generic verbs as main verbs; prefer tier-1/2 academic verbs), Hedging (match strength to evidence), and Topic-Support-Conclude paragraphing.
-4. **VERIFY**: audit against `resources/anti-ai-checklist.md` (vocabulary clusters, structural patterns, sentence-level checks); apply reverse outlining and build the Claim-Evidence Map; weaken or remove unsupported claims.
+4. **VERIFY**: audit against `.agents/skills/academic-writer/resources/anti-ai-checklist.md` (vocabulary clusters, structural patterns, sentence-level checks); apply reverse outlining and build the Claim-Evidence Map; weaken or remove unsupported claims.
 5. **FINALIZE**: read-aloud test, cohesion check, specificity audit, word-count verification, paragraph-length variation, rhythm check; emit per the mode's output format.
 
 ### Transitions
@@ -98,7 +98,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 | Prose still sounds AI-generated after one pass | Vary sentence openers (subject, adverbial, participial, prepositional) and insert one short (≤10-word) sentence per paragraph; re-run audit |
 | Rubric requirement unclear | Quote exact rubric text and ask user; do not combine rules |
 | Claim lacks evidence | Add citation, hedge to match weaker evidence, or remove the claim entirely |
-| Hedging miscalibrated | Replace double hedges; align hedge strength with `resources/hedging-guide.md` evidence-level table |
+| Hedging miscalibrated | Replace double hedges; align hedge strength with `.agents/skills/academic-writer/resources/hedging-guide.md` evidence-level table |
 | Banned generic verb resists replacement | Restructure the sentence so the banned verb is not the main verb |
 | Paragraph blocks are uniform 4–5 sentences | Insert a 2-sentence emphasis paragraph; re-run rhythm check |
 
@@ -114,11 +114,11 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 |--------|---------------|----------|
 | Read rubric / constraint and quote literal text | `READ` | Rubric file or assignment brief |
 | Read existing draft (revise/review modes) | `READ` | Draft file or inline text |
-| Index resources for the current section | `READ` | `resources/{anti-ai-checklist,sentence-structure-reference,academic-verb-tiers,hedging-guide}.md` |
+| Index resources for the current section | `READ` | `.agents/skills/academic-writer/resources/{anti-ai-checklist,sentence-structure-reference,academic-verb-tiers,hedging-guide}.md` |
 | Select sentence mix and 2–3 anchor verbs per paragraph | `SELECT` | Sentence-structure & verb-tier tables |
 | Plan paragraph as Topic-Support-Conclude | `INFER` | Outline notes |
 | Draft / revise prose under all four protocols | `WRITE` | Generated prose |
-| Audit prose against anti-AI checklist | `VALIDATE` | `resources/anti-ai-checklist.md` |
+| Audit prose against anti-AI checklist | `VALIDATE` | `.agents/skills/academic-writer/resources/anti-ai-checklist.md` |
 | Reverse outline + build Claim-Evidence Map | `VALIDATE` | Mapping table |
 | Weaken or remove unsupported claims | `WRITE` | Revised claim line |
 | Compare original vs revised (revise mode) | `COMPARE` | Diff block |
@@ -130,7 +130,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 
 ### Tools and instruments
 - `Read` / `Edit` / `Write` for draft and rubric files
-- `resources/anti-ai-checklist.md`, `sentence-structure-reference.md`, `academic-verb-tiers.md`, `hedging-guide.md`
+- `.agents/skills/academic-writer/resources/anti-ai-checklist.md`, `sentence-structure-reference.md`, `academic-verb-tiers.md`, `hedging-guide.md`
 - Topic-Support-Conclude paragraph template (inline)
 - Claim-Evidence Map (inline 3-column table: Claim / Evidence / Status)
 - Output-format blocks per mode (Draft / Revision / Review)
@@ -139,7 +139,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 1. **READ** rubric/draft and quote the exact literal constraint text; pin word limits, mandatory sections, and rubric rows.
 2. **PLAN** each paragraph as Topic-Support-Conclude; pre-select the sentence-type mix and 2–3 anchor verbs from `academic-verb-tiers.md`.
 3. **DRAFT** prose with Sentence Structure, Verb, Hedging, and Topic-Support-Conclude protocols enforced simultaneously.
-4. **AUDIT** the draft against `resources/anti-ai-checklist.md` (banned vocabulary clusters, banned structural patterns, sentence-level checks) and fix every flag.
+4. **AUDIT** the draft against `.agents/skills/academic-writer/resources/anti-ai-checklist.md` (banned vocabulary clusters, banned structural patterns, sentence-level checks) and fix every flag.
 5. **REVERSE-OUTLINE** the section and build the Claim-Evidence Map; weaken or remove any unsupported claim.
 6. **POLISH** with read-aloud, cohesion, specificity, word-count, rhythm, and paragraph-length-variation checks; emit in the mode's output format.
 
@@ -147,7 +147,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 | Scope | Resource target |
 |-------|-----------------|
 | `LOCAL_FS` | Rubric, existing draft, generated prose output |
-| `CODEBASE` | `resources/` 4 reference files, `_shared/core/{context-loading,quality-principles}.md` |
+| `CODEBASE` | `.agents/skills/academic-writer/resources/` 4 reference files, `.agents/skills/_shared/core/{context-loading,quality-principles}.md` |
 | `MEMORY` | Mode, quoted constraints, anchor verbs per paragraph, anti-AI flags resolved, Claim-Evidence Map |
 
 ### Preconditions
@@ -157,7 +157,7 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 
 ### Effects and side effects
 - Writes drafted, revised, or reviewed prose to the user's working location (file or inline).
-- Does not modify `resources/` reference files.
+- Does not modify `.agents/skills/academic-writer/resources/` reference files.
 - Does not fetch external citations; defers to `scholar` when discovery is required.
 - May NOTIFY adjacent skills but does not auto-spawn them; user or workflow drives the actual handoff.
 
@@ -174,9 +174,9 @@ Produce, revise, and audit publication-grade academic English prose so that ever
 10. Read aloud before emit; if a sentence does not flow naturally, restructure it.
 
 ## References
-- Anti-AI checklist: `resources/anti-ai-checklist.md`
-- Sentence-structure reference: `resources/sentence-structure-reference.md`
-- Academic verb tiers: `resources/academic-verb-tiers.md`
-- Hedging guide: `resources/hedging-guide.md`
-- Shared context loading: `../_shared/core/context-loading.md`
-- Shared quality principles: `../_shared/core/quality-principles.md`
+- Anti-AI checklist: `.agents/skills/academic-writer/resources/anti-ai-checklist.md`
+- Sentence-structure reference: `.agents/skills/academic-writer/resources/sentence-structure-reference.md`
+- Academic verb tiers: `.agents/skills/academic-writer/resources/academic-verb-tiers.md`
+- Hedging guide: `.agents/skills/academic-writer/resources/hedging-guide.md`
+- Shared context loading: `.agents/skills/_shared/core/context-loading.md`
+- Shared quality principles: `.agents/skills/_shared/core/quality-principles.md`

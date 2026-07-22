@@ -32,7 +32,7 @@ All agents assess task difficulty at the start and apply the appropriate protoco
 2. **Pre-check**: Confirm whether test files exist for the target module (e.g., `__tests__/`, `*.test.*`)
 3. Step 3 (Implement): Implementation
 4. Step 4 (Verify): Minimal checklist items:
-   - All `Code Quality` items from `common-checklist.md`
+   - All `Code Quality` items from `.agents/skills/_shared/core/common-checklist.md`
    - `Tests actually assert meaningful behavior` (if tests exist or were added)
    - Run existing tests to verify no regressions
 
@@ -55,9 +55,9 @@ All agents assess task difficulty at the start and apply the appropriate protoco
      - [ ] Sprint deliverable complete
      - [ ] lint/test pass
      - If sprint took 2x expected turns → write checkpoint and inform user
-       (see `context-budget.md` Standalone Agent Mode)
+       (see `.agents/skills/_shared/core/context-budget.md` Standalone Agent Mode)
    - On gate pass → next sprint
-4. Step 4 (Verify): Full + `common-checklist.md`
+4. Step 4 (Verify): Full + `.agents/skills/_shared/core/common-checklist.md`
 
 #### Sprint Decomposition Example
 

@@ -12,16 +12,16 @@ description: Coordinate multiple agents for a complex multi-domain project using
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
   - Use `.agents/results/` for all coordination and progress files
   - Do NOT rely on MCP-specific tools or memory providers
-- **Read the coordination skill BEFORE starting.** Load the coordination skill and follow its Core Rules.
-- **Follow the context-loading guide.** Load the context-loading skill and load only task-relevant resources.
+- **Read the coordination skill BEFORE starting.** Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and follow its Core Rules.
+- **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
 ---
 
 ## Step 0: Preparation (DO NOT SKIP)
 
-1. Load the coordination skill and confirm Core Rules.
-2. Load the context-loading skill for resource loading strategy.
-3. Load the coordination-protocol skill for the coordination protocol.
+1. Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and confirm Core Rules.
+2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
+3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
 4. Record session start:
    - Write `.agents/results/session-work.md`
    - Include: session start time, user request summary.
@@ -102,9 +102,9 @@ After all implementation agents complete, use the OpenCode `task` tool to spawn 
 ## Step 6.1: Measure Quality Score (Conditional)
 
 If automated measurement is available:
-1. Load the quality-score skill (conditional, per context-loading guide)
+1. Read `.agents/skills/_shared/conditional/quality-score.md` (conditional, per context-loading guide)
 2. Measure Quality Score based on QA findings
-3. Record as baseline in Experiment Ledger via memory tools
+3. Record as baseline in `.agents/results/experiment-ledger.md` (see `.agents/skills/_shared/conditional/experiment-ledger.md`)
 
 ---
 
@@ -115,14 +115,14 @@ If QA finds CRITICAL or HIGH issues:
 1. Re-spawn the responsible agent with QA findings. **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
 2. If Quality Score is active: measure after fix, apply Keep/Discard rule, record in Experiment Ledger.
 3. Repeat Steps 5-7.
-4. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (load the exploration-loop skill per context-loading guide):
+4. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (read `.agents/skills/_shared/conditional/exploration-loop.md` per context-loading guide):
    - Generate 2-3 alternative approaches via Exploration Decision template
    - Re-spawn the same agent type with different hypothesis prompts (separate workspaces)
    - QA scores each result
    - Best result adopted, others discarded
    - All experiments recorded in Experiment Ledger
 5. Continue until all critical issues are resolved.
-6. Use memory write tool to record final results.
+6. Write final results to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 7. If Quality Score was measured: generate Experiment Ledger summary and auto-generate lessons from discarded experiments.
 
 ---

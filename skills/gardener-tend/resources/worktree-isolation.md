@@ -25,7 +25,7 @@ If any subagent detects it modified files outside `WORKTREE`, or ran destructive
 
 - `git fetch origin main`
 - `git worktree add`, `git worktree remove`, `git worktree prune`
-- Reading PR status via forge CLI (`gh` / `glab` per `../../_shared/runtime/providers.md`)
+- Reading PR status via forge CLI (`gh` / `glab` per `.agents/skills/_shared/runtime/providers.md`)
 
 ## Prohibited in MAIN_REPO
 

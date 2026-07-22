@@ -156,7 +156,7 @@ Expected improvement: {X}ms → {Y}ms
 ## 6. Exploration Decision (Orchestrator, All Agents)
 
 Use this when the same issue causes repeated failures and alternative approaches should be explored.
-See `exploration-loop.md` for the full protocol.
+See `.agents/skills/_shared/conditional/exploration-loop.md` for the full protocol.
 
 ```
 === Exploration Decision ===

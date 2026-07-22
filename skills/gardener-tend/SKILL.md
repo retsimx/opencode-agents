@@ -12,7 +12,7 @@ description: >
 ## Scheduling
 
 ### Goal
-Maintain PR health by checking merge status, diagnosing CI failures, and acting on reviewer comments. Makes **one change per invocation** in an isolated git worktree, then exits. The external loop schedules repeat invocations. Provider-agnostic: GitHub (`gh`) or GitLab (`glab`) per `../_shared/runtime/providers.md`.
+Maintain PR health by checking merge status, diagnosing CI failures, and acting on reviewer comments. Makes **one change per invocation** in an isolated git worktree, then exits. The external loop schedules repeat invocations. Provider-agnostic: GitHub (`gh`) or GitLab (`glab`) per `.agents/skills/_shared/runtime/providers.md`.
 
 ### Intent signature
 - User wants automated PR maintenance for gardener PRs
@@ -47,11 +47,11 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 - Resolved reviewer comments deleted after fix is pushed
 
 ### Dependencies
-- Forge CLI (`gh` or `glab`) for PR queries, checks/pipelines, and comments — see `../_shared/runtime/providers.md`
-- How to run (outer loops): `../_shared/runtime/gardener-running.md`
+- Forge CLI (`gh` or `glab`) for PR queries, checks/pipelines, and comments — see `.agents/skills/_shared/runtime/providers.md`
+- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
 - `scm` skill for commit conventions
 - `debug` skill for CI failure diagnosis
-- Resources: `resources/worktree-isolation.md`, `resources/execution-protocol.md`
+- Resources: `.agents/skills/gardener-tend/resources/worktree-isolation.md`, `.agents/skills/gardener-tend/resources/execution-protocol.md`
 - Local test/lint/coverage commands from project
 
 ### Control-flow features
@@ -64,8 +64,8 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 ## Structural Flow
 
 ### Entry
-1. Detect `PROVIDER` from `git remote get-url origin` per `../_shared/runtime/providers.md`. Verify CLI auth.
-2. Fetch all open PRs with `chore(gardener)` title prefix (normalize fields per `providers.md`).
+1. Detect `PROVIDER` from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Verify CLI auth.
+2. Fetch all open PRs with `chore(gardener)` title prefix (normalize fields per `.agents/skills/_shared/runtime/providers.md`).
 3. Order by age (oldest first).
 4. For each PR, run checks in priority order.
 
@@ -98,7 +98,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 | Action | SSL primitive | Evidence |
 |--------|---------------|----------|
 | Detect provider | `READ` | `git remote get-url origin` |
-| Fetch open PRs | `CALL_TOOL` | List open PRs (`providers.md`) |
+| Fetch open PRs | `CALL_TOOL` | List open PRs (`.agents/skills/_shared/runtime/providers.md`) |
 | Check merge state | `CALL_TOOL` | View single PR → normalize `mergeableState` |
 | Check CI status | `CALL_TOOL` | Fetch CI / pipeline status |
 | Fetch comments | `CALL_TOOL` | Reviewer comments / notes |
@@ -107,7 +107,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 | Diagnose CI fail | `CALL_TOOL` + `INFER` | Read CI logs + fix |
 | Run local verify | `VALIDATE` | Test/lint/coverage commands |
 | Push changes | `CALL_TOOL` | `git push --force-with-lease` |
-| Delete comment | `CALL_TOOL` | Delete comment/note (`providers.md`) |
+| Delete comment | `CALL_TOOL` | Delete comment/note (`.agents/skills/_shared/runtime/providers.md`) |
 | Promote draft | `CALL_TOOL` | Promote draft → ready |
 | Clean up worktree | `CALL_TOOL` | `git worktree remove` |
 
@@ -117,7 +117,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 1. Detect PROVIDER; auth check
 2. List open PRs; filter title startswith "chore(gardener)"; sort createdAt asc
 3. Per PR: normalize mergeableState → CI → comments → draft promotion
-4. All forge commands from ../_shared/runtime/providers.md for PROVIDER
+4. All forge commands from `.agents/skills/_shared/runtime/providers.md` for PROVIDER
 ```
 
 ### Resource scope
@@ -149,14 +149,14 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 6. **Fix all CI failures in one pass** — diagnose and fix every failed step
 7. **Ask when vague** — ambiguous comments get a reply, not a delete
 8. **Age priority** — oldest PRs first
-9. **Provider-agnostic** — never hardcode `gh` or `glab`; use `providers.md`
+9. **Provider-agnostic** — never hardcode `gh` or `glab`; use `.agents/skills/_shared/runtime/providers.md`
 
 ## References
 
-- How to run (outer loops): `../_shared/runtime/gardener-running.md`
+- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
 - Sibling skills: `gardener-sow` (create PRs), `gardener-harvest` (merge queue)
-- Provider CLI map: `../_shared/runtime/providers.md`
-- Worktree isolation: `resources/worktree-isolation.md`
-- Execution protocol: `resources/execution-protocol.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
+- Provider CLI map: `.agents/skills/_shared/runtime/providers.md`
+- Worktree isolation: `.agents/skills/gardener-tend/resources/worktree-isolation.md`
+- Execution protocol: `.agents/skills/gardener-tend/resources/execution-protocol.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`

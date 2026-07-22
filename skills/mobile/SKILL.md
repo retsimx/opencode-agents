@@ -37,7 +37,7 @@ Build, modify, and verify cross-platform mobile application features with clean 
 ### Dependencies
 - Flutter/Dart or React Native toolchain as detected from the project
 - Riverpod/Bloc, Dio, platform SDKs, and Maestro where applicable
-- `resources/execution-protocol.md`, examples, snippets, checklist, and screen template
+- `.agents/skills/mobile/resources/execution-protocol.md`, examples, snippets, checklist, and screen template
 
 ### Control-flow features
 - Branches by platform, state management pattern, offline requirement, native permission, and test level
@@ -124,20 +124,20 @@ Then run the project's mobile verification commands, typically unit/widget tests
 7. Use Maestro for E2E testing of critical user flows
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for input/output examples.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/mobile/resources/execution-protocol.md` step by step.
+See `.agents/skills/mobile/resources/examples.md` for input/output examples.
+Before submitting, run `.agents/skills/mobile/resources/checklist.md`.
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
-- Execution steps: `resources/execution-protocol.md`
-- Code examples: `resources/examples.md`
-- Code snippets: `resources/snippets.md`
-- Checklist: `resources/checklist.md`
-- Error recovery: `resources/error-playbook.md`
-- Tech stack: `resources/tech-stack.md`
-- Screen template: `resources/screen-template.dart`
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification: `../_shared/core/clarification-protocol.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Execution steps: `.agents/skills/mobile/resources/execution-protocol.md`
+- Code examples: `.agents/skills/mobile/resources/examples.md`
+- Code snippets: `.agents/skills/mobile/resources/snippets.md`
+- Checklist: `.agents/skills/mobile/resources/checklist.md`
+- Error recovery: `.agents/skills/mobile/resources/error-playbook.md`
+- Tech stack: `.agents/skills/mobile/resources/tech-stack.md`
+- Screen template: `.agents/skills/mobile/resources/screen-template.dart`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

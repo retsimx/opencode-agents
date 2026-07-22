@@ -25,7 +25,7 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 - Updating an existing skill to the SSL-lite format
 - Adding `Canonical command path` or `Canonical workflow path` to an execution-heavy skill
 - Auditing whether a skill is usable by routing, execution, validation, and recovery logic
-- Deciding whether detailed examples belong inline or in `resources/`
+- Deciding whether detailed examples belong inline or in `.agents/skills/skill-creator/resources/`
 
 ### When NOT to use
 - Installing third-party skills into `$CODEX_HOME/skills` -> use skill installer
@@ -43,13 +43,13 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 
 ### Expected outputs
 - A complete `SKILL.md` using the SSL-lite top-level sections
-- Optional `resources/*.md`, `config/*.yaml`, `scripts/*`, or `assets/*` only when progressive disclosure or deterministic execution requires them
+- Optional `.agents/skills/skill-creator/resources/*.md`, `config/*.yaml`, `scripts/*`, or `assets/*` only when progressive disclosure or deterministic execution requires them
 - A validation report with structure checks, routing checks, execution checks, and unresolved assumptions
 
 ### Dependencies
 - Existing skill conventions in `.agents/skills/*/SKILL.md`
-- SSL-lite template in `resources/ssl-lite-template.md`
-- Validation checklist in `resources/validation-checklist.md`
+- SSL-lite template in `.agents/skills/skill-creator/resources/ssl-lite-template.md`
+- Validation checklist in `.agents/skills/skill-creator/resources/validation-checklist.md`
 - Local filesystem and search tools for reading adjacent skills and checking output
 
 ### Control-flow features
@@ -68,7 +68,7 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 ### Scenes
 1. **PREPARE**: Collect skill purpose, trigger intents, boundaries, inputs, outputs, dependencies, and risk/resource constraints.
 2. **ACQUIRE**: Read analogous skills, existing resources, project conventions, and any user-provided source material.
-3. **REASON**: Decide what belongs inline in `SKILL.md` and what belongs in `resources/`, `config/`, `scripts/`, or `assets/`.
+3. **REASON**: Decide what belongs inline in `SKILL.md` and what belongs in `.agents/skills/skill-creator/resources/`, `config/`, `scripts/`, or `assets/`.
 4. **ACT**: Create or update the skill using the SSL-lite template.
 5. **VERIFY**: Run structural, routing, execution, resource, and formatting checks.
 6. **FINALIZE**: Report created/changed files, validation result, and any remaining assumptions.
@@ -76,7 +76,7 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 ### Transitions
 - If the skill performs fragile or repeated commands, include `### Canonical command path` inline.
 - If the skill is mostly human judgment or investigation, include `### Canonical workflow path` inline.
-- If detailed examples are long, variant-specific, or optional, move them to `resources/` and reference them explicitly.
+- If detailed examples are long, variant-specific, or optional, move them to `.agents/skills/skill-creator/resources/` and reference them explicitly.
 - If a skill already exists, preserve working content and normalize only what is needed for the target format.
 - If the trigger description is too broad, narrow it before writing the skill.
 
@@ -85,7 +85,7 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 |---------|----------|
 | Skill scope overlaps heavily with another skill | Add a clear `When NOT to use` boundary and cross-route |
 | Execution path is vague | Add canonical command or workflow path inline |
-| `SKILL.md` becomes too long | Move detailed examples to `resources/` and keep navigation in `References` |
+| `SKILL.md` becomes too long | Move detailed examples to `.agents/skills/skill-creator/resources/` and keep navigation in `References` |
 | No reliable validation command exists | Use structural grep/awk checks and manual checklist validation |
 | User input is underspecified | Make conservative assumptions and list them, unless the target behavior would be unsafe |
 
@@ -103,7 +103,7 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 | Select skill type | `SELECT` | Command/workflow/judgment/reference-heavy classification |
 | Infer boundaries | `INFER` | Trigger intents and adjacent skill overlap |
 | Write skill file | `WRITE` | New or updated `SKILL.md` |
-| Add resources | `WRITE` | `resources/`, `config/`, `scripts/`, or `assets/` |
+| Add resources | `WRITE` | `.agents/skills/skill-creator/resources/`, `config/`, `scripts/`, or `assets/` |
 | Validate structure | `VALIDATE` | Heading and canonical-path checks |
 | Report result | `NOTIFY` | Changed files and validation summary |
 
@@ -111,17 +111,17 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 - `rg`, `find`, `awk`, `sed`, `git diff --check`
 - `apply_patch` for manual file edits
 - Existing skills as examples
-- `resources/ssl-lite-template.md` for the canonical section skeleton
-- `resources/validation-checklist.md` for acceptance criteria
+- `.agents/skills/skill-creator/resources/ssl-lite-template.md` for the canonical section skeleton
+- `.agents/skills/skill-creator/resources/validation-checklist.md` for acceptance criteria
 
 ### Canonical workflow path
 1. Read 1-3 analogous existing skills before writing.
 2. Classify the new skill as command-heavy, workflow-heavy, judgment-heavy, or reference-heavy.
-3. Draft `SKILL.md` from `resources/ssl-lite-template.md`.
+3. Draft `SKILL.md` from `.agents/skills/skill-creator/resources/ssl-lite-template.md`.
 4. Add exactly one inline canonical path:
    - `### Canonical command path` for fragile or repeatable commands
    - `### Canonical workflow path` for decision, review, design, or research flow
-5. Move long examples, provider-specific details, or optional protocols into `resources/`.
+5. Move long examples, provider-specific details, or optional protocols into `.agents/skills/skill-creator/resources/`.
 6. Validate top-level headings, canonical path presence, frontmatter, and whitespace.
 
 ### Resource scope
@@ -152,12 +152,12 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 7. Include resource scope and resource targets for filesystem, codebase, process, credentials, network, user data, or memory.
 8. Include effects and side effects, especially for commands, network calls, credentials, destructive actions, generated files, and long-running processes.
 9. Add one canonical path inline so an agent can execute or reason without loading every resource file.
-10. Put long variant-specific details in `resources/`, not in the main skill body.
+10. Put long variant-specific details in `.agents/skills/skill-creator/resources/`, not in the main skill body.
 11. Do not create extra README, changelog, or installation docs inside a skill.
 12. Do not overwrite unrelated user edits.
 
 ## References
-- SSL-lite template: `resources/ssl-lite-template.md`
-- Validation checklist: `resources/validation-checklist.md`
-- Shared context loading: `../_shared/core/context-loading.md`
-- Shared quality principles: `../_shared/core/quality-principles.md`
+- SSL-lite template: `.agents/skills/skill-creator/resources/ssl-lite-template.md`
+- Validation checklist: `.agents/skills/skill-creator/resources/validation-checklist.md`
+- Shared context loading: `.agents/skills/_shared/core/context-loading.md`
+- Shared quality principles: `.agents/skills/_shared/core/quality-principles.md`

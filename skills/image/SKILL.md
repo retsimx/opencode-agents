@@ -42,7 +42,7 @@ Generate images and visual assets through authenticated multi-vendor routing whi
 ### Dependencies
 - `image-generate` CLI and vendor authentication
 - Codex image generation, Pollinations API, or Gemini API/CLI strategy
-- `resources/vendor-matrix.md`, `resources/prompt-tips.md`, and `config/image-config.yaml`
+- `.agents/skills/image/resources/vendor-matrix.md`, `.agents/skills/image/resources/prompt-tips.md`, and `config/image-config.yaml`
 
 ### Control-flow features
 - Branches by prompt ambiguity, vendor auth, cost threshold, reference-image support, path safety, and safety/timeout exit codes
@@ -157,7 +157,7 @@ Before invoking `image-generate`, the calling agent runs this checklist against 
 
 Skip both clarification and amplification when the user has clearly authored a full creative brief (≥ 2 of: subject + style + lighting + composition). Respect their prompt verbatim.
 
-**Category-specific briefs** (app mockup, poster, thumbnail, infographic, comic panel, avatar): consult `resources/prompt-tips.md` → *External Prompt Libraries*.
+**Category-specific briefs** (app mockup, poster, thumbnail, infographic, comic panel, avatar): consult `.agents/skills/image/resources/prompt-tips.md` → *External Prompt Libraries*.
 
 **Output language.** Generation prompts are sent to the provider in English (image models are trained predominantly on English captions). Translate the user's request if they wrote in another language, and show them the translated version during amplification so they can correct misreadings.
 
@@ -255,18 +255,18 @@ Other skills call `image-generate --format json` and parse the JSON manifest fro
 
 ## References
 
-Follow `resources/execution-protocol.md` step by step.
-See `resources/vendor-matrix.md` for strategy precheck rules.
-Use `resources/prompt-tips.md` for writing effective prompts.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/image/resources/execution-protocol.md` step by step.
+See `.agents/skills/image/resources/vendor-matrix.md` for strategy precheck rules.
+Use `.agents/skills/image/resources/prompt-tips.md` for writing effective prompts.
+Before submitting, run `.agents/skills/image/resources/checklist.md`.
 
 ### Configuration
 
 Project-specific settings: `config/image-config.yaml`.
 Env vars: `IMAGE_DEFAULT_VENDOR`, `IMAGE_DEFAULT_OUT`, `FORCE_YES`, `POLLINATIONS_API_KEY`, `GEMINI_API_KEY`, `IMAGE_GEMINI_STRATEGIES`.
 
-- Execution steps: `resources/execution-protocol.md`
-- Vendor matrix: `resources/vendor-matrix.md`
-- Prompt tips: `resources/prompt-tips.md`
-- Checklist: `resources/checklist.md`
-- Context loading: `../_shared/core/context-loading.md`
+- Execution steps: `.agents/skills/image/resources/execution-protocol.md`
+- Vendor matrix: `.agents/skills/image/resources/vendor-matrix.md`
+- Prompt tips: `.agents/skills/image/resources/prompt-tips.md`
+- Checklist: `.agents/skills/image/resources/checklist.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`

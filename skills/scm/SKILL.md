@@ -414,9 +414,9 @@ Use HEREDOC by default, and switch to `-F` for long or flaky terminal sessions.
 
 - `config/commit-config.yaml`
 - `config/cm-config.yaml`
-- `resources/conventional-commits.md`
-- `resources/onboarding-risk-signals.md`
-- `resources/codeowners-playbook.md`
+- `.agents/skills/scm/resources/conventional-commits.md`
+- `.agents/skills/scm/resources/onboarding-risk-signals.md`
+- `.agents/skills/scm/resources/codeowners-playbook.md`
 
 ### Important notes
 

@@ -9,7 +9,7 @@ tools:
 
 ## 1. Why the Service Mesh Has Its Own Observability File
 
-The service mesh is classified as a **L4-L7 hybrid layer** in the taxonomy defined in `resources/standards.md §OSI Boundary Decision`. It differs from the adjacent L4-transport layer in a fundamental way: the mesh proxy (sidecar or ambient agent) operates at the HTTP/gRPC framing level, not at raw TCP socket level.
+The service mesh is classified as a **L4-L7 hybrid layer** in the taxonomy defined in `.agents/skills/observability/resources/standards.md` §OSI Boundary Decision. It differs from the adjacent L4-transport layer in a fundamental way: the mesh proxy (sidecar or ambient agent) operates at the HTTP/gRPC framing level, not at raw TCP socket level.
 
 Three properties make mesh observability distinct enough to warrant a dedicated file:
 
@@ -49,7 +49,7 @@ Envoy exposes golden signals per **listener** (inbound) and **cluster** (outboun
 | Saturation (pending) | `envoy_cluster_upstream_rq_pending_total` | Per cluster |
 | mTLS handshake errors | `istio_tcp_connections_closed_total` | Proxy-level |
 
-Istio 1.22+ Telemetry API disables `destination_service_name` by default at high pod counts to cap cardinality. Override only after confirming cardinality budget in `resources/meta-observability.md`.
+Istio 1.22+ Telemetry API disables `destination_service_name` by default at high pod counts to cap cardinality. Override only after confirming cardinality budget in `.agents/skills/observability/resources/meta-observability.md`.
 
 ### 3.2 Distributed Traces
 
@@ -132,7 +132,7 @@ The `resourceDetectors.environment` block activates the **Environment Resource D
 
 ### 4.3 Custom Samplers (Envoy 1.29+)
 
-Envoy 1.29 introduced the OTel Sampler interface, allowing parent-based or trace-ID-ratio samplers to be configured without patching application code. Tail-based sampling decisions are still made at the Collector tier; see `resources/transport/sampling-recipes.md` for tail-sampler configuration.
+Envoy 1.29 introduced the OTel Sampler interface, allowing parent-based or trace-ID-ratio samplers to be configured without patching application code. Tail-based sampling decisions are still made at the Collector tier; see `.agents/skills/observability/resources/transport/sampling-recipes.md` for tail-sampler configuration.
 
 ---
 
@@ -212,7 +212,7 @@ The Operator injects the SDK agent, sets `OTEL_EXPORTER_OTLP_ENDPOINT`, and conf
 
 ## 6. Propagator Headers per Mesh
 
-Cross-reference: `resources/boundaries/cross-application.md` for full propagator compatibility matrix.
+Cross-reference: `.agents/skills/observability/resources/boundaries/cross-application.md` for full propagator compatibility matrix.
 
 | Header | Standard / Origin | Carried by | Notes |
 |--------|------------------|-----------|-------|
@@ -258,7 +258,7 @@ Application SDK (via OTel Operator Instrumentation CR)
 
 Both pipelines feed the same backend. The backend joins spans by `trace_id`. The result is a waterfall chart with proxy-level boundary spans and application-level internal spans in the same view.
 
-For Collector topology options see `resources/transport/collector-topology.md`.
+For Collector topology options see `.agents/skills/observability/resources/transport/collector-topology.md`.
 
 ---
 
@@ -266,7 +266,7 @@ For Collector topology options see `resources/transport/collector-topology.md`.
 
 When Istio PeerAuthentication is set to `STRICT` mode, all pod-to-pod traffic is encrypted with mTLS. The mesh then exposes security context as observable attributes:
 
-- **TLS version**: `tls.protocol_version` (Development tier per semconv 1.27.0; see `resources/standards.md §Semconv Stability Tiers`)
+- **TLS version**: `tls.protocol_version` (Development tier per semconv 1.27.0; see `.agents/skills/observability/resources/standards.md` §Semconv Stability Tiers)
 - **Cipher suite**: `tls.cipher` (Development tier)
 - **Certificate expiry**: alertable via PrometheusRule on `citadel_server_root_cert_expiry_timestamp`
 - **SPIFFE peer identity**: available in Envoy access log via `%DOWNSTREAM_PEER_SUBJECT%`; identifies source workload for zero-trust audit
@@ -292,7 +292,7 @@ spec:
             summary: "Istio root certificate expires in fewer than 7 days"
 ```
 
-Cross-reference: `resources/signals/privacy.md §Security Context` for TLS attribute stability notes.
+Cross-reference: `.agents/skills/observability/resources/signals/privacy.md` §Security Context for TLS attribute stability notes.
 
 ---
 
@@ -307,13 +307,13 @@ Istio's default sampling rate is **1%** (`randomSamplingPercentage: 1.0`). At 1%
 | High-traffic SLO critical path | Tail-based at Collector | Collector `tail_sampling` processor |
 | Canary release tracing | 100% on canary subset | Telemetry CR scoped to canary namespace or label |
 
-Tune via the Telemetry API `samplingPercentage` field (Istio 1.22+) or by configuring a custom OTel Sampler via Envoy 1.29+. For tail-based sampling (retain error traces, drop successful traces after SLO window), configure at the gateway Collector tier as documented in `resources/transport/sampling-recipes.md`.
+Tune via the Telemetry API `samplingPercentage` field (Istio 1.22+) or by configuring a custom OTel Sampler via Envoy 1.29+. For tail-based sampling (retain error traces, drop successful traces after SLO window), configure at the gateway Collector tier as documented in `.agents/skills/observability/resources/transport/sampling-recipes.md`.
 
 ---
 
 ## 10. Matrix Coverage Reference (mesh row)
 
-These cells from `resources/matrix.md` are the primary coverage drivers for this file:
+These cells from `.agents/skills/observability/resources/matrix.md` are the primary coverage drivers for this file:
 
 | matrix cell | symbol | artifact |
 |------------|--------|---------|
@@ -327,7 +327,7 @@ These cells from `resources/matrix.md` are the primary coverage drivers for this
 
 ## 11. Anti-Patterns
 
-The following are anti-patterns for this layer. They are candidates for inclusion in `resources/anti-patterns.md`.
+The following are anti-patterns for this layer. They are candidates for inclusion in `.agents/skills/observability/resources/anti-patterns.md`.
 
 | # | Anti-pattern | Impact | Remedy |
 |---|-------------|--------|--------|
@@ -343,17 +343,17 @@ The following are anti-patterns for this layer. They are candidates for inclusio
 
 
 Internal cross-references:
-- `resources/standards.md`: normative semconv stability tiers and W3C Trace Context requirements
-- `resources/matrix.md`: full 112-cell coverage map (mesh row)
-- `resources/transport/sampling-recipes.md`: tail-based sampling at Collector tier
-- `resources/transport/collector-topology.md`: DaemonSet vs sidecar Collector topology
-- `resources/meta-observability.md`: cardinality guardrails and pipeline self-health
-- `resources/layers/L4-transport.md`: eBPF socket-level profiles for mesh sidecar overhead
-- `resources/boundaries/cross-application.md`: full propagator compatibility matrix
-- `resources/boundaries/multi-tenant.md`: baggage-based tenant attribution
-- `resources/boundaries/release.md`: canary trace routing with `service.version`
-- `resources/signals/privacy.md`: TLS attribute stability and mTLS security context
-- `resources/signals/traces.md`: OTel SDK trace patterns for application layer
+- `.agents/skills/observability/resources/standards.md`: normative semconv stability tiers and W3C Trace Context requirements
+- `.agents/skills/observability/resources/matrix.md`: full 112-cell coverage map (mesh row)
+- `.agents/skills/observability/resources/transport/sampling-recipes.md`: tail-based sampling at Collector tier
+- `.agents/skills/observability/resources/transport/collector-topology.md`: DaemonSet vs sidecar Collector topology
+- `.agents/skills/observability/resources/meta-observability.md`: cardinality guardrails and pipeline self-health
+- `.agents/skills/observability/resources/layers/L4-transport.md`: eBPF socket-level profiles for mesh sidecar overhead
+- `.agents/skills/observability/resources/boundaries/cross-application.md`: full propagator compatibility matrix
+- `.agents/skills/observability/resources/boundaries/multi-tenant.md`: baggage-based tenant attribution
+- `.agents/skills/observability/resources/boundaries/release.md`: canary trace routing with `service.version`
+- `.agents/skills/observability/resources/signals/privacy.md`: TLS attribute stability and mTLS security context
+- `.agents/skills/observability/resources/signals/traces.md`: OTel SDK trace patterns for application layer
 
 ## References
 

@@ -62,11 +62,11 @@ Use when the user is starting fresh: no existing pipeline, first-time SDK integr
 
 #### Primary Route
 
-`resources/vendor-categories.md` → category selection; `resources/transport/collector-topology.md` for Kubernetes
+`.agents/skills/observability/resources/vendor-categories.md` → category selection; `.agents/skills/observability/resources/transport/collector-topology.md` for Kubernetes
 
 #### Secondary Considerations
 
-`resources/standards.md` for semconv requirements before first instrumentation commit
+`.agents/skills/observability/resources/standards.md` for semconv requirements before first instrumentation commit
 
 ---
 
@@ -97,11 +97,11 @@ Move from a legacy tool to a modern equivalent. Applies to logging agents, APM p
 
 #### Primary Route
 
-`resources/vendor-categories.md §(h) Log Pipeline` (deprecation notes); CNCF 2025-10 Fluentd migration guide
+`.agents/skills/observability/resources/vendor-categories.md` §(h) Log Pipeline (deprecation notes); CNCF 2025-10 Fluentd migration guide
 
 #### Secondary Considerations
 
-`resources/transport/otlp-grpc-vs-http.md` for destination protocol selection during migration
+`.agents/skills/observability/resources/transport/otlp-grpc-vs-http.md` for destination protocol selection during migration
 
 ---
 
@@ -133,11 +133,11 @@ Production incident or bug root-cause analysis. Use when something is broken, de
 
 #### Primary Route
 
-`resources/incident-forensics.md` (MRA + 6-dimension localization flow)
+`.agents/skills/observability/resources/incident-forensics.md` (MRA + 6-dimension localization flow)
 
 #### Secondary Considerations
 
-`resources/signals/traces.md`, `resources/signals/logs.md`, `resources/boundaries/multi-tenant.md` (if single-tenant degradation pattern)
+`.agents/skills/observability/resources/signals/traces.md`, `.agents/skills/observability/resources/signals/logs.md`, `.agents/skills/observability/resources/boundaries/multi-tenant.md` (if single-tenant degradation pattern)
 
 ---
 
@@ -169,11 +169,11 @@ Define alerts, SLO burn-rate rules, or monitor configuration. Use when the user 
 
 #### Primary Route
 
-`resources/boundaries/slo.md`; `resources/observability-as-code.md` (PrometheusRule CRD, OpenSLO YAML)
+`.agents/skills/observability/resources/boundaries/slo.md`; `.agents/skills/observability/resources/observability-as-code.md` (PrometheusRule CRD, OpenSLO YAML)
 
 #### Secondary Considerations
 
-`resources/meta-observability.md §Section F` for meta-observability pipeline health alerts
+`.agents/skills/observability/resources/meta-observability.md` §Section F for meta-observability pipeline health alerts
 
 ---
 
@@ -205,11 +205,11 @@ Design or debug distributed tracing: propagators, baggage, cross-service context
 
 #### Primary Route
 
-`resources/boundaries/cross-application.md` (propagator matrix); `resources/layers/mesh.md` (zero-code auto-instrumentation)
+`.agents/skills/observability/resources/boundaries/cross-application.md` (propagator matrix); `.agents/skills/observability/resources/layers/mesh.md` (zero-code auto-instrumentation)
 
 #### Secondary Considerations
 
-`resources/signals/privacy.md` (baggage PII rules; no user identifiers in traceparent/baggage without redaction)
+`.agents/skills/observability/resources/signals/privacy.md` (baggage PII rules; no user identifiers in traceparent/baggage without redaction)
 
 ---
 
@@ -241,11 +241,11 @@ Optimize performance, reduce cost, tame cardinality, configure sampling, or fix 
 
 #### Primary Route
 
-`resources/transport/` (all 4 files: `udp-statsd-mtu.md`, `otlp-grpc-vs-http.md`, `collector-topology.md`, `sampling-recipes.md`); `resources/meta-observability.md §Cardinality`
+`.agents/skills/observability/resources/transport/` (all 4 files: `udp-statsd-mtu.md`, `otlp-grpc-vs-http.md`, `collector-topology.md`, `sampling-recipes.md`); `.agents/skills/observability/resources/meta-observability.md` §Cardinality
 
 #### Secondary Considerations
 
-`resources/vendor-categories.md` for alternative tool selection when current vendor is causing the cost spike
+`.agents/skills/observability/resources/vendor-categories.md` for alternative tool selection when current vendor is causing the cost spike
 
 ---
 
@@ -277,11 +277,11 @@ Multi-tenant, multi-cloud, or multi-region telemetry routing, isolation, data re
 
 #### Primary Route
 
-`resources/boundaries/multi-tenant.md`; `resources/transport/collector-topology.md`
+`.agents/skills/observability/resources/boundaries/multi-tenant.md`; `.agents/skills/observability/resources/transport/collector-topology.md`
 
 #### Secondary Considerations
 
-`resources/boundaries/cross-application.md` for trust boundary enforcement when routing crosses application domains
+`.agents/skills/observability/resources/boundaries/cross-application.md` for trust boundary enforcement when routing crosses application domains
 
 ---
 
@@ -321,5 +321,5 @@ When no intent is detected with confidence:
 ## Integration with Hooks
 
 - Keywords from each intent feed `.agents/hooks/core/triggers.json` for auto-detection at `UserPromptSubmit`
-- Intent classification result is consumed by `resources/execution-protocol.md §Step 1` to select the primary resource file set
+- Intent classification result is consumed by `.agents/skills/observability/resources/execution-protocol.md` §Step 1 to select the primary resource file set
 - Override flags (`--investigate`, etc.) bypass keyword scoring entirely and force the named intent

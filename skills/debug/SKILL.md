@@ -36,7 +36,7 @@ Reproduce, diagnose, minimally fix, and regression-test bugs while preserving sc
 - Bug documentation under `.agents/results/bugs/` when appropriate
 
 ### Dependencies
-- `resources/execution-protocol.md`, examples, checklist, common patterns, and debugging checklist
+- `.agents/skills/debug/resources/execution-protocol.md`, examples, checklist, common patterns, and debugging checklist
 - Local codebase search and symbol/reference tools
 - Project test, lint, typecheck, and runtime commands
 
@@ -132,19 +132,19 @@ Then run the smallest reproduction command first, add a regression test, and re-
 - `grep("error pattern")`: Find similar issues
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for input/output examples.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/debug/resources/execution-protocol.md` step by step.
+See `.agents/skills/debug/resources/examples.md` for input/output examples.
+Before submitting, run `.agents/skills/debug/resources/checklist.md`.
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
-- Execution steps: `resources/execution-protocol.md`
-- Code examples: `resources/examples.md`
-- Checklist: `resources/checklist.md`
-- Error recovery: `resources/error-playbook.md`
-- Bug report template: `resources/bug-report-template.md`
-- Common patterns: `resources/common-patterns.md`
-- Debugging checklist: `resources/debugging-checklist.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Execution steps: `.agents/skills/debug/resources/execution-protocol.md`
+- Code examples: `.agents/skills/debug/resources/examples.md`
+- Checklist: `.agents/skills/debug/resources/checklist.md`
+- Error recovery: `.agents/skills/debug/resources/error-playbook.md`
+- Bug report template: `.agents/skills/debug/resources/bug-report-template.md`
+- Common patterns: `.agents/skills/debug/resources/common-patterns.md`
+- Debugging checklist: `.agents/skills/debug/resources/debugging-checklist.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

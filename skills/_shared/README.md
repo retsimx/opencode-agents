@@ -2,6 +2,20 @@
 
 `_shared/` contains cross-skill resources grouped by loading behavior and ownership.
 
+## Path convention (host project root)
+
+This library is cloned as `.agents/` inside a host project. Agents run with **cwd = host project root**. All load/read/write paths in skills MUST be written from that root:
+
+| Kind | Format |
+|------|--------|
+| Shared doc | `.agents/skills/_shared/{core\|conditional\|runtime}/file.md` |
+| Skill doc | `.agents/skills/{skill-name}/SKILL.md` |
+| Skill resource | `.agents/skills/{skill-name}/resources/file.md` |
+| Session artifacts | `.agents/results/...` |
+| Host project docs | `AGENTS.md`, `docs/...` (no `.agents/` prefix) |
+
+Do **not** use skill-relative paths like `../_shared/...` or bare filenames like `providers.md` for agent tool operations.
+
 ## Structure
 
 - `core/`
@@ -12,14 +26,14 @@
   - Examples: quality score, experiment ledger, exploration loop.
 - `runtime/`
   - Runtime-injected or CLI-specific protocols.
-  - Examples: memory protocol, vendor execution protocols, forge provider map (`providers.md`), gardener outer-loop recipes (`gardener-running.md`).
+  - Examples: coordination protocol, execution protocol, forge provider map (`.agents/skills/_shared/runtime/providers.md`), gardener outer-loop recipes (`.agents/skills/_shared/runtime/gardener-running.md`).
 
 ## Workflow-Owned Resources
 
 Workflow-specific materials do not belong in `_shared/`.
 
-- `ultrawork/resources/phase-gates.md`
-- `ultrawork/resources/multi-review-protocol.md`
+- `.agents/skills/ultrawork/resources/phase-gates.md`
+- `.agents/skills/ultrawork/resources/multi-review-protocol.md`
 
 ## Load Classes
 

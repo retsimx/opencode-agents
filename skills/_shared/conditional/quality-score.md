@@ -52,7 +52,7 @@ npm run type-check 2>&1 | grep -c "error"
 
 ### When to Measure
 
-Quality Score is measured **on demand**, not at every step. Load `quality-score.md` only at these checkpoints:
+Quality Score is measured **on demand**, not at every step. Load `.agents/skills/_shared/conditional/quality-score.md` only at these checkpoints:
 
 | Checkpoint | Trigger | Measurer |
 |-----------|---------|----------|
@@ -89,8 +89,8 @@ ELSE:
 
 ### Delta Recording
 
-Every scored change is recorded in the Experiment Ledger (see `experiment-ledger.md`).
-Record via memory protocol: `[EDIT]("experiment-ledger.md", append row)`.
+Every scored change is recorded in the Experiment Ledger (see `.agents/skills/_shared/conditional/experiment-ledger.md`).
+Append a row to `.agents/results/experiment-ledger.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 
 ---
 

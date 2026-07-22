@@ -441,7 +441,7 @@ From `incident-forensics.md §4`; trace lookup by `trace_id` across backends:
 ## Contribution Protocol
 
 - Add new scenarios only if they demonstrate cross-file value spanning 3+ skill files.
-- Each scenario must cite at least 3 other skill files by relative path from `resources/`.
+- Each scenario must cite at least 3 other skill files by relative path from `.agents/skills/observability/resources/`.
 - Scenarios are for human learning: keep them narrative, not exhaustive.
 - Code and YAML snippets are illustrative excerpts; for authoritative full config see the
   referenced files.

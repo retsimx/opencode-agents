@@ -54,10 +54,10 @@ When you encounter a failure during planning, follow these recovery steps.
 
 1. Check existing codebase first; consistency wins over "better" tech
 2. If greenfield: use the project's default stack (see SKILL.md tech-stack references)
-3. Default choices: refer to each domain skill's `resources/tech-stack.md` for current versions
-   - Frontend: `frontend/resources/tech-stack.md`
-   - Backend: `backend/resources/tech-stack.md`
-   - Mobile: `mobile/resources/tech-stack.md`
+3. Default choices: refer to each domain skill's tech-stack doc for current versions
+   - Frontend: `.agents/skills/frontend/resources/tech-stack.md`
+   - Mobile: `.agents/skills/mobile/resources/tech-stack.md`
+   - Backend: domain skill resources / stack docs under `.agents/skills/backend/` (when present)
 4. Note decision rationale in plan: `tech_decision: { choice: "X", reason: "Y" }`
 
 ---

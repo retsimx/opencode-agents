@@ -140,9 +140,9 @@ Follow the brainstorm workflow step by step:
 
 ## References
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
-- Context loading: `../_shared/core/context-loading.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification protocol: `../_shared/core/clarification-protocol.md`
-- Quality principles: `../_shared/core/quality-principles.md`
-- Skill-to-agent mapping: `../_shared/core/skill-routing.md`
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
+- Quality principles: `.agents/skills/_shared/core/quality-principles.md`
+- Skill-to-agent mapping: `.agents/skills/_shared/core/skill-routing.md`

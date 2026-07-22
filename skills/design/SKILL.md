@@ -132,7 +132,7 @@ bunx getdesign@latest list
 1. Check `.design-context.md` before any design work. If missing, run Phase 1 (Setup) to create it.
 2. System font stack as default (`system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`). Add custom fonts only with project justification.
 3. If the service supports CJK languages (ko/ja/zh): prioritize CJK-ready fonts (Pretendard Variable > Noto Sans CJK > system-ui fallback). If latin-only: choose fonts appropriate for the target audience.
-4. Enforce anti-patterns strictly; reject AI slop. See `resources/anti-patterns.md`.
+4. Enforce anti-patterns strictly; reject AI slop. See `.agents/skills/design/resources/anti-patterns.md`.
 5. Name colors semantically with hex values: "Deep Ocean Navy (#1a2332)" not "dark blue".
 6. Recommend components with install commands (shadcn CLI).
 7. ALL output must be responsive-first (mobile layout as default, enhance upward).
@@ -183,7 +183,7 @@ bunx getdesign@latest list
 
 ### Workflow Summary
 7 phases: Setup → Extract → Enhance → Propose → Generate → Audit → Handoff.
-See `resources/execution-protocol.md` for full detail.
+See `.agents/skills/design/resources/execution-protocol.md` for full detail.
 
 ### Vendor Inspiration (getdesign)
 
@@ -218,18 +218,18 @@ and synthesizes a project-specific DESIGN.md around them. Importantly:
 Attribution is appended to the generated `DESIGN.md` in Phase 7 as a
 required MIT compliance footer. Full fetcher rules, matching algorithm,
 injection defenses, and multi-vendor merge policy live in
-`resources/getdesign-fetcher.md`.
+`.agents/skills/design/resources/getdesign-fetcher.md`.
 
 ### Resources
-- `resources/execution-protocol.md`: 7-phase workflow
-- `resources/anti-patterns.md`: Full DO/DON'T catalog
-- `resources/checklist.md`: Audit checklist (Responsive + WCAG + Nielsen + Slop)
-- `resources/design-md-spec.md`: DESIGN.md generation guide (9 sections)
-- `resources/design-tokens.md`: CSS/Tailwind/shadcn export templates
-- `resources/prompt-enhancement.md`: Vague request to detailed spec
-- `resources/stitch-integration.md`: Stitch MCP tool mapping (optional)
-- `resources/getdesign-fetcher.md`: Vendor seed fetch, hash verify, seed rules
-- `resources/error-playbook.md`: Design error recovery
+- `.agents/skills/design/resources/execution-protocol.md`: 7-phase workflow
+- `.agents/skills/design/resources/anti-patterns.md`: Full DO/DON'T catalog
+- `.agents/skills/design/resources/checklist.md`: Audit checklist (Responsive + WCAG + Nielsen + Slop)
+- `.agents/skills/design/resources/design-md-spec.md`: DESIGN.md generation guide (9 sections)
+- `.agents/skills/design/resources/design-tokens.md`: CSS/Tailwind/shadcn export templates
+- `.agents/skills/design/resources/prompt-enhancement.md`: Vague request to detailed spec
+- `.agents/skills/design/resources/stitch-integration.md`: Stitch MCP tool mapping (optional)
+- `.agents/skills/design/resources/getdesign-fetcher.md`: Vendor seed fetch, hash verify, seed rules
+- `.agents/skills/design/resources/error-playbook.md`: Design error recovery
 
 ## References
 - `reference/visual-hierarchy.md`: 7 hierarchy principles (Alignment, Color, Contrast, Proximity, Size, Texture, Time)

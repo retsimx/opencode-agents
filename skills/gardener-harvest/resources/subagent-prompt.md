@@ -6,7 +6,7 @@ Use this prompt verbatim when spawning a `task` subagent to assess a single PR.
 - `<number>` — the PR number
 - `<repo_path>` — absolute path to the local repo
 - `<provider>` — `github` or `gitlab`
-- `<high_risk_globs>` — newline-joined list from `resources/repo-rules.yaml`
+- `<high_risk_globs>` — newline-joined list from `.agents/skills/gardener-harvest/resources/repo-rules.yaml`
 
 The subagent reports raw findings ONLY. The parent agent applies the decision
 logic. The subagent does not recommend MERGE/ASK/SKIP, does not mutate the

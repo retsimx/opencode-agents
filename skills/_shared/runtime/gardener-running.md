@@ -7,7 +7,7 @@ Each skill is **single-shot** (or one maintenance action / one harvest pass). Fo
 ## Prerequisites
 
 - Repo root as cwd
-- Forge CLI authenticated for `origin` (`gh` or `glab` — see `providers.md`)
+- Forge CLI authenticated for `origin` (`gh` or `glab` — see `.agents/skills/_shared/runtime/providers.md` in this directory)
 - OpenCode (or equivalent) with the project skills loaded
 - Optional: set `MODEL` to your preferred OpenCode model id
 
@@ -104,5 +104,5 @@ Example: two terminals — sow in one, tend in another; harvest manually when re
 
 ## Related
 
-- Provider CLI map: `providers.md`
-- Skills: `../gardener-sow/SKILL.md`, `../gardener-tend/SKILL.md`, `../gardener-harvest/SKILL.md`
+- Provider CLI map: `.agents/skills/_shared/runtime/providers.md` (this directory)
+- Skills: `.agents/skills/gardener-sow/SKILL.md`, `.agents/skills/gardener-tend/SKILL.md`, `.agents/skills/gardener-harvest/SKILL.md`

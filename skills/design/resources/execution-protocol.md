@@ -25,7 +25,7 @@ If it does not exist:
 After `.design-context.md` exists (either newly created or already present):
 1. Parse the `## Reference Sites` section (if any) and extract bare
    domains (`linear.app`, `stripe.com`, …).
-2. Load `resources/getdesign-fetcher.md` and run its Matching Algorithm
+2. Load `.agents/skills/design/resources/getdesign-fetcher.md` and run its Matching Algorithm
    against the live `getdesign@latest` manifest.
 3. Hold the resolved brand list in memory for Phase 2. No disk write.
 4. If zero matches, continue silently; vendor inspiration is optional.
@@ -34,7 +34,7 @@ After `.design-context.md` exists (either newly created or already present):
 If the user wants to use Stitch for design extraction or generation:
 1. Check if Stitch MCP is available: look for stitch-related tools
 2. If not available, offer setup:
-   - Load `resources/stitch-integration.md` for client-specific setup instructions
+   - Load `.agents/skills/design/resources/stitch-integration.md` for client-specific setup instructions
    - Ask which client they use (Claude Code / Cursor / VS Code / Gemini CLI / Codex)
    - Provide the matching setup command
 3. If user declines: proceed without Stitch (all phases work standalone)
@@ -57,13 +57,13 @@ that has data; subsequent branches are fallbacks.
 Triggered when Phase 1 resolved at least one vendor brand from the
 `## Reference Sites` section.
 
-1. For each resolved brand: follow `resources/getdesign-fetcher.md`
+1. For each resolved brand: follow `.agents/skills/design/resources/getdesign-fetcher.md`
    steps. Fetch via `bunx getdesign@latest add <brand> --out <tmp>`
    with `GETDESIGN_DISABLE_TELEMETRY=1`, verify the SHA256 against the
    manifest `templateHash`, then load the file into context with the
    prompt-injection framing described in the fetcher doc.
 2. Run an immediate **pre-audit** of each seed against
-   `resources/anti-patterns.md`. Record any anti-pattern violations
+   `.agents/skills/design/resources/anti-patterns.md`. Record any anti-pattern violations
    (glassmorphism density, purple gradients, nested cards, etc.) to
    surface in Phase 4 PROPOSE.
 3. Delete all temp files once context is loaded.
@@ -77,7 +77,7 @@ Triggered when Phase 1 resolved at least one vendor brand from the
 2. Extract: font families, color values, spacing patterns, component
    structures.
 3. Translate raw values into the 9-section DESIGN.md format
-   (`resources/design-md-spec.md`).
+   (`.agents/skills/design/resources/design-md-spec.md`).
 
 ### Branch D: No Reference
 Skip to Phase 3.
@@ -94,7 +94,7 @@ Phase 4 PROPOSE.
 Otherwise, if the user request is vague (< 3 sentences, no section
 details):
 
-1. Load `resources/prompt-enhancement.md`
+1. Load `.agents/skills/design/resources/prompt-enhancement.md`
 2. Transform the request into a section-by-section specification:
    - For each section specify: layout, background, typography, components, motion, responsive behavior
 3. Present the enhanced prompt to the user for confirmation
@@ -139,7 +139,7 @@ consciously choose to keep any anti-patterns.
 ### Multi-vendor merge
 If two or more vendors matched in Phase 1, do not auto-blend. Present
 the dimension-level selection dialog from
-`resources/getdesign-fetcher.md` ("Multi-Vendor Merge Policy") before
+`.agents/skills/design/resources/getdesign-fetcher.md` ("Multi-Vendor Merge Policy") before
 presenting variations A/B/C.
 
 **MUST get user confirmation on the chosen direction before proceeding.**
@@ -150,12 +150,12 @@ presenting variations A/B/C.
 
 Based on the chosen direction:
 
-1. Write `DESIGN.md` following `resources/design-md-spec.md`
+1. Write `DESIGN.md` following `.agents/skills/design/resources/design-md-spec.md`
    (9 sections, including the mandatory Section 9 "Agent Prompt
    Guide" with Quick Color Reference, Example Component Prompts, and
    Iteration Guide).
 2. If a vendor seed fed Phase 2, apply the Seed Application Rules from
-   `resources/getdesign-fetcher.md`: adopt color/spacing/components/
+   `.agents/skills/design/resources/getdesign-fetcher.md`: adopt color/spacing/components/
    depth/responsive from the seed; rewrite typography, visual theme,
    do-don't, and agent prompt guide from scratch using project
    context.
@@ -188,7 +188,7 @@ before synthesis. Those findings should appear as decisions in the
 final DESIGN.md Section 7 (Do's and Don'ts) rather than as violations
 here.
 
-Load `resources/checklist.md` and run all checks in order:
+Load `.agents/skills/design/resources/checklist.md` and run all checks in order:
 
 1. **Responsive** (MANDATORY, run first)
    - All sections render at 375px width
@@ -228,7 +228,7 @@ Fix violations automatically where possible, or report to user with recommendati
 
 1. Save `DESIGN.md` to the project root.
 2. If Phase 2 Branch B fired, append the **License Attribution** block
-   from `resources/getdesign-fetcher.md` as the final section of
+   from `.agents/skills/design/resources/getdesign-fetcher.md` as the final section of
    `DESIGN.md`. This is mandatory for MIT compliance.
 3. Update `.design-context.md` if new decisions were made.
 4. Write design token files if not already written.

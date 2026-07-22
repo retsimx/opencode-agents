@@ -102,7 +102,7 @@ Compile all findings into a prioritized report:
 - **LOW**: Backlog
 
 Each finding must include: `file:line`, description, and remediation code.
-Use memory write tool to record the final report.
+Write the final report to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 
 ---
 
@@ -131,7 +131,7 @@ When user wants fixes too, execute review then fix then re-review loop:
 
 ## Standards-Aligned Review (Optional)
 
-When the user asks for an enterprise or compliance framing, or when the project is regulated, read `resources/iso-quality.md` and frame findings against the ISO/IEC 25010 quality model and ISO/IEC 29119 test process. Surface:
+When the user asks for an enterprise or compliance framing, or when the project is regulated, read `.agents/skills/review/resources/iso-quality.md` and frame findings against the ISO/IEC 25010 quality model and ISO/IEC 29119 test process. Surface:
 
 - **Quality model (ISO/IEC 25010)**: functional suitability, performance efficiency, compatibility, usability, reliability, security, maintainability, portability.
 - **Test process (ISO/IEC 29119)**: org test strategy, dynamic/functional test design, test execution, reporting.
@@ -143,7 +143,7 @@ Add this section to the report when relevant; do not bloat small reviews with th
 
 ## Self-Check Before Reporting
 
-Before finalizing the report, walk `resources/self-check.md` to confirm:
+Before finalizing the report, walk `.agents/skills/review/resources/self-check.md` to confirm:
 
 - Findings cite `file:line` and include remediation code or diff.
 - Severity tier is justified (CRITICAL/HIGH/MEDIUM/LOW).
@@ -163,12 +163,12 @@ Before finalizing the report, walk `resources/self-check.md` to confirm:
 
 ## References
 
-- Review checklist: `resources/checklist.md`
-- Self-check before report: `resources/self-check.md`
-- Report examples: `resources/examples.md`
-- Execution protocol: `resources/execution-protocol.md`
-- ISO/IEC quality guide: `resources/iso-quality.md`
-- Error recovery: `resources/error-playbook.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
-- Clarification protocol: `../_shared/core/clarification-protocol.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
+- Review checklist: `.agents/skills/review/resources/checklist.md`
+- Self-check before report: `.agents/skills/review/resources/self-check.md`
+- Report examples: `.agents/skills/review/resources/examples.md`
+- Execution protocol: `.agents/skills/review/resources/execution-protocol.md`
+- ISO/IEC quality guide: `.agents/skills/review/resources/iso-quality.md`
+- Error recovery: `.agents/skills/review/resources/error-playbook.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`

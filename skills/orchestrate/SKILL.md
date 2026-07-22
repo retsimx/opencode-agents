@@ -61,9 +61,9 @@ Automatically orchestrate multi-agent execution with task decomposition, paralle
 
 ### Step 0: Preparation (DO NOT SKIP)
 
-1. Load the coordination skill and confirm Core Rules.
-2. Load the context-loading skill for resource loading strategy.
-3. Load the coordination-protocol skill for the coordination protocol.
+1. Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and confirm Core Rules.
+2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
+3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
 
 ---
 
@@ -93,7 +93,7 @@ Look for a plan file:
 // turbo
 For each priority tier (P0 first, then P1, etc.):
 
-- Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`.
+- Each agent gets: task description, API contracts, relevant context from `.agents/skills/_shared/core/context-loading.md`.
 - Use `edit` to update `.agents/results/task-board.md` with agent status.
 
 #### Dispatch via OpenCode `task` tool
@@ -138,7 +138,7 @@ At each poll, evaluate for every in-progress agent:
 |-------------|----------|--------|
 | < 80% | any | Continue monitoring |
 | >= 80% | >= 50% | Continue (agent is on track to finish) |
-| >= 80% | < 50% | **Context Reset**: Checkpoint + re-spawn (see `_shared/core/context-budget.md`) |
+| >= 80% | < 50% | **Context Reset**: Checkpoint + re-spawn (see `.agents/skills/_shared/core/context-budget.md`) |
 | 100% (max turns) | < 100% | **Context Reset**: Force checkpoint + re-spawn with remaining items |
 
 Record reset events in `task-board.md`:
@@ -167,7 +167,7 @@ For each completed agent, run automated verification:
   >
   > If neither condition is met, re-spawn the agent with error context and increment the retry counter.
 
-- FAIL (after 2 retries, and cost cap not yet exceeded): Activate **Exploration Loop** (load `exploration-loop.md` per `context-loading.md`):
+- FAIL (after 2 retries, and cost cap not yet exceeded): Activate **Exploration Loop** (read `.agents/skills/_shared/conditional/exploration-loop.md` per `.agents/skills/_shared/core/context-loading.md`):
   1. Generate 2-3 alternative hypotheses for the failing task
   2. Spawn the **same agent type** with different hypothesis prompts (parallel, separate workspaces)
   3. Score each result with Quality Score (if available)
@@ -190,10 +190,10 @@ Present session summary to the user.
 
 - If any tasks failed after retries, list them with error details.
 - Suggest next steps: manual fix, re-run specific agents, or run the review skill for QA.
-- Use memory write tool to record final results.
+- Write final results to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 - If Quality Score was measured during this session:
   - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
-  - Auto-generate lessons from discarded experiments (delta <= -5) into `lessons-learned.md`
+  - Auto-generate lessons from discarded experiments (delta <= -5) into `.agents/skills/_shared/core/lessons-learned.md`
   - Include agent effectiveness ranking in the report
 
 ---
@@ -275,7 +275,7 @@ Human review is reserved for final approval, not catching lint errors.
 
 ## Clarification Debt (CD) Monitoring
 
-Track user corrections during session execution. See `../_shared/core/session-metrics.md` for full protocol.
+Track user corrections during session execution. See `.agents/skills/_shared/core/session-metrics.md` for full protocol.
 
 ### Event Classification
 When user sends feedback during session:
@@ -286,17 +286,17 @@ When user sends feedback during session:
 ### Threshold Actions
 | CD Score | Action |
 |----------|--------|
-| CD >= 50 | **RCA Required**: review-agent must add entry to `lessons-learned.md` |
+| CD >= 50 | **RCA Required**: review-agent must add entry to `.agents/skills/_shared/core/lessons-learned.md` |
 | CD >= 80 | **Session Pause**: Request user to re-specify requirements |
 | `redo` >= 2 | **Scope Lock**: Request explicit allowlist confirmation before continuing |
 
 ### Recording
-After each user correction event, append event to `session-metrics.md` Events table.
+After each user correction event, append event to `.agents/results/session-metrics.md` Events table (protocol: `.agents/skills/_shared/core/session-metrics.md`).
 
 At session end, if CD >= 50:
 1. Include CD summary in final report
 2. Trigger review-agent RCA generation
-3. Update `lessons-learned.md` with prevention measures
+3. Update `.agents/skills/_shared/core/lessons-learned.md` with prevention measures
 
 ---
 
@@ -315,7 +315,7 @@ At session end, if CD >= 50:
 
 ## Coordination Files
 
-All coordination is file-based in `.agents/results/`. See `resources/coordination-schema.md` for file formats.
+All coordination is file-based in `.agents/results/`. See `.agents/skills/orchestrate/resources/coordination-schema.md` for file formats.
 
 ### File Ownership
 
@@ -338,16 +338,16 @@ All coordination is file-based in `.agents/results/`. See `resources/coordinatio
 ---
 
 ## References
-- Prompt template: `resources/subagent-prompt-template.md`
-- Coordination schema: `resources/coordination-schema.md`
+- Prompt template: `.agents/skills/orchestrate/resources/subagent-prompt-template.md`
+- Coordination schema: `.agents/skills/orchestrate/resources/coordination-schema.md`
 - Config: `config/cli-config.yaml`
 - Task templates: `templates/`
-- Skill-to-agent mapping: `../_shared/core/skill-routing.md`
-- Session metrics: `../_shared/core/session-metrics.md`
-- API contracts: `../_shared/core/api-contracts/`
-- Context loading: `../_shared/core/context-loading.md`
-- Difficulty guide: `../_shared/core/difficulty-guide.md`
-- Reasoning templates: `../_shared/core/reasoning-templates.md`
-- Clarification protocol: `../_shared/core/clarification-protocol.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+- Skill-to-agent mapping: `.agents/skills/_shared/core/skill-routing.md`
+- Session metrics: `.agents/skills/_shared/core/session-metrics.md`
+- API contracts: `.agents/skills/_shared/core/api-contracts/`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Difficulty guide: `.agents/skills/_shared/core/difficulty-guide.md`
+- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

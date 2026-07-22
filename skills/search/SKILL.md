@@ -37,7 +37,7 @@ Classify information-seeking requests, route them to the best search channel, at
 
 ### Dependencies
 - Context7 MCP for docs, runtime-native web search, `gh`/`glab` for code, grep/glob/read for local search
-- `resources/intent-rules.md`, `resources/trust-registry.md`, execution protocol, examples, and checklist
+- `.agents/skills/search/resources/intent-rules.md`, `.agents/skills/search/resources/trust-registry.md`, execution protocol, examples, and checklist
 
 ### Control-flow features
 - Branches by classified intent, user flags, route success/failure, and trust constraints
@@ -159,19 +159,19 @@ Other skills reference search by specifying intent and query:
 3. Use Trust Score in results to weigh source reliability
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for input/output examples.
-Use `resources/intent-rules.md` for intent classification reference.
-Use `resources/trust-registry.md` for domain trust scoring reference.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/search/resources/execution-protocol.md` step by step.
+See `.agents/skills/search/resources/examples.md` for input/output examples.
+Use `.agents/skills/search/resources/intent-rules.md` for intent classification reference.
+Use `.agents/skills/search/resources/trust-registry.md` for domain trust scoring reference.
+Before submitting, run `.agents/skills/search/resources/checklist.md`.
 Execution protocol instructions are included in the `task` tool prompt.
-Source files live under `../_shared/runtime/execution-protocol.md`.
-- Execution steps: `resources/execution-protocol.md`
-- Intent classification: `resources/intent-rules.md`
-- Trust registry: `resources/trust-registry.md`
-- Examples: `resources/examples.md`
-- Checklist: `resources/checklist.md`
-- Error recovery: `resources/error-playbook.md`
-- Context loading: `../_shared/core/context-loading.md`
-- Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Execution steps: `.agents/skills/search/resources/execution-protocol.md`
+- Intent classification: `.agents/skills/search/resources/intent-rules.md`
+- Trust registry: `.agents/skills/search/resources/trust-registry.md`
+- Examples: `.agents/skills/search/resources/examples.md`
+- Checklist: `.agents/skills/search/resources/checklist.md`
+- Error recovery: `.agents/skills/search/resources/error-playbook.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Context budget: `.agents/skills/_shared/core/context-budget.md`
+- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`

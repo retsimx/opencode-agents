@@ -1,15 +1,15 @@
 # QA Agent - Execution Protocol
 
 ## Step 0: Prepare
-1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Quick security + quality check | **Medium**: Full 4 steps | **Complex**: Full + prioritized scope
-2. **Check lessons**: read QA section in `../../_shared/core/lessons-learned.md`
-3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
+2. **Check lessons**: read QA section in `.agents/skills/_shared/core/lessons-learned.md`
+3. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: security/auth concerns, existing code conflict potential?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context**: follow `../../_shared/core/context-budget.md` (prioritize high-risk files)
-5. **After review**: add recurring issues to `../../_shared/core/lessons-learned.md`
-6. **If standards matter**: read `resources/iso-quality.md`
+4. **Budget context**: follow `.agents/skills/_shared/core/context-budget.md` (prioritize high-risk files)
+5. **After review**: add recurring issues to `.agents/skills/_shared/core/lessons-learned.md`
+6. **If standards matter**: read `.agents/skills/review/resources/iso-quality.md`
 
 **Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
 
@@ -36,7 +36,7 @@ When applicable, map findings and gaps to:
 - **ISO/IEC 25010** quality characteristics
 - **ISO/IEC 29119** test planning, design, traceability, and exit criteria
 
-Use `resources/checklist.md` (renamed review-checklist) as the comprehensive review guide.
+Use `.agents/skills/review/resources/checklist.md` (renamed review-checklist) as the comprehensive review guide.
 
 ## Step 2.5: Runtime Verification
 
@@ -169,10 +169,10 @@ Generate structured report with:
   - missing test design / traceability / exit criteria
 
 ## Step 4: Verify
-- Run `resources/self-check.md` to verify your own review quality
+- Run `.agents/skills/review/resources/self-check.md` to verify your own review quality
 - Ensure no false positives (each finding is real and reproducible)
 - Confirm remediation suggestions are correct and complete
-- Run `../../_shared/core/common-checklist.md` for general quality
+- Run `.agents/skills/_shared/core/common-checklist.md` for general quality
 
 ## On Error
-See `resources/error-playbook.md` for recovery steps.
+See `.agents/skills/review/resources/error-playbook.md` for recovery steps.

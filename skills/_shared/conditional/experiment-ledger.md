@@ -7,11 +7,11 @@ Inspired by autoresearch's git-commit-as-experiment-log pattern.
 
 ## Ledger Location
 
-The ledger follows the file-based coordination protocol (see `coordination-protocol.md`):
+The ledger follows the file-based coordination protocol (see `.agents/skills/_shared/runtime/coordination-protocol.md`):
 
-- **File-based mode**: `.agents/results/experiment-ledger.md`
+- **Location**: `.agents/results/experiment-ledger.md`
 
-Both modes use the same format. The orchestrate creates the ledger; agents append via memory tools.
+The orchestrate creates the ledger; agents append rows with the built-in `read` / `edit` tools.
 
 ---
 
@@ -50,7 +50,7 @@ Request: "{original user request, first 100 chars}..."
 An experiment is recorded when:
 1. A discrete logical change is applied (not individual line edits)
 2. A quality score can be measured before and after
-3. A keep/discard decision is made per `quality-score.md`
+3. A keep/discard decision is made per `.agents/skills/_shared/conditional/quality-score.md`
 
 Do NOT record: trivial formatting, changes with no measurable impact, PLAN phase.
 
@@ -60,12 +60,12 @@ Do NOT record: trivial formatting, changes with no measurable impact, PLAN phase
 2. Apply change
 3. Measure new quality score
 4. Calculate delta: `score_after - score_before`
-5. Apply Keep/Discard rule from `quality-score.md`
-6. Append row via memory tools: `[EDIT]("experiment-ledger.md", append row)`
+5. Apply Keep/Discard rule from `.agents/skills/_shared/conditional/quality-score.md`
+6. Append a row to `.agents/results/experiment-ledger.md` via `edit` (see `.agents/skills/_shared/runtime/coordination-protocol.md`)
 
 ### Who Records
 
-See `coordination-protocol.md` → "Experiment Tracking" section for recorder assignments.
+See `.agents/skills/_shared/runtime/coordination-protocol.md` → "Experiment Tracking" section for recorder assignments.
 
 ---
 
@@ -97,7 +97,7 @@ IMPL: {score} → VERIFY: {score} → REFINE: {score} → Final: {score}
 
 Discarded experiments with **delta <= -5** auto-generate lesson candidates at session end.
 
-Format (matches `lessons-learned.md` RCA format):
+Format (matches `.agents/skills/_shared/core/lessons-learned.md` RCA format):
 
 ```markdown
 ### {YYYY-MM-DD}: {agent-type} - {hypothesis} (DISCARDED, delta: {delta})
@@ -107,7 +107,7 @@ Format (matches `lessons-learned.md` RCA format):
 - **Source**: Experiment Ledger #{experiment_number}, Session {session_id}
 ```
 
-The orchestrate appends these to the relevant domain section in `lessons-learned.md`.
+The orchestrate appends these to the relevant domain section in `.agents/skills/_shared/core/lessons-learned.md`.
 
 ---
 
@@ -119,4 +119,4 @@ The orchestrate appends these to the relevant domain section in `lessons-learned
 | **Exploration Loop** | Records parallel experiments and winner selection |
 | **Session Metrics** | Experiment count and keep rate in session summary |
 | **Lessons Learned** | DISCARD experiments (delta <= -5) auto-generate lessons |
-| **Memory Protocol** | Ledger uses same read/write tools as other memory files |
+| **Coordination Protocol** | Ledger uses the same `read` / `write` / `edit` tools as other `.agents/results/` files |

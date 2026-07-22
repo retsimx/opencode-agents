@@ -13,7 +13,7 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
   - Use `.agents/results/` for all coordination and progress files
   - Do NOT rely on MCP-specific tools or memory providers
 - **This workflow does NOT stop until all completion criteria pass or safeguards trigger.**
-- **Follow the context-loading guide.** Load the context-loading skill and load only task-relevant resources.
+- **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
 ---
 
@@ -21,9 +21,9 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
 
 ### Step 0.1: Load Prerequisites
 
-1. Load the context-loading skill for resource loading strategy.
-2. Load the coordination-protocol skill for the coordination protocol.
-3. Read `resources/judge-protocol.md` for JUDGE rules.
+1. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
+2. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
+3. Read `.agents/skills/ralph/resources/judge-protocol.md` for JUDGE rules.
 
 ### Step 0.2: Define Completion Criteria
 
@@ -102,9 +102,9 @@ For **EVERY criterion regardless of current status** (including PASS from prior 
 
 **Why re-verify PASS criteria**: ultrawork modifies shared code (utils, configs, migrations, dependencies). A PASS in iteration N may regress in iteration N+1 when fixing other criteria. Without re-verification, "DONE" can ship silent regressions.
 
-**Heavy verification caching**: For verifications that take >30 seconds (e2e tests, integration suites), apply the caching rules in `resources/judge-protocol.md` to skip re-runs when no relevant files changed.
+**Heavy verification caching**: For verifications that take >30 seconds (e2e tests, integration suites), apply the caching rules in `.agents/skills/ralph/resources/judge-protocol.md` to skip re-runs when no relevant files changed.
 
-**Follow `resources/judge-protocol.md` for the full protocol.**
+**Follow `.agents/skills/ralph/resources/judge-protocol.md` for the full protocol.**
 
 ### Step 2.2: Produce JUDGE Result
 
@@ -272,6 +272,6 @@ Phase 3: REPLAN → Extract remaining, narrow scope
 | REPLAN  | Scope narrowing            | Extract FAIL + REGRESSED items, separated by class |
 
 ## References
-- Judge protocol: `resources/judge-protocol.md`
-- Context loading: context-loading skill
-- Coordination protocol: coordination-protocol skill
+- Judge protocol: `.agents/skills/ralph/resources/judge-protocol.md`
+- Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Coordination protocol: `.agents/skills/_shared/runtime/coordination-protocol.md`

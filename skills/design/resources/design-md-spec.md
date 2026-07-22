@@ -9,7 +9,7 @@ to generate code that matches the design system without additional guidance.
 
 The 9-section structure below is aligned with the community
 [getdesign](https://getdesign.md) schema so that templates fetched by
-`resources/getdesign-fetcher.md` drop in as Phase 2 seeds without shape
+`.agents/skills/design/resources/getdesign-fetcher.md` drop in as Phase 2 seeds without shape
 mismatch. Downstream agents (`frontend`, `frontend-engineer`) are
 expected to read Section 9 ("Agent Prompt Guide") verbatim as
 copy-paste instructions.
@@ -100,7 +100,7 @@ exact measurements, transition durations, and accessibility notes.
 ### 7. Do's and Don'ts
 
 Project-specific rules that encode visual discipline. Pull from
-`resources/anti-patterns.md` plus any brand-specific constraints from
+`.agents/skills/design/resources/anti-patterns.md` plus any brand-specific constraints from
 `.design-context.md`. Write as bullet pairs:
 
 ```
@@ -195,7 +195,7 @@ When extracting DESIGN.md from an existing site, Stitch project, or
 getdesign vendor template:
 
 1. **Retrieval**: fetch source (HTML/CSS, Stitch screen data, or
-   vendor template via `resources/getdesign-fetcher.md`)
+   vendor template via `.agents/skills/design/resources/getdesign-fetcher.md`)
 2. **Extraction**: identify fonts, colors, spacing, component patterns
 3. **Translation**: convert raw CSS values to semantic descriptions
 4. **Synthesis**: organize into the 9 sections above

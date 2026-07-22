@@ -12,19 +12,19 @@ description: High-quality 5-phase development workflow with 11 review steps out 
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
   - Use `.agents/results/` for all coordination and progress files
   - Do NOT rely on MCP-specific tools or memory providers
-- **Read the coordination skill BEFORE starting.** Load the coordination skill and follow its Core Rules.
-- **Follow the context-loading guide.** Load the context-loading skill and load only task-relevant resources.
+- **Read the coordination skill BEFORE starting.** Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and follow its Core Rules.
+- **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
 ---
 
 ## Phase 0: Initialization (DO NOT SKIP)
 
-1. Load the coordination skill and confirm Core Rules.
-2. Load the context-loading skill for resource loading strategy.
-3. Load the coordination-protocol skill for the coordination protocol.
-4. Read `resources/multi-review-protocol.md` (11 review guides)
-5. Load the quality-principles skill (4 principles)
-6. Read `resources/phase-gates.md` (gate definitions)
+1. Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and confirm Core Rules.
+2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
+3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
+4. Read `.agents/skills/ultrawork/resources/multi-review-protocol.md` (11 review guides)
+5. Read `.agents/skills/_shared/core/quality-principles.md` (4 principles)
+6. Read `.agents/skills/ultrawork/resources/phase-gates.md` (gate definitions)
 7. Record session start:
    - Write `.agents/results/session-ultrawork.md`
    - Include: session start time, user request summary, workflow version (ultrawork)
@@ -99,7 +99,7 @@ Spawn implementation agents in parallel using the OpenCode `task` tool:
 
 If automated measurement is available (tests, lint exist):
 
-1. Load the quality-score skill (conditional, per context-loading guide)
+1. Read `.agents/skills/_shared/conditional/quality-score.md` (conditional, per context-loading guide)
 2. Run tests, lint, type-check via Bash to measure baseline
 3. Create Experiment Ledger: write `.agents/results/experiment-ledger.md` with initial baseline row
 4. Record composite score as the IMPL baseline
@@ -174,7 +174,7 @@ If baseline was measured at Step 5.2:
 **Root-cause-first fix mandate:** when re-spawning implementation agents to address QA findings, the fix prompt MUST require root-cause remediation. Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
 
 **Gate failure (2nd time on same issue, and termination conditions not yet met)** → Activate **Exploration Loop**:
-1. Load the exploration-loop skill (conditional, per context-loading guide)
+1. Read `.agents/skills/_shared/conditional/exploration-loop.md` (conditional, per context-loading guide)
 2. Generate 2-3 alternative hypotheses using Exploration Decision template
 3. Experiment each approach sequentially (git stash per attempt)
 4. Measure Quality Score for each
@@ -285,7 +285,7 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 If Quality Score was measured during this session:
 1. Measure final Quality Score
 2. Generate Experiment Ledger summary (total experiments, keep rate, net delta)
-3. Auto-generate lessons from discarded experiments (delta <= -5) into `lessons-learned.md`
+3. Auto-generate lessons from discarded experiments (delta <= -5) into `.agents/skills/_shared/core/lessons-learned.md`
 4. Append Quality Score Progression and Experiment Summary to session metrics
 
 **Always** (regardless of Quality Score availability):
@@ -293,7 +293,7 @@ If Quality Score was measured during this session:
    - Review all QA findings: any disputed by impl agents? → `false_positive`
    - Review runtime verification results: any stubs caught that static review missed? → `missed_stub`
    - Review impl agent self-check results: any bugs caught by QA that self-check missed? → `good_catch`
-6. Append EA events to `session-metrics.md`
+6. Append EA events to `.agents/results/session-metrics.md` (protocol: `.agents/skills/_shared/core/session-metrics.md`)
 7. If rolling 3-session EA >= 30: Flag in final report
    → "QA tuning suggested. Run `retro` to review."
 
@@ -339,10 +339,10 @@ This workflow conditionally incorporates patterns from autoresearch:
 
 | Pattern | When Active | Reference |
 |---------|-------------|-----------|
-| **Continuous metrics** | When measurement tools available | quality-score skill (loaded at VERIFY/SHIP) |
+| **Continuous metrics** | When measurement tools available | `.agents/skills/_shared/conditional/quality-score.md` (loaded at VERIFY/SHIP) |
 | **Keep/Discard** | When quality score is measured | quality-score delta rules |
-| **Experiment logging** | When baseline is established | experiment-ledger (via memory protocol) |
-| **Hypothesis exploration** | On repeated gate failures | exploration-loop skill (loaded on trigger) |
+| **Experiment logging** | When baseline is established | `.agents/skills/_shared/conditional/experiment-ledger.md` (via coordination protocol) |
+| **Hypothesis exploration** | On repeated gate failures | `.agents/skills/_shared/conditional/exploration-loop.md` (loaded on trigger) |
 | **Auto-learning** | At session end, if experiments exist | lessons-learned auto-generation |
 
-All protocols are loaded **conditionally** per context-loading guide, not at Phase 0.
+All protocols are loaded **conditionally** per `.agents/skills/_shared/core/context-loading.md`, not at Phase 0.

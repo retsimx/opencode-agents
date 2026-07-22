@@ -117,8 +117,8 @@ Return to appropriate phase based on failure type
 
 ## Quality Score Integration
 
-Gates from IMPL through SHIP incorporate the Quality Score when measurement is available (see `quality-score.md`).
-Quality Score is loaded **conditionally** per `context-loading.md`, not at Phase 0.
+Gates from IMPL through SHIP incorporate the Quality Score when measurement is available (see `.agents/skills/_shared/conditional/quality-score.md`).
+Quality Score is loaded **conditionally** per `.agents/skills/_shared/core/context-loading.md`, not at Phase 0.
 
 When a score is available, it supplements the checklist:
 - **Grade A (90-100)**: Gate auto-passes if all checklist items are also met
@@ -131,8 +131,8 @@ When no measurement tools are available, gates fall back to the binary checklist
 ### Repeated Gate Failure Rule
 
 If the same gate **fails twice** on the same issue:
-- Load `exploration-loop.md` (conditional loading, see `context-loading.md`)
-- Activate the **Exploration Loop** (see `exploration-loop.md`)
+- Load `.agents/skills/_shared/conditional/exploration-loop.md` (conditional loading, see `.agents/skills/_shared/core/context-loading.md`)
+- Activate the **Exploration Loop** (see `.agents/skills/_shared/conditional/exploration-loop.md`)
 - Generate 2-3 alternative hypotheses
 - Experiment and select the highest-scoring approach
 - Resume gate evaluation with the winning approach

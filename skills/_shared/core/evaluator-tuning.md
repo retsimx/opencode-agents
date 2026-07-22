@@ -35,11 +35,11 @@ Sessions accumulate EA events in session-metrics.md
 
 | Error Pattern | Patch Target | Example |
 |--------------|-------------|---------|
-| Missed bug category | QA `checklist.md`: add check item | "Race condition in concurrent writes" |
-| Wrong severity | QA `execution-protocol.md`: add calibration rule | "Auth issues are always CRITICAL" |
-| Missed stub | QA `checklist.md`: runtime verification section | "Check upload actually processes file" |
-| False positive pattern | QA `execution-protocol.md`: add exclusion | "Unused imports in test files are OK" |
-| Inconsistent depth | QA `execution-protocol.md`: difficulty link | "Complex tasks require full audit" |
+| Missed bug category | `.agents/skills/review/resources/checklist.md`: add check item | "Race condition in concurrent writes" |
+| Wrong severity | `.agents/skills/review/resources/execution-protocol.md`: add calibration rule | "Auth issues are always CRITICAL" |
+| Missed stub | `.agents/skills/review/resources/checklist.md`: runtime verification section | "Check upload actually processes file" |
+| False positive pattern | `.agents/skills/review/resources/execution-protocol.md`: add exclusion | "Unused imports in test files are OK" |
+| Inconsistent depth | `.agents/skills/review/resources/execution-protocol.md`: difficulty link | "Complex tasks require full audit" |
 
 ---
 
@@ -63,7 +63,7 @@ When `good_catch` events accumulate (>= 5 in rolling window):
 
 1. Identify which QA instruction or checklist item led to the catch
 2. Generalize: Can this pattern apply to other domains?
-3. If yes: Propose addition to `common-checklist.md`
+3. If yes: Propose addition to `.agents/skills/_shared/core/common-checklist.md`
 4. Record in tuning log as positive reinforcement
 
 This prevents tuning drift toward pure skepticism; QA must also know what it does well.
@@ -74,9 +74,9 @@ This prevents tuning drift toward pure skepticism; QA must also know what it doe
 
 | System | Role |
 |--------|------|
-| `session-metrics.md` | EA event source (automatic collection) |
+| `.agents/skills/_shared/core/session-metrics.md` (this directory) | EA event source (automatic collection) |
 | `retro` | Aggregation + tuning report generation (semi-automated) |
-| `lessons-learned.md` | QA Evaluation Lessons for persistent patterns |
-| QA `checklist.md` | Primary patch target for missed checks |
-| QA `execution-protocol.md` | Patch target for process/severity issues |
-| `common-checklist.md` | Propagation target for generalized good patterns |
+| `.agents/skills/_shared/core/lessons-learned.md` (this directory) | QA Evaluation Lessons for persistent patterns |
+| `.agents/skills/review/resources/checklist.md` | Primary patch target for missed checks |
+| `.agents/skills/review/resources/execution-protocol.md` | Patch target for process/severity issues |
+| `.agents/skills/_shared/core/common-checklist.md` (this directory) | Propagation target for generalized good patterns |

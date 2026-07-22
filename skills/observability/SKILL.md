@@ -45,7 +45,7 @@ Route, design, tune, and review observability work across MELT+P signals, layers
 - Vendor delegation target when appropriate
 
 ### Dependencies
-- OTel/W3C/CNCF references and resources under `resources/`
+- OTel/W3C/CNCF references and resources under `.agents/skills/observability/resources/`
 - Vendor categories, matrix, standards, incident forensics, meta-observability, transport, layers, boundaries, and signal guides
 
 ### Control-flow features
@@ -104,7 +104,7 @@ Route, design, tune, and review observability work across MELT+P signals, layers
 ### Canonical workflow path
 ```text
 1. Classify intent: setup, migrate, investigate, alert, trace, tune, or route.
-2. Select layer/boundary/signal coverage from `resources/matrix.md`.
+2. Select layer/boundary/signal coverage from `.agents/skills/observability/resources/matrix.md`.
 3. Load the specific vendor, transport, incident, or signal guide before producing guidance.
 ```
 
@@ -128,7 +128,7 @@ When CNCF/vendor status is load-bearing, verify live state at `https://landscape
 
 ### Guardrails
 1. **Classify intent before routing**: every query goes through intent classification; setup | migrate | investigate | alert | trace | tune | route
-2. **Category-first, not vendor-registry**: delegate to vendor-owned skills via `resources/vendor-categories.md`; do not duplicate their documentation
+2. **Category-first, not vendor-registry**: delegate to vendor-owned skills via `.agents/skills/observability/resources/vendor-categories.md`; do not duplicate their documentation
 3. **Transport tuning is the moat**: UDP/MTU thresholds, OTLP protocol selection, Collector topology, and sampling recipes are in-skill depth that other skills do not cover
 4. **Meta-observability is non-negotiable**: always validate pipeline self-health, clock sync (< 100 ms drift), cardinality, and retention before declaring setup complete
 5. **CNCF-first preference**: Prometheus, Jaeger, Thanos, Fluent Bit, OpenFeature (Graduated 2024-11), Flagger, Falco (Graduated); OpenTelemetry, Cortex, OpenCost (Incubating)
@@ -215,18 +215,18 @@ The combinations below are outside this skill's boundary. The external tools lis
 **Boundaries (4):** multi-tenant, cross-application, slo, release
 **Signals (7):** metrics, logs, traces, profiles, cost, audit, privacy
 
-See `resources/matrix.md` for the full 112-cell coverage map with N/A markers for invalid combinations.
+See `.agents/skills/observability/resources/matrix.md` for the full 112-cell coverage map with N/A markers for invalid combinations.
 
 ### Routes (Intent)
 
 | Intent | Primary target | Fallback |
 |--------|---------------|----------|
-| `setup` | `resources/vendor-categories.md` → vendor-owned skill | Generic OTel semconv in `resources/standards.md` |
-| `migrate` | CNCF 2025-10 guide + `resources/vendor-categories.md §(h)` | OTel Collector bridge config |
-| `investigate` | `resources/incident-forensics.md` (MRA + 6-dim localization) | `signals/traces.md` + `signals/logs.md` |
-| `alert` | `boundaries/slo.md` (burn-rate alert rules) | `resources/observability-as-code.md` |
+| `setup` | `.agents/skills/observability/resources/vendor-categories.md` → vendor-owned skill | Generic OTel semconv in `.agents/skills/observability/resources/standards.md` |
+| `migrate` | CNCF 2025-10 guide + `.agents/skills/observability/resources/vendor-categories.md` §(h) | OTel Collector bridge config |
+| `investigate` | `.agents/skills/observability/resources/incident-forensics.md` (MRA + 6-dim localization) | `signals/traces.md` + `signals/logs.md` |
+| `alert` | `boundaries/slo.md` (burn-rate alert rules) | `.agents/skills/observability/resources/observability-as-code.md` |
 | `trace` | `boundaries/cross-application.md` (propagator matrix) | `layers/mesh.md` (zero-code auto-instrumentation) |
-| `tune` | `transport/` (4 files: UDP/MTU, OTLP, topology, sampling) | `resources/meta-observability.md` (cardinality guardrails) |
+| `tune` | `transport/` (4 files: UDP/MTU, OTLP, topology, sampling) | `.agents/skills/observability/resources/meta-observability.md` (cardinality guardrails) |
 | `route` | `boundaries/multi-tenant.md` + `transport/collector-topology.md` | `boundaries/cross-application.md` (data residency) |
 
 ### Invocation
@@ -248,12 +248,12 @@ Shared invocation (from other skills):
 3. Receive routed guidance or a vendor-skill delegation target
 
 ### How to Execute
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for end-to-end walkthroughs.
-Use `resources/intent-rules.md` for intent classification reference.
-Use `resources/matrix.md` for coverage navigation across layers, boundaries, and signals.
-Use `resources/vendor-categories.md` for vendor delegation and category selection.
-Before submitting, run `resources/checklist.md`.
+Follow `.agents/skills/observability/resources/execution-protocol.md` step by step.
+See `.agents/skills/observability/resources/examples.md` for end-to-end walkthroughs.
+Use `.agents/skills/observability/resources/intent-rules.md` for intent classification reference.
+Use `.agents/skills/observability/resources/matrix.md` for coverage navigation across layers, boundaries, and signals.
+Use `.agents/skills/observability/resources/vendor-categories.md` for vendor delegation and category selection.
+Before submitting, run `.agents/skills/observability/resources/checklist.md`.
 
 ### Integrations with Agent Ecosystem
 
@@ -261,7 +261,7 @@ Before submitting, run `resources/checklist.md`.
 
 | Skill | Integration point | Reciprocal link status |
 |-------|------------------|-------|
-| `debug` | On failure: pull traces + logs by `request_id` → trigger `resources/incident-forensics.md` 6-dim localization playbook | ⏳ pending (v1.1) |
+| `debug` | On failure: pull traces + logs by `request_id` → trigger `.agents/skills/observability/resources/incident-forensics.md` 6-dim localization playbook | ⏳ pending (v1.1) |
 | `review` | Canary post-deploy loop via chrome-devtools MCP: console errors + Core Web Vitals trend; INP/LCP/CLS from `layers/L7-application/web-rum.md` | ⏳ pending (v1.1) |
 | `tf-infra` | Terraform modules for OTel Collector, Grafana, and Loki stack provisioning | ⏳ pending (v1.1) |
 | `scm` | Deployment SHA → `service.version` OTel attribute + release marker events; see `boundaries/release.md` | ⏳ pending (v1.1) |
@@ -274,8 +274,8 @@ Before submitting, run `resources/checklist.md`.
 
 - **Spec version pinning**: `otel_spec` / `otel_semconv` keys in each file's frontmatter document the assumed version. If content depends on a specific attribute stability tier, the tier is stated inline.
 - **Update triggers** (not scheduled):
-  - OTel semconv promotion (Development → RC → Stable) affecting attributes cited in this skill → update `resources/standards.md` and the affected file, bump minor version.
-  - Attribute deprecation → replace across all citing files; migration note in `resources/standards.md`.
+  - OTel semconv promotion (Development → RC → Stable) affecting attributes cited in this skill → update `.agents/skills/observability/resources/standards.md` and the affected file, bump minor version.
+  - Attribute deprecation → replace across all citing files; migration note in `.agents/skills/observability/resources/standards.md`.
   - CNCF status change for a vendor/project named in `vendor-categories.md` (Graduated / Archived / acquired) → update the vendor table.
 - **Authoritative live state**: `https://landscape.cncf.io` for CNCF project status. This skill does not promise to track it on any schedule; verify at use time if the information is load-bearing.
 - **No per-file review stamps**: earlier drafts carried `last_reviewed` / `next_review` frontmatter. Those were removed because no automated enforcement exists; relying on voluntary manual review produces stale stamps that misrepresent currency. Git history (`git log path/to/file`) is the source of truth for when a file was last changed.
@@ -284,42 +284,42 @@ Before submitting, run `resources/checklist.md`.
 
 - Do NOT pre-declare future agent skill names in user-facing documentation. If built-in coverage becomes warranted for an out-of-scope domain, evaluate and name it at that point.
 - File edits follow the ownership matrix in `docs/plans/designs/005-observability.md §Ownership`. CTO co-signs changes to `standards.md`, `matrix.md`, `anti-patterns.md`.
-- Run `resources/checklist.md §1 Setup validation` before merging.
+- Run `.agents/skills/observability/resources/checklist.md` §1 Setup validation before merging.
 
 ## References
-- Execution steps: `resources/execution-protocol.md`
-- Intent classification: `resources/intent-rules.md`
-- Coverage matrix: `resources/matrix.md`
-- Standards (OTel spec, W3C, ISO): `resources/standards.md`
-- Vendor categories: `resources/vendor-categories.md`
-- Incident forensics: `resources/incident-forensics.md`
-- Meta-observability: `resources/meta-observability.md`
-- Observability-as-code: `resources/observability-as-code.md`
-- Anti-patterns (18 items): `resources/anti-patterns.md`
-- Checklist: `resources/checklist.md`
-- Examples: `resources/examples.md`
+- Execution steps: `.agents/skills/observability/resources/execution-protocol.md`
+- Intent classification: `.agents/skills/observability/resources/intent-rules.md`
+- Coverage matrix: `.agents/skills/observability/resources/matrix.md`
+- Standards (OTel spec, W3C, ISO): `.agents/skills/observability/resources/standards.md`
+- Vendor categories: `.agents/skills/observability/resources/vendor-categories.md`
+- Incident forensics: `.agents/skills/observability/resources/incident-forensics.md`
+- Meta-observability: `.agents/skills/observability/resources/meta-observability.md`
+- Observability-as-code: `.agents/skills/observability/resources/observability-as-code.md`
+- Anti-patterns (18 items): `.agents/skills/observability/resources/anti-patterns.md`
+- Checklist: `.agents/skills/observability/resources/checklist.md`
+- Examples: `.agents/skills/observability/resources/examples.md`
 - Transport:
-  - `resources/transport/udp-statsd-mtu.md`
-  - `resources/transport/otlp-grpc-vs-http.md`
-  - `resources/transport/collector-topology.md`
-  - `resources/transport/sampling-recipes.md`
+  - `.agents/skills/observability/resources/transport/udp-statsd-mtu.md`
+  - `.agents/skills/observability/resources/transport/otlp-grpc-vs-http.md`
+  - `.agents/skills/observability/resources/transport/collector-topology.md`
+  - `.agents/skills/observability/resources/transport/sampling-recipes.md`
 - Layers:
-  - `resources/layers/L3-network.md`
-  - `resources/layers/L4-transport.md`
-  - `resources/layers/mesh.md`
-  - `resources/layers/L7-application/web-rum.md`
-  - `resources/layers/L7-application/mobile-rum.md`
-  - `resources/layers/L7-application/crash-analytics.md`
+  - `.agents/skills/observability/resources/layers/L3-network.md`
+  - `.agents/skills/observability/resources/layers/L4-transport.md`
+  - `.agents/skills/observability/resources/layers/mesh.md`
+  - `.agents/skills/observability/resources/layers/L7-application/web-rum.md`
+  - `.agents/skills/observability/resources/layers/L7-application/mobile-rum.md`
+  - `.agents/skills/observability/resources/layers/L7-application/crash-analytics.md`
 - Boundaries:
-  - `resources/boundaries/multi-tenant.md`
-  - `resources/boundaries/cross-application.md`
-  - `resources/boundaries/slo.md`
-  - `resources/boundaries/release.md`
+  - `.agents/skills/observability/resources/boundaries/multi-tenant.md`
+  - `.agents/skills/observability/resources/boundaries/cross-application.md`
+  - `.agents/skills/observability/resources/boundaries/slo.md`
+  - `.agents/skills/observability/resources/boundaries/release.md`
 - Signals:
-  - `resources/signals/metrics.md`
-  - `resources/signals/logs.md`
-  - `resources/signals/traces.md`
-  - `resources/signals/profiles.md`
-  - `resources/signals/cost.md`
-  - `resources/signals/audit.md`
-  - `resources/signals/privacy.md`
+  - `.agents/skills/observability/resources/signals/metrics.md`
+  - `.agents/skills/observability/resources/signals/logs.md`
+  - `.agents/skills/observability/resources/signals/traces.md`
+  - `.agents/skills/observability/resources/signals/profiles.md`
+  - `.agents/skills/observability/resources/signals/cost.md`
+  - `.agents/skills/observability/resources/signals/audit.md`
+  - `.agents/skills/observability/resources/signals/privacy.md`

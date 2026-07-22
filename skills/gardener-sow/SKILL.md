@@ -49,9 +49,9 @@ Improve the repository by **exactly one** micro-change per invocation. Runs in a
 ### Dependencies
 - OpenCode `task` tool — all scan, work, verify, ship, worktree, and revert work
 - `scm` skill — loaded by SHIP subagent for commit conventions
-- Shared provider map: `../_shared/runtime/providers.md` (`gh` / `glab`)
-- How to run (outer loops): `../_shared/runtime/gardener-running.md`
-- Resources: `resources/worktree-isolation.md`, `resources/worker-prompt.md`, `resources/worktree-prompt.md`, `resources/pr-size-limits.md`, `resources/exclusions.md`, `resources/ci-gates.md`, `resources/init-prompt.md`, `resources/verify-prompt.md`, `resources/ship-prompt.md`, `resources/revert-prompt.md`
+- Shared provider map: `.agents/skills/_shared/runtime/providers.md` (`gh` / `glab`)
+- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
+- Resources: `.agents/skills/gardener-sow/resources/worktree-isolation.md`, `.agents/skills/gardener-sow/resources/worker-prompt.md`, `.agents/skills/gardener-sow/resources/worktree-prompt.md`, `.agents/skills/gardener-sow/resources/pr-size-limits.md`, `.agents/skills/gardener-sow/resources/exclusions.md`, `.agents/skills/gardener-sow/resources/ci-gates.md`, `.agents/skills/gardener-sow/resources/init-prompt.md`, `.agents/skills/gardener-sow/resources/verify-prompt.md`, `.agents/skills/gardener-sow/resources/ship-prompt.md`, `.agents/skills/gardener-sow/resources/revert-prompt.md`
 - Forge CLI (`gh` or `glab`) for draft PR creation
 - Design doc: `docs/plans/designs/gardener-loop.md`
 
@@ -134,7 +134,7 @@ Improve the repository by **exactly one** micro-change per invocation. Runs in a
 
 **CRITICAL: The orchestrator is a thin single-shot runner. It MUST NOT loop. It MUST NOT perform scan, work, verify, ship, or worktree operations inline. Every phase except LOG uses the built-in `task` tool. Never run `$ task` in bash.**
 
-**Every task subagent prompt MUST include `MAIN_REPO` (absolute path) and `WORKTREE` (absolute path, once created). Nested subagents inherit both. See `resources/worktree-isolation.md`.**
+**Every task subagent prompt MUST include `MAIN_REPO` (absolute path) and `WORKTREE` (absolute path, once created). Nested subagents inherit both. See `.agents/skills/gardener-sow/resources/worktree-isolation.md`.**
 
 **All git/forge/bash commands inside subagents MUST be wrapped with `timeout 300` to prevent infinite hangs.**
 
@@ -229,11 +229,11 @@ EXIT
 8. **Every subagent gets `MAIN_REPO` + `WORKTREE`** — nested subagents inherit both
 9. **Dirty main is allowed** — worktree created from `origin/main` without cleaning main
 10. **Mandatory cleanup** — worktree removed before exit regardless of outcome
-11. **Human-reviewable size** — see `resources/pr-size-limits.md` (≤150 diff lines, one concern; no hard file limit)
-12. **Respect exclusions** — see `resources/exclusions.md`
+11. **Human-reviewable size** — see `.agents/skills/gardener-sow/resources/pr-size-limits.md` (≤150 diff lines, one concern; no hard file limit)
+12. **Respect exclusions** — see `.agents/skills/gardener-sow/resources/exclusions.md`
 13. **Tests must pass** before SHIP — coverage is informational, no hard percentage
-14. **Draft PRs only** — always create via the Create draft PR command for `$PROVIDER` in `../_shared/runtime/providers.md`
-15. **All PRs via forge CLI** — `gh` or `glab` per `providers.md`; never use web UI or other tools
+14. **Draft PRs only** — always create via the Create draft PR command for `$PROVIDER` in `.agents/skills/_shared/runtime/providers.md`
+15. **All PRs via forge CLI** — `gh` or `glab` per `.agents/skills/_shared/runtime/providers.md`; never use web UI or other tools
 16. **Nested tasking allowed** — subagents may spawn further subagents (must pass paths)
 17. **AGENTS.md and TESTING.md** — subagents must comply
 18. **State file tracks open/closed rows** — SHIP appends new row with Status=open, INIT removes merged rows, updates closed rows to Status=closed, and removes Status=done rows
@@ -241,18 +241,18 @@ EXIT
 20. **Provider-agnostic** — detect `PROVIDER` once; pass to every subagent; never hardcode `gh` or `glab`
 
 ## References
-- How to run (outer loops): `../_shared/runtime/gardener-running.md`
+- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
 - Sibling skills: `gardener-tend` (maintain PRs), `gardener-harvest` (merge queue)
-- Provider CLI map: `../_shared/runtime/providers.md`
+- Provider CLI map: `.agents/skills/_shared/runtime/providers.md`
 - Design: `docs/plans/designs/gardener-loop.md`
-- Worktree isolation (FATAL rules): `resources/worktree-isolation.md`
-- Worker instructions: `resources/worker-prompt.md`
-- Worktree lifecycle: `resources/worktree-prompt.md`
-- PR size limits: `resources/pr-size-limits.md`
-- Init subagent: `resources/init-prompt.md`
-- Verify subagent: `resources/verify-prompt.md`
-- Ship subagent: `resources/ship-prompt.md`
-- Revert subagent: `resources/revert-prompt.md`
-- Exclusions: `resources/exclusions.md`
-- CI gates: `resources/ci-gates.md`
-- SCM conventions: `../scm/SKILL.md`
+- Worktree isolation (FATAL rules): `.agents/skills/gardener-sow/resources/worktree-isolation.md`
+- Worker instructions: `.agents/skills/gardener-sow/resources/worker-prompt.md`
+- Worktree lifecycle: `.agents/skills/gardener-sow/resources/worktree-prompt.md`
+- PR size limits: `.agents/skills/gardener-sow/resources/pr-size-limits.md`
+- Init subagent: `.agents/skills/gardener-sow/resources/init-prompt.md`
+- Verify subagent: `.agents/skills/gardener-sow/resources/verify-prompt.md`
+- Ship subagent: `.agents/skills/gardener-sow/resources/ship-prompt.md`
+- Revert subagent: `.agents/skills/gardener-sow/resources/revert-prompt.md`
+- Exclusions: `.agents/skills/gardener-sow/resources/exclusions.md`
+- CI gates: `.agents/skills/gardener-sow/resources/ci-gates.md`
+- SCM conventions: `.agents/skills/scm/SKILL.md`
