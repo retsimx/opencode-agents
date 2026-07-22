@@ -1,4 +1,4 @@
-# PR Gardener — Worktree Isolation (FATAL)
+# Gardener Tend — Worktree Isolation (FATAL)
 
 **Any modification to the main repository checkout is a FATAL ERROR.**
 

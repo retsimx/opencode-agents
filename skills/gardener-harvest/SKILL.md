@@ -1,15 +1,16 @@
 ---
-name: pr-gardener-reviewer
+name: gardener-harvest
 description: >
   Sequential assessment and merge of open PRs via subagent risk classification,
   behavior-change detection, CI detail reporting, change-size measurement,
   confidence scoring, and repository-specific risk globs. Pure read-only against
   PRs — never mutates a PR. Merges (LOW risk + green CI + high confidence),
   asks the user (MEDIUM or uncertain), or skips (HIGH risk, failing or pending CI,
-  draft, large diff). Works with GitHub (`gh`) and GitLab (`glab`).
+  draft, large diff). Works with GitHub (`gh`) and GitLab (`glab`). Family:
+  gardener-sow → gardener-tend → gardener-harvest.
 ---
 
-# PR Gardener Reviewer — Sequential Assessment and Merge
+# Gardener Harvest — Sequential Assessment and Merge
 
 ## Scheduling
 
@@ -39,12 +40,13 @@ merge succeed.
 When something is permanently wrong with a PR (real conflict, branch protection
 rejects squash, PR changed since assessment, CI failing) skip it and move on. No
 exception, including for the user's own PRs, gardener PRs, or "just one tiny fix"
-cases. PR maintenance is the `pr-gardener` skill's job, not this skill's.
+cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 
 ### Intent signature
 - User asks to merge open PRs in order
 - User wants a sequential review-and-merge pass over all open PRs
-- User mentions "merge queue", "merge all PRs", or "process open PRs"
+- User mentions "merge queue", "merge all PRs", "harvest PRs", or "process open PRs"
+- User invokes `/gardener-harvest`
 
 ### When to use
 - Several open PRs are queued and the user wants them merged one by one
@@ -54,9 +56,9 @@ cases. PR maintenance is the `pr-gardener` skill's job, not this skill's.
 ### When NOT to use
 - A single PR with a known issue -> use `debug` skill
 - PRs need deep architectural review -> use `review` or `deep-review` skill
-- PRs are draft or WIP and need promotion -> use `pr-gardener` skill
-- CI is failing and the user wants it fixed -> use `pr-gardener` skill
-- Creating new PRs -> use `gardener` skill
+- PRs are draft or WIP and need promotion -> use `gardener-tend`
+- CI is failing and the user wants it fixed -> use `gardener-tend`
+- Creating new micro-fix PRs -> use `gardener-sow`
 - Merging requires human sign-off per PR -> out of scope
 
 ### Expected inputs
@@ -73,6 +75,7 @@ cases. PR maintenance is the `pr-gardener` skill's job, not this skill's.
 - `gh` CLI (GitHub) or `glab` CLI (GitLab), authenticated and on `PATH`
 - `task` tool to spawn subagent assessment tasks
 - `question` tool to batch uncertain PRs to the user
+- How to run (outer loops): `../_shared/runtime/gardener-running.md`
 - `resources/providers.md` — stub → shared provider command map (`../_shared/runtime/providers.md`)
 - `../_shared/runtime/providers.md` — GitHub (`gh`) / GitLab (`glab`) detection and commands
 - `resources/repo-rules.yaml` — high-risk file globs for this project
@@ -262,10 +265,11 @@ cases. PR maintenance is the `pr-gardener` skill's job, not this skill's.
 18. **Resume is opt-in.** If `last_run` is older than 1 hour, ask the user before resuming. Never silently clear `processed`.
 
 ## References
+- How to run (outer loops): `../_shared/runtime/gardener-running.md`
 - Subagent assessment prompt: `resources/subagent-prompt.md`
 - Provider command mappings: `../_shared/runtime/providers.md` (stub at `resources/providers.md`)
 - Repository-specific risk globs: `resources/repo-rules.yaml`
 - Execution protocol (state, batching, rate limits, drafts, verification): `resources/execution-protocol.md`
-- PR gardener (adjacent skill, owns PR mutation/maintenance): `../pr-gardener/SKILL.md`
+- Sibling skills: `gardener-sow` (create PRs), `gardener-tend` (maintain PRs)
 - Context loading: `../_shared/core/context-loading.md`
 - Reasoning templates: `../_shared/core/reasoning-templates.md`

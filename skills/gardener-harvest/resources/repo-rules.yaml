@@ -1,5 +1,5 @@
 # Repository-specific merge guardrails.
-# Used by the pr-gardener-reviewer skill.
+# Used by the gardener-harvest skill.
 #
 # A PR that touches any path listed in `high_risk_globs` is escalated to ASK
 # immediately and is never eligible for auto-merge, regardless of risk

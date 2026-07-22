@@ -1,4 +1,4 @@
-# PR Gardener — Execution Protocol
+# Gardener Tend — Execution Protocol
 
 Provider-agnostic. All forge commands come from
 [`../../_shared/runtime/providers.md`](../../_shared/runtime/providers.md).

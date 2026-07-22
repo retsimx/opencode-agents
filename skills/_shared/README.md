@@ -12,7 +12,7 @@
   - Examples: quality score, experiment ledger, exploration loop.
 - `runtime/`
   - Runtime-injected or CLI-specific protocols.
-  - Examples: memory protocol, vendor execution protocols, forge provider map (`providers.md` for `gh` / `glab`).
+  - Examples: memory protocol, vendor execution protocols, forge provider map (`providers.md`), gardener outer-loop recipes (`gardener-running.md`).
 
 ## Workflow-Owned Resources
 

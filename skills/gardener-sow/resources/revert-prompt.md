@@ -4,7 +4,7 @@ Discard uncommitted changes inside a failed iteration worktree. Does NOT remove 
 
 ## Read first
 
-- `.agents/skills/gardener/resources/worktree-isolation.md` — **FATAL if violated**
+- `.agents/skills/gardener-sow/resources/worktree-isolation.md` — **FATAL if violated**
 
 ## Inputs (from orchestrator) — REQUIRED
 

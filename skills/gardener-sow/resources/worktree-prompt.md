@@ -4,7 +4,7 @@ Each iteration runs in an isolated git worktree. The main repo checkout must nev
 
 ## Read first
 
-- `.agents/skills/gardener/resources/worktree-isolation.md`
+- `.agents/skills/gardener-sow/resources/worktree-isolation.md`
 
 ## Inputs (from orchestrator)
 

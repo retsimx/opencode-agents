@@ -4,10 +4,10 @@ Independent verification after WORK. Do not modify source files.
 
 ## Read first
 
-- `.agents/skills/gardener/resources/worktree-isolation.md` — **FATAL if violated**
-- `.agents/skills/gardener/resources/ci-gates.md`
-- `.agents/skills/gardener/resources/exclusions.md`
-- `.agents/skills/gardener/resources/pr-size-limits.md`
+- `.agents/skills/gardener-sow/resources/worktree-isolation.md` — **FATAL if violated**
+- `.agents/skills/gardener-sow/resources/ci-gates.md`
+- `.agents/skills/gardener-sow/resources/exclusions.md`
+- `.agents/skills/gardener-sow/resources/pr-size-limits.md`
 
 ## Inputs (from orchestrator) — REQUIRED
 

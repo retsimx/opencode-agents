@@ -112,6 +112,9 @@ Provide a quick-reference listing of all available agent skills with description
 | **dev-workflow** | Dev environment: mise tasks, git hooks, CI/CD, migrations, release automation |
 | **docs** | Documentation drift detection: verify refs against codebase, propose sync patches |
 | **frontend** | React, Next.js, TypeScript: FSD-lite architecture, shadcn/ui, design system alignment |
+| **gardener-sow** | Single-shot micro-fix → draft PR; wrap in outer `while` for continuous sow (see gardener-running.md) |
+| **gardener-tend** | One PR maintenance action; outer loop drains `chore(gardener)` queue |
+| **gardener-harvest** | Assess + merge open PRs (or ask/skip); usually on-demand |
 | **issue-autopilot** | Forge issue → draft PR: fetch, plan, implement, verify CI, open PR/MR from worktree (`gh` or `glab`) |
 | **image** | Multi-vendor AI image gen: Codex (gpt-image-2), Pollinations (flux/zimage) |
 | **mobile** | Flutter, React Native: cross-platform mobile, Riverpod, widgets |

@@ -3,8 +3,8 @@
 Canonical CLI map for skills that talk to a forge. Use **PR** as the generic
 term for GitHub pull requests and GitLab merge requests.
 
-Skills that depend on this file: `issue-autopilot`, `gardener`, `pr-gardener`,
-`pr-gardener-reviewer`.
+Skills that depend on this file: `issue-autopilot`, `gardener-sow`, `gardener-tend`,
+`gardener-harvest`.
 
 ## Detect provider
 

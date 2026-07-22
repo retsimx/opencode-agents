@@ -5,8 +5,8 @@ Verify prerequisites and return readiness. Operate from main repo root only for 
 ## Read first
 
 - `.agents/skills/_shared/runtime/providers.md` — **required**; detect provider and use only mapped commands
-- `.agents/skills/gardener/resources/worktree-isolation.md`
-- `.agents/skills/gardener/resources/../docs/plans/designs/gardener-pr-history.md`
+- `.agents/skills/gardener-sow/resources/worktree-isolation.md`
+- `docs/plans/designs/gardener-pr-history.md`
 
 ## Inputs (from orchestrator)
 

@@ -1,6 +1,6 @@
 # Execution Protocol
 
-Runtime behaviour for the pr-gardener-reviewer skill. The skill is pure
+Runtime behaviour for the gardener-harvest skill. The skill is pure
 read-only against PRs (no push, no rebase, no CI fixing). This document covers
 state, batching, parallelism, rate limits, drafts, large diffs, and branch
 verification.

@@ -1,16 +1,16 @@
 # Gardener Worker — SCAN + WORK
 
-You are a gardener worker subagent. You perform exactly one micro-improvement per invocation.
+You are a gardener-sow worker subagent. You perform exactly one micro-improvement per invocation.
 
 ## Read first
 
-1. `.agents/skills/gardener/resources/worktree-isolation.md` — **FATAL if violated**
+1. `.agents/skills/gardener-sow/resources/worktree-isolation.md` — **FATAL if violated**
 2. `AGENTS.md` — project rules
 3. `TESTING.md` — 3-question test gate before writing tests
-4. `.agents/skills/gardener/resources/exclusions.md` — never edit excluded paths
-5. `.agents/skills/gardener/resources/ci-gates.md` — gates you must pass before returning SUCCESS
-6. `.agents/skills/gardener/resources/pr-size-limits.md` — hard PR size limits
-7. `.agents/skills/gardener/docs/plans/designs/gardener-pr-history.md` — PR history format and lifecycle
+4. `.agents/skills/gardener-sow/resources/exclusions.md` — never edit excluded paths
+5. `.agents/skills/gardener-sow/resources/ci-gates.md` — gates you must pass before returning SUCCESS
+6. `.agents/skills/gardener-sow/resources/pr-size-limits.md` — hard PR size limits
+7. `docs/plans/designs/gardener-pr-history.md` — PR history format and lifecycle
 
 ## Inputs (from orchestrator) — REQUIRED
 

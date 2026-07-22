@@ -5,12 +5,12 @@ Commit, push, and open a draft PR for the current iteration.
 ## Read first
 
 - `.agents/skills/_shared/runtime/providers.md` — **required**; detect provider and use only mapped Create draft PR command
-- `.agents/skills/gardener/resources/worktree-isolation.md` — **FATAL if violated**
+- `.agents/skills/gardener-sow/resources/worktree-isolation.md` — **FATAL if violated**
 - `AGENTS.md`
 - `.agents/skills/scm/SKILL.md`
-- `.agents/skills/gardener/resources/exclusions.md`
-- `.agents/skills/gardener/resources/pr-size-limits.md`
-- `.agents/skills/gardener/docs/plans/designs/gardener-pr-history.md`
+- `.agents/skills/gardener-sow/resources/exclusions.md`
+- `.agents/skills/gardener-sow/resources/pr-size-limits.md`
+- `docs/plans/designs/gardener-pr-history.md`
 
 ## Inputs (from orchestrator) — REQUIRED
 

@@ -1,14 +1,13 @@
 ---
-name: pr-gardener
+name: gardener-tend
 description: >
-  Autonomous PR maintenance skill. Each invocation checks open PRs with
-  `chore(gardener)` prefix for merge status, CI failures, and reviewer comments.
-  Works with GitHub (`gh`) and GitLab (`glab`). Makes one change per invocation —
-  rebase, fix CI, act on comment, or promote draft to ready — then exits.
-  External loop manages frequency.
+  Tend open gardener PRs (`chore(gardener)` prefix): rebase, fix CI, act on
+  reviewer comments, or promote draft to ready. One change per invocation, then
+  exits. Works with GitHub (`gh`) and GitLab (`glab`). Family: gardener-sow →
+  gardener-tend → gardener-harvest.
 ---
 
-# PR Gardener — Autonomous PR Maintenance
+# Gardener Tend — PR Maintenance
 
 ## Scheduling
 
@@ -21,6 +20,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 - User wants CI failures diagnosed and fixed
 - User wants reviewer comments acted upon
 - User wants healthy draft PRs promoted to ready
+- User invokes `/gardener-tend` or asks to tend gardener PRs
 
 ### When to use
 - Periodic PR health maintenance (cron or on-demand)
@@ -32,7 +32,8 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 - Single PR with known issue (use `debug` skill)
 - Ready-to-merge PR (no failures/comments/conflicts)
 - Human-driven code review (use `review` skill)
-- Creating new PRs (use `gardener` skill)
+- Creating new micro-fix PRs (use `gardener-sow`)
+- Assessing/merging open PRs (use `gardener-harvest`)
 
 ### Expected inputs
 - Repository with `gh` (GitHub) or `glab` (GitLab) CLI authenticated for `origin`
@@ -47,6 +48,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 
 ### Dependencies
 - Forge CLI (`gh` or `glab`) for PR queries, checks/pipelines, and comments — see `../_shared/runtime/providers.md`
+- How to run (outer loops): `../_shared/runtime/gardener-running.md`
 - `scm` skill for commit conventions
 - `debug` skill for CI failure diagnosis
 - Resources: `resources/worktree-isolation.md`, `resources/execution-protocol.md`
@@ -151,6 +153,8 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 
 ## References
 
+- How to run (outer loops): `../_shared/runtime/gardener-running.md`
+- Sibling skills: `gardener-sow` (create PRs), `gardener-harvest` (merge queue)
 - Provider CLI map: `../_shared/runtime/providers.md`
 - Worktree isolation: `resources/worktree-isolation.md`
 - Execution protocol: `resources/execution-protocol.md`
