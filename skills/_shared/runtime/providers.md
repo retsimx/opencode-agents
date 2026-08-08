@@ -4,7 +4,7 @@ Canonical CLI map for skills that talk to a forge. Use **PR** as the generic
 term for GitHub pull requests and GitLab merge requests.
 
 Skills that depend on this file: `issue-autopilot`, `gardener-sow`, `gardener-tend`,
-`gardener-harvest`.
+`gardener-harvest`, `epic-forge`.
 
 ## Detect provider
 
@@ -161,3 +161,86 @@ If both exist, use the provider that matched `origin`. Always also follow projec
 - Prefer **CLI** or name both: `` `gh` / `glab` ``.
 - Prefer **issue** (both forges).
 - Prefer **draft** (GitLab WIP ≡ draft).
+
+## Issue creation, dependency linking, and epic enumeration (epic-forge)
+
+Operations for the `epic-forge` skill: creating issues, linking `blocked_by`
+dependencies, enumerating an epic's issues, and reading an issue's linked
+PRs/commits (for done-determination).
+
+### Create issue
+
+| Operation | GitHub (`gh`) | GitLab (`glab`) |
+|-----------|---------------|-----------------|
+| Create issue (capture returned number) | `gh issue create -R OWNER/REPO --title "TITLE" --body-file PATH` (prints the URL; extract the trailing number) | `glab issue create -R OWNER/REPO --title "TITLE" --description "$(cat PATH)"` (or `--description-file PATH` if available; prints the URL/iid) |
+
+Notes:
+- Always pass `-R OWNER/REPO` explicitly — never rely on cwd for multi-repo runs.
+- Capture the created issue number from the returned URL for the prefix→number registry and the linking pass.
+
+### Link dependency (`blocked_by`)
+
+| Operation | GitHub (`gh`) | GitLab (`glab`) |
+|-----------|---------------|-----------------|
+| Add `blocked_by` | `gh api -H "X-GitHub-Api-Version: 2026-03-10" -X POST repos/OWNER/REPO/issues/{issue_number}/dependencies/blocked_by -F issue_id={BLOCKING_DB_ID}` | `glab api -X POST projects/:pid/issues/:iid/links -f target_project_id=:pid -f target_issue_iid={BLOCKING_IID} -f link_type=is_blocked_by` |
+| List `blocked_by` | `gh api repos/OWNER/REPO/issues/{issue_number}/dependencies/blocked_by` | `glab api projects/:pid/issues/:iid/links` (filter `link_type == "is_blocked_by"`) |
+| Remove `blocked_by` | `gh api -X DELETE repos/OWNER/REPO/issues/{issue_number}/dependencies/blocked_by/{BLOCKING_DB_ID}` | `glab api -X DELETE projects/:pid/issues/:iid/links/:link_id` |
+
+**GitHub critical detail — `issue_id` is the database `id`, NOT the issue number.**
+Fetch it with `gh api repos/OWNER/REPO/issues/{number} --jq .id`. Database ids are
+globally unique across GitHub, so **cross-repo `blocked_by` works** (a blocking issue
+in another repo is referenced by its own database id). The endpoint is
+**secondary-rate-limited** — pace calls (short sleep between) and handle 429 with
+backoff + resume from the state file. `422 "Target issue has already been taken"`
+means the link already exists (idempotent — skip).
+
+The `X-GitHub-Api-Version` header value is pinned to the GA version current at time
+of writing (`2026-03-10`). Before relying on it, verify the current version with
+`gh api /` and read the `x-github-api-version-selected` response header — GitHub
+rejects unknown version headers with 400.
+
+**GitLab**: `link_type` values are `relates_to`, `blocks`, `is_blocked_by`. Cross-project
+links are supported by passing the target project id. Verify the exact field names on
+the target GitLab version (`glab api` is the reliable path; `glab issue` subcommands
+may not expose links).
+
+### Enumerate an epic's issues
+
+| Operation | GitHub (`gh`) | GitLab (`glab`) |
+|-----------|---------------|-----------------|
+| Find issues belonging to an epic | `gh issue list -R OWNER/REPO --search '"Epic: #{epic_number}"' --state all --json number,title,state,stateReason` | Native epic children when available: `glab api groups/:gid/epics/:iid/issues` (or `projects/:pid/epics/:iid/issues`); else body-reference search via `glab api "projects/:pid/issues?search=Epic%3A%20#{epic_number}&scope=all"` |
+
+Notes:
+- Cross-check the search results against the epic body's task-table hyperlinks; if
+  they disagree, surface the discrepancy to the user rather than assuming.
+- Normalize to `{number, title, state, stateReason}` — `stateReason` is GitHub-only
+  (`gh issue view --json stateReason`; `not_planned`/`completed`). GitLab has no
+  close-reason field (`closed_by` only); infer from labels (e.g. `Duplicate`,
+  `Won't fix`) and treat anything else as ambiguous → ask.
+
+### Get linked PRs/commits for an issue (done-determination)
+
+| Operation | GitHub (`gh`) | GitLab (`glab`) |
+|-----------|---------------|-----------------|
+| Linked PRs | `gh issue view {n} -R OWNER/REPO --json timelineItems` (filter `CrossReferencedEvent`/PR events) or `gh pr list -R OWNER/REPO --search "issue:{n}"` | `glab api projects/:pid/issues/:iid/related_merge_requests` (or `links` with MR targets) |
+| Linked commits | `gh api repos/OWNER/REPO/issues/{n}/timeline` (filter commit events) | `glab api projects/:pid/issues/:iid/notes` (commit references) |
+
+Use for the updater's done-determination: a merged PR or commit link ⇒ done;
+`not_planned`/`duplicate` without a work link ⇒ not done; ambiguous ⇒ ask the user.
+
+### Epic representation & creation
+
+"Epic" is not uniform across forges. The skill uses the native concept where it
+exists, with an issue+label fallback:
+
+| Forge | Representation | Creation |
+|-------|----------------|----------|
+| GitHub | An issue tagged with an `epic` label (no native epics) | `gh label create epic -R OWNER/REPO` (once), then `gh issue create -R OWNER/REPO --label epic --title "Epic: ..." --body-file PATH` |
+| GitLab | Native group-level epic when the repo is in a group; else issue+`epic` label | Native: `glab api -X POST groups/:gid/epics -f title="Epic: ..." -f description="$(cat PATH)"` (or `projects/:pid/epics` for project epics); fallback: `glab issue create -R OWNER/REPO --label epic --title "Epic: ..." --description "$(cat PATH)"` |
+
+Notes:
+- Resolve once whether GitLab native epics are available (repo in a group, user has
+  epic permissions); if the native call fails with 404/403, fall back to issue+label.
+- The epic body carries the full spec + task table inline (see
+  `.agents/skills/epic-forge/resources/epic-template.md`); the label is only for
+  discoverability, never the source of truth.
