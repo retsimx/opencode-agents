@@ -30,6 +30,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | UI design, design system, landing page, DESIGN.md, color palette, typography, glassmorphism, responsive design | **design** | |
 | brainstorm, ideate, design, explore, idea, concept | **brainstorm** | Run before plan |
 | plan, breakdown, task, sprint | **plan** | |
+| epic, issue, decompose design to issues, create epics/issues on the forge, update epic | **epic-forge** | Consumes brainstorm/plan; forge creation + linking |
 | automatic, parallel, orchestrate | **orchestrate** | |
 | workflow, guide, manual, step-by-step | **coordination** | |
 | configuration management, SCM, CM, git, commit, gitflow, GitHub Flow, GitLab Flow, trunk-based branching, merge conflict, rebase, worktree, baseline, tag, release branch, signed commits, merge queue, conventional commits | **scm** | SCM + Conventional Commits in one skill |
@@ -48,6 +49,8 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | "Fix bug and review" | debug → review |
 | "Add feature and test" | plan → relevant agent → review |
 | "I have an idea for a feature" | brainstorm → plan → relevant agents → review |
+| "Create epics/issues from this design" | brainstorm → plan → epic-forge |
+| "Update epic #N with this change" | epic-forge (update mode; brainstorm/plan branch on complexity) |
 | "Let's design something new" | brainstorm → plan → relevant agents → review |
 | "Do everything automatically" | orchestrate (internally plan → agents → review) |
 | "I'll manage manually" | coordination |

@@ -52,7 +52,7 @@ Do not use skill-relative paths (`../_shared/...`) for agent `read`/`write`/`edi
 .agents/
 ├── README.md              # This file
 ├── rules/                 # Domain-specific coding rules (i18n, etc.)
-├── skills/                # Agent skill library (34 skills)
+├── skills/                # Agent skill library (38 skills)
 │   ├── _shared/           # Shared runtime protocols and core resources
 │   ├── agenthelp/         # Help desk — list all skills on request
 │   ├── backend/           # Backend API & server implementation
@@ -79,6 +79,7 @@ Load skills via the `skill` tool by name (e.g., `skill "brainstorm"`).
 |-------|-------------|
 | `brainstorm` | Design-first ideation — explores intent, constraints, approaches |
 | `plan` | Product-management planning: requirements → prioritized tasks → machine-readable plan + human tracker; ISO 21500 / 31000 / 38500-aligned planning |
+| `epic-forge` | Decompose a design into forge-created epics + issues (self-contained contracts), create + link natively (blocked_by), update existing epics; forge-agnostic (gh/glab) |
 
 ### Multi-Agent Execution
 | Skill | What it does |
@@ -108,7 +109,7 @@ Run the `agenthelp` skill for a complete listing with descriptions.
 
 ## Skills — When to Use Which
 
-All 34 skills can be loaded via the `skill` tool. The main categories:
+All 38 skills can be loaded via the `skill` tool. The main categories:
 
 ### Implementation Domains
 - **backend** — APIs, databases, auth (Repository/Service/Router pattern)
@@ -124,6 +125,7 @@ All 34 skills can be loaded via the `skill` tool. The main categories:
 
 ### Process & Management
 - **plan** — Product-management planning: requirements, task breakdown, API contracts, prioritization, ISO-aligned delivery framing
+- **epic-forge** — Decompose a design into forge-created epics + issues, create + link natively, update existing epics
 - **architecture** — Software design, tradeoff analysis, ADR records
 - **design** — AI design systems, typography, color, motion
 - **orchestrate** — Multi-agent spawning and coordination

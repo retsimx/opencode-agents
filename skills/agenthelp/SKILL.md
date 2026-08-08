@@ -111,6 +111,7 @@ Provide a quick-reference listing of all available agent skills with description
 | **design** | AI design system: DESIGN.md, typography, color, motion, responsive layouts, WCAG 2.2 |
 | **dev-workflow** | Dev environment: mise tasks, git hooks, CI/CD, migrations, release automation |
 | **docs** | Documentation drift detection: verify refs against codebase, propose sync patches |
+| **epic-forge** | Decompose a design into forge-created epics + issues (self-contained contracts), create + link natively (blocked_by), update existing epics; forge-agnostic (gh/glab) |
 | **frontend** | React, Next.js, TypeScript: FSD-lite architecture, shadcn/ui, design system alignment |
 | **gardener-sow** | Single-shot micro-fix → draft PR; wrap in outer `while` for continuous sow (see gardener-running.md) |
 | **gardener-tend** | One PR maintenance action; outer loop drains `chore(gardener)` queue |
