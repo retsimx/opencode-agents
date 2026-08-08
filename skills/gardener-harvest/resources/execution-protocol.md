@@ -42,7 +42,7 @@ commands outside that map.
 
 - **GitHub**: `gh pr list --state open --json number,title,headRefName,createdAt,isDraft --limit 1000`. The `--limit` flag MUST be explicit — the default is 30 and silently under-fetches.
   - Above 1000 open PRs: `--limit 5000`, or paginate via `gh api 'search/issues?q=is:pr+is:open+repo:<owner>/<repo>&sort=created&order=asc&per_page=100&page=N'` until a page returns 0 items.
-- **GitLab**: `glab mr list --state opened --output json --per-page 100 --page N`, page until a request returns 0 results.
+- **GitLab**: `glab api "projects/:pid/merge_requests?state=opened&per_page=100&page=N"`, page until a request returns 0 results.
 - After fetch, always re-sort client-side by `createdAt` ascending so the oldest PR is processed first.
 - Then filter drafts (`isDraft == false` on GitHub; `draft == false || work_in_progress == false` on GitLab) and any PR number already in the state file's `processed` list.
 - Log the total count of remaining PRs to process before starting the first batch. This is the user's main signal of scope.
@@ -73,7 +73,7 @@ commands outside that map.
 
 ## Rate-limit awareness
 
-- Before listing PRs: check `gh api rate_limit` (GitHub) or `glab api rate_limit` (GitLab).
+- Before listing PRs: check `gh api rate_limit` on GitHub. GitLab has no non-admin rate-limit endpoint (`glab api rate_limit` returns 404) — handle 429 responses when they occur instead.
 - If remaining core allowance < 200, set batch size to 1 and proceed slowly.
 - On a 429 or rate-limit response from any API call: stop spawning new subagents immediately. Finish any pending batch, write state, exit with reason "rate_limited".
 

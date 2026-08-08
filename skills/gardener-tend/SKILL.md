@@ -70,7 +70,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 4. For each PR, run checks in priority order.
 
 ### Scenes
-1. **CHECK_MERGE**: Normalize `mergeableState` via View single PR. If conflicts or behind → rebase in worktree → push → exit.
+1. **CHECK_MERGE**: Normalize `mergeStateStatus` via View single PR. If conflicts or behind → rebase in worktree → push → exit.
 2. **CHECK_CI**: Fetch CI/pipeline status. If any failed → create worktree → diagnose + fix all failures → verify locally → push → exit.
 3. **CHECK_COMMENTS**: Fetch reviewer comments/notes. If actionable (code snippet) → implement change → delete comment → push → exit. If vague → ask for clarification → exit.
 4. **CHECK_DRAFT**: If PR is draft + all CI complete + no failures + no comments → promote to ready → exit.
@@ -99,7 +99,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 |--------|---------------|----------|
 | Detect provider | `READ` | `git remote get-url origin` |
 | Fetch open PRs | `CALL_TOOL` | List open PRs (`.agents/skills/_shared/runtime/providers.md`) |
-| Check merge state | `CALL_TOOL` | View single PR → normalize `mergeableState` |
+| Check merge state | `CALL_TOOL` | View single PR → normalize `mergeStateStatus` |
 | Check CI status | `CALL_TOOL` | Fetch CI / pipeline status |
 | Fetch comments | `CALL_TOOL` | Reviewer comments / notes |
 | Create worktree | `CALL_TOOL` | `git worktree add` |
@@ -116,7 +116,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 ```
 1. Detect PROVIDER; auth check via `gh repo view` / `glab repo view` (functional request against the repo)
 2. List open PRs; filter title startswith "chore(gardener)"; sort createdAt asc
-3. Per PR: normalize mergeableState → CI → comments → draft promotion
+3. Per PR: normalize mergeStateStatus → CI → comments → draft promotion
 4. All forge commands from `.agents/skills/_shared/runtime/providers.md` for PROVIDER
 ```
 

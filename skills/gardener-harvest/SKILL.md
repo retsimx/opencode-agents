@@ -191,7 +191,7 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 5. List ALL open PRs via provider's list command. MUST pass an explicit limit:
    - GitHub: `gh pr list --state open --json number,title,headRefName,createdAt,isDraft --limit 1000`
      (paginate via `gh api search/issues` above 1000 — see `.agents/skills/gardener-harvest/resources/providers.md`)
-   - GitLab: `glab mr list --state opened --output json --per-page 100 --page N` until empty
+   - GitLab: `glab api "projects/:pid/merge_requests?state=opened&per_page=100&page=N"` until empty
    Re-sort client-side by `createdAt` ascending. Filter `isDraft == false`.
 6. PREFILTER oldest-first:
    - skip already-processed (state file)

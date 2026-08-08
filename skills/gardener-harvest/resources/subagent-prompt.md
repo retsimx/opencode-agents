@@ -36,7 +36,7 @@ GitLab (`glab`) commands (adapt project id `:pid` and merge request iid `:iid` f
 ```bash
 glab mr diff <number>
 glab api projects/:pid/merge_requests/:iid/pipelines
-glab mr view <number> --output json
+glab api projects/:pid/merge_requests/<number>
 ```
 
 ## Step 2: Analyze
