@@ -56,7 +56,7 @@ All commands MUST be wrapped with `timeout 300`.
 Exactly one line:
 
 - `CLEANED`
-- `CLEANUP_FAIL|<reason>` — orchestrator logs and loops anyway
+- `CLEANUP_FAIL|<reason>` — orchestrator exits anyway (no log)
 
 ## Rules
 

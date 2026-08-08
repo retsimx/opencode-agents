@@ -17,11 +17,11 @@ Verify prerequisites and return readiness. Operate from main repo root only for 
 All commands MUST be wrapped with `timeout 300`.
 
 1. From `MAIN_REPO`: detect `PROVIDER` from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`.
-2. Run the Auth check for `PROVIDER` (`gh auth status` or `glab auth status`) — abort with `NOT_READY|<cli> not authenticated` if it fails.
+2. Run the Auth check for `PROVIDER` per `.agents/skills/_shared/runtime/providers.md` — a functional request **against the repo** (`gh repo view` or `glab repo view`), NOT `auth status` (which often prints "Invalid token provided" even when the token works). Abort with `NOT_READY|<cli> not authenticated` only if the functional request fails.
 3. From `MAIN_REPO`: `timeout 300 git fetch origin main`.
 4. Read `.agents/results/gardener-state.md`. Use `edit` with `replaceAll=true` to remove every row where `| done |` appears in the Status column.
 5. Re-read the file. Collect all rows where Status=open or Status=closed.
-6. For each row where Status=open, extract the PR URL (column 6). Run the View by URL command for `PROVIDER` (normalize `state` per `.agents/skills/_shared/runtime/providers.md`) for each (batch up to 10 at a time). If a PR's normalized state is `merged`/`MERGED`, use `edit` to remove that row from the file. If normalized state is `closed`/`CLOSED`, use `edit` to change the row's Status from `open` to `closed`.
+6. For each row where Status=open, extract the PR URL (column 6). **Skip rows whose PR URL is `-`** (verify-fail rows have no PR). Run the View by URL command for `PROVIDER` (normalize `state` per `.agents/skills/_shared/runtime/providers.md`) for each (batch up to 10 at a time). If a PR's normalized state is `merged`/`MERGED`, use `edit` to remove that row from the file. If normalized state is `closed`/`CLOSED`, use `edit` to change the row's Status from `open` to `closed`.
 7. Prune stale gardener worktrees: `timeout 300 git worktree prune`.
 
 **Do NOT check whether main is dirty.** A dirty main checkout is allowed. Gardener never modifies main.

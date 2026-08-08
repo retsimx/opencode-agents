@@ -159,7 +159,7 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 | Action | SSL primitive | Evidence |
 |--------|---------------|----------|
 | Detect provider | `READ` | `git remote get-url origin` |
-| Verify CLI auth | `CALL_TOOL` | `gh auth status` / `glab auth status` |
+| Verify CLI auth | `CALL_TOOL` | `gh repo view` / `glab repo view` (functional request against the repo) |
 | List open PRs | `CALL_TOOL` | per `.agents/skills/gardener-harvest/resources/providers.md` |
 | Filter drafts and large diffs | `SELECT` | client-side predicate on PR metadata |
 | Load state file | `READ` | `.agents/results/pr-merge-queue.json` |
@@ -185,7 +185,7 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 
 ```
 1. Detect provider from `git remote get-url origin`.
-2. Verify CLI auth via `gh auth status` / `glab auth status`.
+2. Verify CLI auth via a functional request against the repo (`gh repo view` / `glab repo view`).
 3. Load `.agents/results/pr-merge-queue.json` (create if missing).
 4. Load `.agents/skills/gardener-harvest/resources/repo-rules.yaml` and flatten the high_risk_globs list.
 5. List ALL open PRs via provider's list command. MUST pass an explicit limit:

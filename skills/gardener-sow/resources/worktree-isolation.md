@@ -22,7 +22,7 @@ If any subagent detects it modified files outside `WORKTREE`, or ran destructive
 
 `FATAL|main_modified|<detail>`
 
-The orchestrator logs `FATAL` and loops. The iteration is abandoned; CLEANUP still runs if a worktree was created.
+The orchestrator exits (no state-file row). The iteration is abandoned; CLEANUP still runs if a worktree was created.
 
 ## Allowed in MAIN_REPO (SETUP/CLEANUP only)
 

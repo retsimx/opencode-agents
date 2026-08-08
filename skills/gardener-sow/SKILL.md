@@ -41,7 +41,7 @@ Improve the repository by **exactly one** micro-change per invocation. Runs in a
 
 ### Expected outputs
 - At most one small draft PR (`gardener/iter-{NNNN}-{slug}`) on success
-- Log row in `.agents/results/gardener-state.md` (Status and Description); rows removed once PR is merged
+- Log row in `.agents/results/gardener-state.md` **only** for PASS (PR created) and VERIFY FAIL; rows removed once PR is merged
 - No orphaned worktrees after the invocation
 - Main checkout state unchanged
 - Process exits after one attempt (success, skip, or failure)
@@ -78,29 +78,32 @@ Improve the repository by **exactly one** micro-change per invocation. Runs in a
 4. **WORK**: Task subagent (`worker-prompt.md`, MODE=WORK) inside `WORKTREE`; returns `SUCCESS|...`, `FAIL|...`, `ABORT|...`, or `FATAL|main_modified|...`.
 5. **VERIFY**: Task subagent (`verify-prompt.md`) inside `WORKTREE`; returns `PASS`, `FAIL:<reason>`, or `FATAL|main_modified|...`.
 6. **SHIP**: Task subagent (`ship-prompt.md`) inside `WORKTREE`; returns `SHIPPED|<branch>|<pr_url>`, `SHIP_FAIL:<reason>`, or `FATAL|main_modified|...`.
-7. **LOG**: SHIP subagent appends iteration row with Status=open; INIT removes rows whose PRs are merged, updates rows whose PRs are closed (Status=open → Status=closed), and removes rows with Status=done.
+7. **LOG**: SHIP subagent appends the PASS row with Status=open; the orchestrator appends the VERIFY FAIL row (Status=open, PR=`-`); INIT removes rows whose PRs are merged, updates rows whose PRs are closed (Status=open → Status=closed), and removes rows with Status=done. No other outcome appends a row.
 8. **WORKTREE_CLEANUP**: Task subagent (`worktree-prompt.md`, MODE=CLEANUP) removes worktree — **mandatory before exit**; does not alter main working tree.
 9. **EXIT**: End the turn. Do not start another iteration.
 
 ### Transitions
-- WORKTREE_SETUP fails -> LOG, exit (no cleanup needed).
-- Any `FATAL|main_modified` -> WORKTREE_CLEANUP, LOG `FATAL`, exit.
-- SCAN returns `SKIP` -> WORKTREE_CLEANUP, LOG `SKIP`, exit.
-- WORK returns `FAIL` or `ABORT` -> revert via task, WORKTREE_CLEANUP, LOG, exit.
-- VERIFY returns `FAIL` -> revert via task, WORKTREE_CLEANUP, LOG, exit.
-- SHIP returns `SHIP_FAIL` -> revert via task, WORKTREE_CLEANUP, LOG, exit.
-- SHIP returns `SHIPPED` -> LOG `PASS`, WORKTREE_CLEANUP, exit.
-- Any error -> revert if needed, WORKTREE_CLEANUP (always), LOG, exit.
+- WORKTREE_SETUP fails -> exit (no log, no cleanup needed).
+- Any `FATAL|main_modified` -> WORKTREE_CLEANUP, exit (no log).
+- SCAN returns `SKIP` -> WORKTREE_CLEANUP, exit (no log).
+- WORK returns `FAIL` or `ABORT` -> revert via task, WORKTREE_CLEANUP, exit (no log).
+- VERIFY returns `FAIL` -> revert via task, WORKTREE_CLEANUP, LOG `FAIL`, exit.
+- VERIFY returns `EXCLUDED` -> revert via task, WORKTREE_CLEANUP, exit (no log).
+- SHIP returns `SHIP_FAIL` -> revert via task, WORKTREE_CLEANUP, exit (no log).
+- SHIP returns `SHIPPED` -> SHIP already logged `PASS`, WORKTREE_CLEANUP, exit.
+- Any error -> revert if needed, WORKTREE_CLEANUP (always), exit (no log).
 
 ### Failure and recovery
 | Failure | Recovery |
 |---------|----------|
-| `FATAL\|main_modified` | cleanup worktree, log `FATAL`, exit |
+| `FATAL\|main_modified` | cleanup worktree, exit (no log) |
 | VERIFY fails | revert via task, cleanup worktree, log `FAIL:<reason>`, exit |
-| SHIP fails | revert via task, cleanup worktree, log `SHIP_FAIL`, exit |
-| SCAN finds nothing | cleanup worktree, log `SKIP`, exit |
-| Subagent timeout/error | revert if dirty in worktree, cleanup worktree, log `ERROR:<message>`, exit |
-| CLEANUP fails | log `CLEANUP_FAIL`, exit anyway |
+| SHIP fails | revert via task, cleanup worktree, exit (no log) |
+| SCAN finds nothing | cleanup worktree, exit (no log) |
+| Subagent timeout/error | revert if dirty in worktree, cleanup worktree, exit (no log) |
+| CLEANUP fails | exit anyway (no log) |
+
+Only **PASS** and **VERIFY FAIL** outcomes append a row to the state file; every other outcome (NOT_READY, ERROR, WORKTREE_FAIL, WORK FAIL/ABORT, SKIP, EXCLUDED, SHIP_FAIL, FATAL, CLEANUP_FAIL) exits silently without logging.
 
 ### Exit
 - Always exit after one pipeline attempt (PASS / SKIP / FAIL / FATAL / ERROR).
@@ -120,7 +123,8 @@ Improve the repository by **exactly one** micro-change per invocation. Runs in a
 | Delegate ship | `CALL_TOOL` | task subagent returns `SHIPPED` or `SHIP_FAIL` |
 | Revert on failure | `CALL_TOOL` | task subagent per `revert-prompt.md` |
 | Delegate worktree cleanup | `CALL_TOOL` | task subagent returns `CLEANED` |
-| Append log | `UPDATE_STATE` | state file append with Status=open (SHIP subagent) |
+| Append PASS row | `UPDATE_STATE` | state file append with Status=open (SHIP subagent) |
+| Append verify-fail row | `UPDATE_STATE` | state file append with Status=open, PR=`-` (orchestrator, only on VERIFY FAIL) |
 | Remove merged row | `UPDATE_STATE` | state file row removal (INIT subagent — also removes Status=done rows) |
 | Update closed row | `UPDATE_STATE` | state file Status=open → Status=closed (INIT subagent) |
 | Exit | `UPDATE_STATE` | end turn after cleanup |
@@ -148,12 +152,12 @@ branch = null
 # INIT — resources/init-prompt.md
 Call task (gardener-init) with MAIN_REPO
 Return: READY|<iteration_number> or NOT_READY|<reason>
-if NOT_READY: log, EXIT
+if NOT_READY: EXIT (no log)
 
 # WORKTREE_SETUP — resources/worktree-prompt.md MODE=SETUP, SLUG=pending
 Call task (gardener-worktree-setup) with MAIN_REPO, ITERATION, SLUG=pending
 Return: WORKTREE_READY|<worktree_path>|<branch> or WORKTREE_FAIL|<reason>
-if WORKTREE_FAIL: log, EXIT
+if WORKTREE_FAIL: EXIT (no log)
 
 worktree = path; branch = branch name
 
@@ -163,7 +167,7 @@ Return: FOUND|<slug>|... or SKIP|... or FATAL|main_modified|...
 
 if FATAL or SKIP:
     Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    log; EXIT
+    EXIT (no log)
 
 # WORK
 Call task (gardener-work) with MAIN_REPO, WORKTREE, ITEM=<slug>|<description>|<rationale>
@@ -172,16 +176,23 @@ Return: SUCCESS|... or FAIL|... or ABORT|... or FATAL|main_modified|...
 if FATAL/FAIL/ABORT:
     Call task (gardener-revert) with MAIN_REPO, WORKTREE
     Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    log; EXIT
+    EXIT (no log)
 
 # VERIFY
 Call task (gardener-verify) with MAIN_REPO, WORKTREE
 Return: PASS or FAIL:<reason> or EXCLUDED:<path> or FATAL|main_modified|...
 
-if not PASS or FATAL:
+if VERIFY == FAIL:<reason>:
     Call task (gardener-revert) with MAIN_REPO, WORKTREE
     Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    log; EXIT
+    append verify-fail row to STATE_FILE (orchestrator bash):
+        | <ITERATION> | FAIL | <slug> | <description> | <BRANCH> | - | open | <ISO_TIMESTAMP> |
+    EXIT
+
+if VERIFY == EXCLUDED or FATAL:
+    Call task (gardener-revert) with MAIN_REPO, WORKTREE
+    Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
+    EXIT (no log)
 
 # SHIP
 Call task (gardener-ship) with MAIN_REPO, WORKTREE, BRANCH, ITERATION, SLUG, DESCRIPTION
@@ -190,9 +201,9 @@ Return: SHIPPED|... or SHIP_FAIL|... or FATAL|main_modified|...
 if SHIP_FAIL or FATAL:
     Call task (gardener-revert) with MAIN_REPO, WORKTREE
     Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    log; EXIT
+    EXIT (no log)
 
-# LOG — SHIP already appended the state row (Status=open)
+# LOG — SHIP already appended the PASS row (Status=open)
 
 # WORKTREE_CLEANUP — mandatory before exit
 Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
@@ -236,7 +247,7 @@ EXIT
 15. **All PRs via forge CLI** — `gh` or `glab` per `.agents/skills/_shared/runtime/providers.md`; never use web UI or other tools
 16. **Nested tasking allowed** — subagents may spawn further subagents (must pass paths)
 17. **AGENTS.md and TESTING.md** — subagents must comply
-18. **State file tracks open/closed rows** — SHIP appends new row with Status=open, INIT removes merged rows, updates closed rows to Status=closed, and removes Status=done rows
+18. **State file tracks open/closed rows** — only PASS and VERIFY FAIL rows are appended; SHIP appends the PASS row with Status=open, the orchestrator appends the VERIFY FAIL row with Status=open and PR=`-`; INIT removes merged rows, updates closed rows to Status=closed, removes Status=done rows, and skips Status=open rows whose PR URL is `-`
 19. **Description column for SCAN** — SCAN compares slug AND description to distinguish similar fixes
 20. **Provider-agnostic** — detect `PROVIDER` once; pass to every subagent; never hardcode `gh` or `glab`
 

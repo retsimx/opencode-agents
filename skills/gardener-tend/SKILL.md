@@ -64,7 +64,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 ## Structural Flow
 
 ### Entry
-1. Detect `PROVIDER` from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Verify CLI auth.
+1. Detect `PROVIDER` from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Verify CLI auth via a functional request against the repo (`gh repo view` / `glab repo view`).
 2. Fetch all open PRs with `chore(gardener)` title prefix (normalize fields per `.agents/skills/_shared/runtime/providers.md`).
 3. Order by age (oldest first).
 4. For each PR, run checks in priority order.
@@ -114,7 +114,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 ### Canonical workflow path
 
 ```
-1. Detect PROVIDER; auth check
+1. Detect PROVIDER; auth check via `gh repo view` / `glab repo view` (functional request against the repo)
 2. List open PRs; filter title startswith "chore(gardener)"; sort createdAt asc
 3. Per PR: normalize mergeableState → CI → comments → draft promotion
 4. All forge commands from `.agents/skills/_shared/runtime/providers.md` for PROVIDER

@@ -7,7 +7,7 @@ Resolve `PROVIDER` once at Entry and use only that CLI for the run.
 ## Entry Gate
 
 1. Detect `PROVIDER` from `git remote get-url origin`.
-2. Confirm CLI auth (`gh auth status` or `glab auth status`).
+2. Confirm CLI auth with a functional request against the repo (`gh repo view` or `glab repo view`) — `auth status` is unreliable (often prints "Invalid token provided" even when the token works).
 3. Fetch all open PRs via List open PRs; normalize fields (`number`, `title`, `createdAt`, `headRefName`, `baseRefName`, `mergeableState`, `isDraft`, `url`).
 4. Filter to `chore(gardener)` prefix in title.
 5. Sort by `createdAt` ascending (oldest first).

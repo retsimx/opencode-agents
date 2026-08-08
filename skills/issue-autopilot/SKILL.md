@@ -41,7 +41,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 
 1. Ask the user for the issue number if not provided. **Use the `question` tool — NOT plain text.**
 2. Detect provider from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Record `PROVIDER` (`github`|`gitlab`) and the matching CLI (`gh`|`glab`).
-3. Verify the provider CLI is authenticated (`gh auth status` or `glab auth status`). If not, report error and abort.
+3. Verify the provider CLI is authenticated with a functional request against the repo (`gh repo view` or `glab repo view` — `auth status` is unreliable and often reports "Invalid token provided" even when the token works). If the request fails, report error and abort.
 4. Fetch issue details using the Issues table in `.agents/skills/_shared/runtime/providers.md` (normalize title, body, labels, comments, assignees, state).
 5. Present the issue to the user: title, body, labels, key comments.
 6. Fetch latest changes to main and ensure local main is up to date:

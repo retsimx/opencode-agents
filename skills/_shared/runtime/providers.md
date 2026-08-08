@@ -21,12 +21,16 @@ subagent. Never hardcode `gh` or `glab` outside this table.
 
 ## Auth check
 
+`gh auth status` / `glab auth status` is **NOT a reliable gate** — both CLIs
+sometimes print "Invalid token provided" even when the token works. Verify auth
+with a functional request **against the repo** instead:
+
 | Provider | Command |
 |----------|---------|
-| GitHub | `gh auth status` |
-| GitLab | `glab auth status` |
+| GitHub | `gh repo view` |
+| GitLab | `glab repo view` |
 
-Abort immediately on failure. Do not attempt to log in for the user.
+Abort only if the functional request fails. Do not attempt to log in for the user.
 
 - GitHub: `gh auth login` with `repo` scope (and `workflow` if inspecting workflow runs).
 - GitLab: `glab auth login` with `api` scope on the target instance.
