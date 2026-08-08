@@ -74,7 +74,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 2. **CHECK_CI**: Fetch CI/pipeline status. If any failed → create worktree → diagnose + fix all failures → verify locally → push → exit.
 3. **CHECK_COMMENTS**: Fetch reviewer comments/notes. If actionable (code snippet) → implement change → delete comment → push → exit. If vague → ask for clarification → exit.
 4. **CHECK_DRAFT**: If PR is draft + all CI complete + no failures + no comments → promote to ready → exit.
-5. **ALL_CLEAR**: If no changes across all PRs → exit silently.
+5. **ALL_CLEAR**: If no changes across all PRs → sleep 60 seconds → exit silently.
 
 ### Transitions
 - If one PR needs action → act → exit. Next invocation continues from next PR.
@@ -89,7 +89,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 
 ### Exit
 - Success: one PR updated (rebase, fix, comment, or promotion).
-- No-op: all PRs healthy → exit silently.
+- No-op: all PRs healthy → sleep 60 seconds → exit silently.
 - Error: blocker documented.
 
 ## Logical Operations

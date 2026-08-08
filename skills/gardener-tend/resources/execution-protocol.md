@@ -88,7 +88,7 @@ Only if PR is draft (`isDraft: true`):
 
 ### 5. ALL_CLEAR
 
-If no PR required any action → no-op. Exit skill.
+If no PR required any action → no-op. Sleep 60 seconds, then exit skill.
 
 ## Verification
 
