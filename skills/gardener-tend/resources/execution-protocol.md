@@ -88,7 +88,7 @@ Only if PR is draft (`isDraft: true`):
 
 ### 5. ALL_CLEAR
 
-If no PR required any action → no-op. Sleep 60 seconds, then exit skill.
+If no PR required any action → no-op. **MANDATORY**: run `sleep 300` (5 minutes) and wait for it to finish before exiting the skill. Do NOT end the turn until the sleep has completed — skipping the sleep is not allowed.
 
 ## Verification
 
