@@ -103,7 +103,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 | Check CI status | `CALL_TOOL` | Fetch CI / pipeline status |
 | Fetch comments | `CALL_TOOL` | Reviewer comments / notes |
 | Create worktree | `CALL_TOOL` | `git worktree add` |
-| Rebase branch | `CALL_TOOL` | `git rebase` + conflict resolution |
+| Rebase branch | `CALL_TOOL` | `GIT_EDITOR=true GIT_SEQUENCE_EDITOR=true git rebase` + conflict resolution |
 | Diagnose CI fail | `CALL_TOOL` + `INFER` | Read CI logs + fix |
 | Run local verify | `VALIDATE` | Test/lint/coverage commands |
 | Push changes | `CALL_TOOL` | `git push --force-with-lease` |
@@ -151,6 +151,7 @@ Maintain PR health by checking merge status, diagnosing CI failures, and acting 
 8. **Age priority** — oldest PRs first
 9. **Provider-agnostic** — never hardcode `gh` or `glab`; use `.agents/skills/_shared/runtime/providers.md`
 10. **No-op sleep is mandatory** — on ALL_CLEAR, run `sleep 300` (5 minutes) and confirm it completed before ending the turn; never exit early
+11. **Never run interactive git commands** — never run `git rebase --continue` or any git command that may open an editor (rebase, merge, commit, etc.) without a non-interactive bypass: `GIT_EDITOR=true` (plus `GIT_SEQUENCE_EDITOR=true` for interactive rebases), or `git config core.editor true` in the worktree
 
 ## References
 

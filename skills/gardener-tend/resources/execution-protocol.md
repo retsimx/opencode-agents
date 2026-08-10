@@ -26,15 +26,17 @@ Use View single PR and normalize `mergeStateStatus` per the Mergeability table i
 | CI / merge check still running | Skip to next PR |
 | Clean | Proceed to next check |
 
-**Rebase procedure:**
+**Rebase procedure (never interactive):**
 1. Create worktree: `git worktree add /tmp/wt-<number> origin/<headRefName>`
 2. Fetch latest base: `git fetch origin <baseRefName>`
-3. Rebase: `cd /tmp/wt-<number> && git rebase origin/<baseRefName>`
-4. Resolve conflicts, stage, continue rebase
+3. Rebase non-interactively: `cd /tmp/wt-<number> && GIT_EDITOR=true GIT_SEQUENCE_EDITOR=true git rebase origin/<baseRefName>`
+4. Resolve conflicts, stage, then continue non-interactively: `GIT_EDITOR=true GIT_SEQUENCE_EDITOR=true git rebase --continue`
 5. Run local CI (ruff + tests + coverage)
 6. Push: `git push origin HEAD:refs/heads/<headRefName> --force-with-lease`
 7. Clean up: `git worktree remove /tmp/wt-<number>`
 8. **Exit skill** (one change per invocation)
+
+> **Never** run `git rebase --continue` or any git command that may open an editor (rebase, merge, commit, etc.) without a non-interactive bypass: `GIT_EDITOR=true` (plus `GIT_SEQUENCE_EDITOR=true` for interactive rebases), or `git config core.editor true` in the worktree.
 
 ### 2. CHECK_CI
 
