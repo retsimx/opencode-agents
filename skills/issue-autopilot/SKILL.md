@@ -80,12 +80,12 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 1. `cd $WORKTREE` — enforce worktree isolation for all operations.
 2. Present the issue to the user as context.
 3. Load the **brainstorm** skill and follow it step by step. **You MUST execute every step in the brainstorm skill in order. Do NOT shortcut, combine, or skip any step.**
-4. Save the approved design doc to `docs/plans/designs/<NNN>-<issue-title>.md`.
+4. Save the approved design doc to `<PARENT_REPO>/docs/plans/designs/<NNN>-<issue-title>.md`, where `<PARENT_REPO>` is the main checkout (NOT `$WORKTREE`) — planning docs must persist worktree removal.
 
 ### GATE EXIT
-- [ ] Design document saved at `docs/plans/designs/<NNN>-<issue-title>.md` inside `$WORKTREE`
+- [ ] Design document saved at `<PARENT_REPO>/docs/plans/designs/<NNN>-<issue-title>.md` (parent checkout, outside `$WORKTREE`)
 - [ ] User explicitly approved the design (Step 5 blind review round completed, Step 6 saved)
-- [ ] No files were modified outside `$WORKTREE`
+- [ ] No files were modified outside `$WORKTREE` (exception: planning docs under `<PARENT_REPO>/docs/` and the issue-autopilot skill itself)
 - [ ] Brainstorm skill completed in full (all 7 steps)
 
 **You CANNOT proceed to Phase 2 without satisfying ALL gate exit items.**
@@ -105,8 +105,8 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 3. **You MUST get user confirmation before proceeding to Phase 3.**
 
 ### GATE EXIT
-- [ ] Machine-readable plan saved at `.agents/results/plan-{sessionId}.json` inside `$WORKTREE`
-- [ ] Human-readable tracker saved at `docs/plans/work/{NNN}-{name}.md` inside `$WORKTREE` (for Medium/Complex plans)
+- [ ] Machine-readable plan saved at `<PARENT_REPO>/.agents/results/plan-{sessionId}.json` (note: `.agents` is its own git repo, absent from worktrees; `results/` is gitignored there — local working artifact)
+- [ ] Human-readable tracker saved at `<PARENT_REPO>/docs/plans/work/{NNN}-{name}.md` (parent checkout, NOT `$WORKTREE`; for Medium/Complex plans)
 - [ ] User explicitly confirmed the plan
 - [ ] No files were modified outside `$WORKTREE`
 
