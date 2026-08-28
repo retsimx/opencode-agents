@@ -9,10 +9,11 @@ This document defines the complete technical runbook for orchestrating automated
 `forge-review` follows the **Universal File-First State I/O** and **Zero-Context Relay** architecture:
 1. **Orchestrator** retrieves PR/MR metadata, diffs, and issue specifications.
 2. Diffs and specifications are persisted to disk in `.agents/results/review-inputs-{sessionId}/`.
-3. Three specialized subagents are dispatched concurrently with input file references (preventing conversational context saturation).
+3. Three specialized subagents (`qa-agent`, `deep-reviewer`, `security-agent`) are dispatched concurrently with input file references (preventing conversational context saturation).
 4. Subagents write structured analysis artifacts to disk and return standard 4-line summaries.
-5. Orchestrator aggregates findings into the top-level review template (`review-template.md`) and formats inline suggestions (`comment-template.md`).
-6. Orchestrator submits review and comments to the target forge via CLI / API.
+5. Orchestrator aggregates specialist outputs into an intermediate raw synthesis (`.agents/results/raw-review-pr-{n}-{sessionId}.md`).
+6. Subagent 4 (`review-verifier`) executes the 4-step Ground Truth and Critic verification pass against the workspace tree and diff hunks, emitting the final verified review artifact (`.agents/results/review-pr-{n}-{sessionId}.md`).
+7. Orchestrator presents the verified scorecard in chat, executes the Human Approval Gate, and submits verified review and inline comments to the target forge via CLI / REST API.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -37,15 +38,26 @@ This document defines the complete technical runbook for orchestrating automated
        │                       │                       │
        ▼                       ▼                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            Phase 3: Aggregation & Synthesis                 │
-│  - Read all subagent result files from disk                 │
-│  - Deduplicate findings & determine Verdict                 │
-│  - Format Top-Level Review Body & Inline Diff Comments      │
+│              Phase 3: Intermediate Synthesis                │
+│  - Read Subagents 1, 2, 3 result files from disk            │
+│  - Merge into RAW_REVIEW_FILE                               │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│      Phase 3.5: Review Verifier & Critic Specialist Pass    │
+│  invoke_subagent([review-verifier])                         │
+│  - Check 1: Ground Truth Fact-Check (Drop hallucinations)   │
+│  - Check 2: Diff Hunk Validation (Prevent 422 errors)       │
+│  - Check 3: Suggestion Syntax & Indentation Validation      │
+│  - Check 4: Deduplication & Severity Recalibration          │
+│  - Write: OUTPUT_FILE (.agents/results/review-pr-*.md)      │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │         Phase 4: Provider Review Submission & Gating        │
+│  - Present Verified Scorecard & Gate via ask_question       │
 │  - Submit Top-Level Review & Inline Diff Comments via API   │
 │  - Handle Rate Limits, Pagination, and Error Fallbacks      │
 └─────────────────────────────────────────────────────────────┘
@@ -174,41 +186,132 @@ glab mr unapprove <MR_IID>
 
 ## 3. Subagent Prompt Templates (Zero-Context Relay)
 
-When the orchestrator triggers Phase 2, it launches the 3 subagents concurrently via `invoke_subagent`. All heavy inputs (`DIFF_FILE`, `SPEC_FILE`, `METADATA_FILE`) are passed **by file reference on disk**, never dumped as large raw strings into the prompt.
+When the orchestrator triggers Phase 2 and Phase 3.5, it launches specialized subagents via `invoke_subagent`. All heavy inputs (`DIFF_FILE`, `SPEC_FILE`, `METADATA_FILE`, `RAW_REVIEW_FILE`) are passed **by file reference on disk**, never dumped as large raw strings into the prompt.
 
-### Prompt Template 1: `qa-agent` (Contract & Acceptance Criteria Specialist)
+### 3.1 Prompt Template 1: `qa-agent` (Contract & Acceptance Criteria Specialist)
 
 ```json
 {
   "TypeName": "self",
   "Role": "QA Contract Specialist",
-  "Prompt": "You are the QA Contract Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- SPEC_FILE: \"{SPEC_FILE_PATH}\"\n- METADATA_FILE: \"{METADATA_FILE_PATH}\"\n- OUTPUT_FILE: \".agents/results/result-qa-{SESSION_ID}.md\"\n\n### Objective:\nVerify 100% of Acceptance Criteria and contract requirements from SPEC_FILE against the code diff in DIFF_FILE.\n\n### Instructions:\n1. Read SPEC_FILE and extract every functional requirement, edge case, and acceptance criterion.\n2. Read DIFF_FILE and investigate touched files in the workspace.\n3. Build the Acceptance Criteria & Contract Alignment Matrix with explicit `file:line` proof citations for every item.\n4. Determine status: `VERIFIED`, `INCOMPLETE`, `DEVIATED`, or `MISSING`.\n5. Write complete analysis to OUTPUT_FILE.\n6. Return strictly the 4-line chat completion summary."
+  "Prompt": "You are the QA Contract Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- SPEC_FILE: \"{SPEC_FILE_PATH}\"\n- METADATA_FILE: \"{METADATA_FILE_PATH}\"\n- SKILL_FILE: \".agents/skills/review/SKILL.md\"\n- OUTPUT_FILE: \".agents/results/result-qa-{SESSION_ID}.md\"\n\n### Objective:\nVerify 100% of Acceptance Criteria and contract requirements from SPEC_FILE against the code diff in DIFF_FILE.\n\n### Instructions:\n1. Read `.agents/skills/review/SKILL.md` for QA alignment and review protocols.\n2. Read SPEC_FILE and extract every functional requirement, edge case, and acceptance criterion.\n3. Read DIFF_FILE and investigate touched files in the workspace.\n4. Build the Acceptance Criteria & Contract Alignment Matrix with explicit `file:line` proof citations for every item.\n5. Determine status: `VERIFIED`, `INCOMPLETE`, `DEVIATED`, or `MISSING`.\n6. Write complete analysis to OUTPUT_FILE conforming to `.agents/skills/forge-review/resources/review-template.md` Section 1.\n7. Return strictly the 4-line chat completion summary."
 }
 ```
 
 ---
 
-### Prompt Template 2: `deep-reviewer` (9-Dimension Code Quality Specialist)
+### 3.2 Prompt Template 2: `deep-reviewer` (9-Dimension Code Quality Specialist)
 
 ```json
 {
   "TypeName": "self",
   "Role": "Deep Review Specialist",
-  "Prompt": "You are the Deep Review Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- OUTPUT_FILE: \".agents/results/result-deep-review-{SESSION_ID}.md\"\n\n### Objective:\nPerform a deterministic, evidence-based 9-dimension code audit on the changes in DIFF_FILE.\n\n### Evaluation Dimensions:\n1. Correctness (logic errors, broken invariants, unhandled conditions)\n2. Regression Risk (broken existing workflows, contract drift)\n3. State & Data Integrity (DB migrations, transaction boundaries, concurrency)\n4. UI / Rendering / UX (template tags, CSS/HTMX states, error handling)\n5. Test Coverage & Quality (missing assertions, test gaps, deterministic mocks)\n6. Performance & Scalability (N+1 queries, memory bottlenecks, unindexed lookups)\n7. Dead Code & Hygiene (unreachable code, unused imports)\n8. DRY & Architectural Consistency (duplicated logic, pattern conformity)\n9. Code Style & Maintainability (naming clarity, docstring accuracy)\n\n### Instructions:\n1. Read DIFF_FILE and trace execution paths through modified files.\n2. Identify defects and draft inline ` ```suggestion ` blocks following .agents/skills/forge-review/resources/comment-template.md.\n3. Write full structured review report to OUTPUT_FILE.\n4. Return strictly the 4-line chat completion summary."
+  "Prompt": "You are the Deep Review Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- SKILL_FILE: \".agents/skills/deep-review/SKILL.md\"\n- CHECKLIST_FILE: \"docs/checklists/{domain}.md\" (if present)\n- OUTPUT_FILE: \".agents/results/result-deep-review-{SESSION_ID}.md\"\n\n### Objective:\nPerform a deterministic, evidence-based 9-dimension code audit on the changes in DIFF_FILE.\n\n### Evaluation Dimensions:\n1. Correctness (logic errors, broken invariants, unhandled conditions)\n2. Regression Risk (broken existing workflows, contract drift)\n3. State & Data Integrity (DB migrations, transaction boundaries, concurrency)\n4. UI / Rendering / UX (template tags, CSS/HTMX states, error handling)\n5. Test Coverage & Quality (missing assertions, test gaps, deterministic mocks)\n6. Performance & Scalability (N+1 queries, memory bottlenecks, unindexed lookups)\n7. Dead Code & Hygiene (unreachable code, unused imports)\n8. DRY & Architectural Consistency (duplicated logic, pattern conformity)\n9. Code Style & Maintainability (naming clarity, docstring accuracy)\n\n### Instructions:\n1. Read `.agents/skills/deep-review/SKILL.md` and domain checklist at `docs/checklists/{domain}.md` (if present).\n2. Read DIFF_FILE and trace execution paths through modified files in the workspace.\n3. Perform the 9-dimension audit and identify concrete defects with exact `file:line` citations.\n4. Draft inline ` ```suggestion ` replacement blocks following `.agents/skills/forge-review/resources/comment-template.md`.\n5. Write full structured review report to OUTPUT_FILE.\n6. Return strictly the 4-line chat completion summary."
 }
 ```
 
 ---
 
-### Prompt Template 3: `security-agent` (Security & Threat Specialist)
+### 3.3 Prompt Template 3: `security-agent` (Security & Threat Specialist)
 
 ```json
 {
   "TypeName": "self",
   "Role": "Security Review Specialist",
-  "Prompt": "You are the Security Review Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- OUTPUT_FILE: \".agents/results/result-security-{SESSION_ID}.md\"\n\n### Objective:\nPerform an exhaustive security and vulnerability audit on DIFF_FILE.\n\n### Threat Audit Dimensions:\n1. Authentication & Session Management (token handling, session fixation)\n2. Authorization & IDOR (object-level permissions, tenant scoping)\n3. Injection Flaws (SQLi, Command Injection, Template Injection, XSS)\n4. CSRF & State Mutation Protection (CSRF tokens, method constraints)\n5. Sensitive Data Exposure (leaked secrets, unmasked PII, insecure logging)\n6. Insecure Dependencies & Cryptographic Misconfigurations\n\n### Instructions:\n1. Read DIFF_FILE and search for authorization gaps and input sanitization flaws.\n2. Formulate concrete exploit scenarios for any surfaced vulnerabilities.\n3. Formulate precise remediation suggestion blocks following .agents/skills/forge-review/resources/comment-template.md.\n4. Write complete security audit artifact to OUTPUT_FILE.\n5. Return strictly the 4-line chat completion summary."
+  "Prompt": "You are the Security Review Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- SKILL_FILES: \".agents/skills/deepsec/SKILL.md\", \".agents/skills/review/SKILL.md\"\n- SECURITY_DOC: \"docs/SECURITY.md\" (if present)\n- OUTPUT_FILE: \".agents/results/result-security-{SESSION_ID}.md\"\n\n### Objective:\nPerform an exhaustive security and vulnerability audit on DIFF_FILE.\n\n### Threat Audit Dimensions:\n1. Authentication & Session Management (token handling, session fixation)\n2. Authorization & IDOR (object-level permissions, tenant scoping)\n3. Injection Flaws (SQLi, Command Injection, Template Injection, XSS)\n4. CSRF & State Mutation Protection (CSRF tokens, method constraints)\n5. Sensitive Data Exposure (leaked secrets, unmasked PII, insecure logging)\n6. Insecure Dependencies & Cryptographic Misconfigurations\n\n### Instructions:\n1. Read `.agents/skills/deepsec/SKILL.md` and `.agents/skills/review/SKILL.md` (and `docs/SECURITY.md` if present).\n2. Read DIFF_FILE and search for authorization gaps, IDOR vulnerabilities, and input sanitization flaws.\n3. Formulate concrete exploit scenarios for any surfaced vulnerabilities.\n4. Formulate precise remediation suggestion blocks following `.agents/skills/forge-review/resources/comment-template.md`.\n5. Write complete security audit artifact to OUTPUT_FILE.\n6. Return strictly the 4-line chat completion summary."
 }
 ```
+
+---
+
+### 3.4 Prompt Template 4: `review-verifier` (Review Verifier & Critic Specialist) & Execution Runbook
+
+#### A. Prompt Template 4
+
+```json
+{
+  "TypeName": "self",
+  "Role": "Review Verifier & Critic Specialist",
+  "Prompt": "You are the Review Verifier & Critic Specialist for forge-review.\n\n### Task Context:\n- SESSION_ID: \"{SESSION_ID}\"\n- RAW_REVIEW_FILE: \"{RAW_REVIEW_FILE_PATH}\"\n- DIFF_FILE: \"{DIFF_FILE_PATH}\"\n- OUTPUT_FILE: \".agents/results/review-pr-{PR_NUMBER}-{SESSION_ID}.md\"\n\n### Objective:\nFact-check, validate, and polish every finding and suggestion from RAW_REVIEW_FILE against the actual workspace codebase and DIFF_FILE before human presentation or forge submission.\n\n### 4-Step Verification Logic:\n1. **Check 1 (Ground Truth Fact-Check)**:\n   - For every finding, read the actual source code at the cited `file:line` in the workspace.\n   - If the claim is hallucinated, already handled, or debunked by surrounding code context, DROP the finding entirely.\n2. **Check 2 (Diff Hunk Validation)**:\n   - Cross-reference cited `file:line` against DIFF_FILE.\n   - Ensure the line falls strictly within modified/added diff hunks (the 'RIGHT' or '+' side of the PR diff).\n   - If the issue is valid but located on an untouched line outside the diff hunk, DEMOTE it from an inline comment to a labeled finding in the top-level review body (to prevent GitHub/GitLab HTTP 422 Unprocessable Entity errors).\n3. **Check 3 (Suggestion Syntax & Indentation Validation)**:\n   - Inspect every ` ```suggestion ` block.\n   - Verify indentation matches the exact target file indentation level (tabs vs spaces, exact column offset).\n   - Verify replacement code is syntactically valid and completely self-contained (no placeholder comments like `// rest of code`). Fix any broken suggestion blocks.\n4. **Check 4 (Deduplication & Severity Calibration)**:\n   - Merge overlapping or redundant findings from the QA, Deep Review, and Security sweeps into a single authoritative finding.\n   - Calibrate severity levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `NIT`) based on actual impact and reachability.\n\n### Instructions:\n1. Read RAW_REVIEW_FILE and parse all candidate findings and inline comments.\n2. Read DIFF_FILE and inspect the target files in the workspace.\n3. Execute the 4-Step Verification Logic on every item.\n4. Generate the final verified review artifact conforming to `.agents/skills/forge-review/resources/review-template.md` and write to OUTPUT_FILE.\n5. Return strictly the 4-line chat completion summary."
+}
+```
+
+#### B. Subagent 4 Execution Runbook
+
+The `review-verifier` agent acts as the critical quality firewall between raw multi-agent review suggestions and human/forge publication. It ensures zero false positives, zero invalid suggestion blocks, and zero forge API rejections.
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    Subagent 4: 4-Step Execution Runbook                  │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 1: Ingestion & Inventory                                            │
+│   - Load RAW_REVIEW_FILE (.agents/results/raw-review-pr-*.md)            │
+│   - Parse all Acceptance Criteria results, 9-dimension issues, & comments │
+│   - Index every candidate finding by (file, start_line, end_line)        │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 2: Check 1 — Ground Truth Fact-Checking                             │
+│   - For each finding: view_file on workspace target file at cited lines   │
+│   - Verify: Does the defect truly exist in the current source code?      │
+│   - Verify: Is the condition already mitigated by callers or frameworks? │
+│   - Action: DROP finding if debunked, hallucinated, or non-reproducible  │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 3: Check 2 — Diff Hunk Validation & 422 Prevention                  │
+│   - Parse DIFF_FILE hunk boundaries (@@ -a,b +c,d @@)                    │
+│   - Check: Is the cited target line inside a modified diff hunk?         │
+│   - Action: If YES -> Retain as inline diff comment                      │
+│   - Action: If NO -> DEMOTE to top-level review body (prevents 422 error)│
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 4: Check 3 — Suggestion Syntax & Indentation Normalization          │
+│   - Extract ```suggestion block from each candidate comment              │
+│   - Check indentation against surrounding workspace lines (spaces/tabs)  │
+│   - Check syntax validity (valid Python/TS/HTML AST, imports present)    │
+│   - Action: Rewrite and correct any malformed or incomplete suggestions  │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 5: Check 4 — Deduplication & Severity Calibration                   │
+│   - Detect duplicate reports across QA, Deep Review, & Security agents   │
+│   - Merge duplicate findings into a single unified comment               │
+│   - Calibrate severity (CRITICAL, HIGH, MEDIUM, LOW, NIT)                │
+│   - Compute final verdict: REQUEST_CHANGES | COMMENT | APPROVE           │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 6: Final Review Emission                                            │
+│   - Write verified deliverable to OUTPUT_FILE conforming to              │
+│     resources/review-template.md                                         │
+│   - Output standard 4-line completion summary with verification metrics  │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+##### Detailed Step Execution Guidelines:
+
+1. **Step 1: Ingestion & Inventory**:
+   - Parse all tables, sections, and inline suggestion payloads from `RAW_REVIEW_FILE`.
+   - Record initial counts: `total_raw_findings`, `total_inline_candidates`.
+
+2. **Step 2: Check 1 — Ground Truth Fact-Checking**:
+   - Inspect the live workspace file around the cited line numbers.
+   - Example False Positive / Drop Rule: If Subagent 2 reports "Missing null check on user profile", but `user` is guaranteed non-null by an upstream authentication middleware or model validator, mark as `DROPPED (Ground Truth Refutation)`.
+   - Keep an internal audit log of dropped findings with brief rationales.
+
+3. **Step 3: Check 2 — Diff Hunk Validation (422 Error Guard)**:
+   - Forge providers (GitHub and GitLab) return HTTP 422 Unprocessable Entity if an inline comment is placed on a line not included in the unified diff patch.
+   - For every inline comment candidate:
+     - Check `diff.patch` for `+` lines or context lines within active hunks.
+     - If the target line is outside the hunk, remove it from the inline comments list and add it to the top-level review markdown under **"Non-Diff File Observations / Systemic Concerns"**.
+
+4. **Step 4: Check 3 — Suggestion Syntax & Indentation Normalization**:
+   - Ensure the suggestion block uses valid markdown ` ```suggestion ` syntax.
+   - Align indentation with exact prefix whitespace of the original target line in the workspace.
+   - Ensure suggestions are atomic and complete replacements for the specified `start_line` to `line` range.
+
+5. **Step 5: Check 4 — Deduplication & Severity Calibration**:
+   - If Subagent 1 (QA) and Subagent 2 (Deep Review) both report the same missing error handler on `tutoring/views.py:88`, combine them into one high-severity finding citing both acceptance criteria impact and code quality impact.
+   - Recalculate the overall verdict:
+     - 🔴 `REQUEST_CHANGES`: Any verified `CRITICAL` / `HIGH` finding or `INCOMPLETE` / `DEVIATED` Acceptance Criterion.
+     - 🟡 `COMMENT`: Only `MEDIUM` / `LOW` findings.
+     - 🟢 `APPROVE`: Zero blocking defects, all Acceptance Criteria `VERIFIED`.
+
+6. **Step 6: Final Output Writing**:
+   - Write the finalized markdown artifact to `OUTPUT_FILE` (`.agents/results/review-pr-{PR_NUMBER}-{SESSION_ID}.md`).
+   - The file is now guaranteed safe for direct ingestion by the orchestrator and publication to the forge.
 
 ---
 
@@ -282,7 +385,9 @@ GitHub imposes a 65,536-character limit on review comments and issue bodies.
 If any subagent encounters an error or returns `Status: FAILED`:
 1. The orchestrator must not crash.
 2. Inspect the failed subagent's `OUTPUT_FILE` diagnostic report.
-3. If partial findings exist, ingest them with a `[PARTIAL_EVALUATION]` annotation.
-4. Record an explicit audit note in the top-level review:
+3. If partial findings exist from Subagents 1, 2, or 3, ingest them into `RAW_REVIEW_FILE` with a `[PARTIAL_EVALUATION]` annotation before passing to `review-verifier`.
+4. If Subagent 4 (`review-verifier`) encounters a failure, orchestrator falls back to raw synthesis with automated lint validation or retries Subagent 4.
+5. Record an explicit audit note in the top-level review:
    `> [!WARNING] The Security Specialist evaluation was partially degraded due to tool timeouts. Manual review of authentication boundaries recommended.`
-5. Set review verdict to `COMMENT` or `REQUEST_CHANGES` depending on the severity of available findings.
+6. Set review verdict to `COMMENT` or `REQUEST_CHANGES` depending on the severity of available findings.
+

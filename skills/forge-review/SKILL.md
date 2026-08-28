@@ -38,8 +38,10 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 - `forge`: GitHub (`gh`) or GitLab (`glab`), auto-detected via `git remote get-url origin`.
 
 ### Expected outputs
-- Saved audit artifact at `.agents/results/review-pr-{n}-{sessionId}.md`.
-- Staged unified diff saved at `.agents/results/diff-pr-{n}-{sessionId}.patch`.
+- Raw audit findings at `.agents/results/raw-review-{n}-{sessionId}.md`.
+- Pristine, verified audit artifact at `.agents/results/review-pr-{n}-{sessionId}.md`.
+- Staged unified diff saved at `.agents/results/diff-pr-{n}.patch` (or `.agents/results/diff-pr-{n}-{sessionId}.patch`).
+- Issue specification saved at `.agents/results/spec-issue-{n}.md` (or `.agents/results/spec-issue-{n}-{sessionId}.md`).
 - Alignment scorecard and 9-dimension deep review summary in chat.
 - User-approved formal Forge Review (`REQUEST_CHANGES`, `APPROVE`, `COMMENT`).
 - Line-level inline diff comments with self-contained ` ```suggestion ` blocks.
@@ -54,8 +56,8 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
   "pr_number": 42,
   "issue_number": 154,
   "epic_number": 12,
-  "diff_file": ".agents/results/diff-pr-42-<sessionId>.patch",
-  "spec_file": ".agents/results/spec-issue-154-<sessionId>.md",
+  "diff_file": ".agents/results/diff-pr-42.patch",
+  "spec_file": ".agents/results/spec-issue-154.md",
   "subagents": {
     "qa_alignment": {
       "status": "pending|running|complete|failed",
@@ -68,8 +70,14 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
     "security_audit": {
       "status": "pending|running|complete|failed",
       "result_file": ".agents/results/result-security-audit-pr-42-<sessionId>.md"
+    },
+    "review_verifier": {
+      "status": "pending|running|complete|failed",
+      "raw_input_file": ".agents/results/raw-review-42-<sessionId>.md",
+      "result_file": ".agents/results/review-pr-42-<sessionId>.md"
     }
   },
+  "raw_review_file": ".agents/results/raw-review-42-<sessionId>.md",
   "review_summary_file": ".agents/results/review-pr-42-<sessionId>.md",
   "verdict": "REQUEST_CHANGES|APPROVE|COMMENT",
   "comments_staged": 5,
@@ -90,7 +98,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 ### Control-flow features
 - Branching by forge provider (`gh` vs `glab`).
 - Branching by review target (Issue-linked PR vs Standalone PR vs Local Branch).
-- Parallel subagent delegation across 3 isolated analysis domains (Contract Alignment, 9-Dimension Deep QA, Security Audit).
+- Two-stage 4-Agent Architecture: 3 parallel detector subagents (Contract Alignment, 9-Dimension Deep QA, Security Audit) followed by 1 independent codebase verification & hunk-checking subagent (`review-verifier`).
 - Hard Human Approval Gate (`ask_question` / user prompt) before any forge mutation or review publication.
 - Idempotency guard and rate-limiting backoff for batch inline review comments.
 
@@ -113,12 +121,12 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 ### Scenes
 
 1. **ACQUIRE**:
-   - Fetch the full unified diff of the PR/branch and write to `.agents/results/diff-pr-{n}-{sessionId}.patch` (or `diff-branch-{name}-{sessionId}.patch`).
-   - If linked to an issue, fetch the full issue specification, acceptance criteria, and parent epic details; write to `.agents/results/spec-issue-{n}-{sessionId}.md`.
+   - Fetch the full unified diff of the PR/branch and write to `.agents/results/diff-pr-{n}.patch` (or `.agents/results/diff-pr-{n}-{sessionId}.patch`).
+   - If linked to an issue, fetch the full issue specification, acceptance criteria, and parent epic details; write to `.agents/results/spec-issue-{n}.md` (or `.agents/results/spec-issue-{n}-{sessionId}.md`).
    - Initialize the run state file at `.agents/results/forge-review/<sessionId>/state.json`.
 
 2. **DELEGATE_AUDIT**:
-   - Dispatch 3 specialized subagents concurrently using `invoke_subagent` (or `task` tool) following the Subagent Delegation Contract (anti-context-dilution):
+   - Dispatch 3 specialized detector subagents concurrently using `invoke_subagent` (or `task` tool) following the Subagent Delegation Contract (anti-context-dilution):
      - **Subagent 1 (Contract Alignment Agent / `qa-agent`)**:
        - Loads `skills/review/SKILL.md`.
        - Reads `DIFF_FILE` and `SPEC_FILE` from disk.
@@ -134,26 +142,36 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
        - Audits OWASP Top 10 vulnerabilities (SQLi, XSS, SSRF, IDOR), authorization decorators/middleware, secret leakage, and input sanitization.
        - Saves security report and staged security suggestions to `.agents/results/result-security-audit-pr-{n}-{sessionId}.md`.
 
-3. **SYNTHESIZE**:
-   - Orchestrator waits reactively for all 3 subagents to complete.
+3. **RAW_SYNTHESIZE**:
+   - Orchestrator waits reactively for all 3 detector subagents to complete.
    - Reads the 3 result files from disk.
-   - Aggregates findings into the unified review deliverable at `.agents/results/review-pr-{n}-{sessionId}.md` conforming to `resources/review-template.md`.
-   - Determines the overall review verdict:
-     - 🔴 `REQUEST_CHANGES`: Any Critical/High security issue, broken acceptance criteria, or severe functional regression.
-     - 🟡 `COMMENT`: Medium/Low non-blocking improvements or questions.
-     - 🟢 `APPROVE`: All acceptance criteria met with high quality, no Critical/High findings, passing tests.
-   - Compiles the structured inline comment registry (path, line number/range, severity, problem, suggestion block).
+   - Writes combined raw findings and unvetted suggestions to `.agents/results/raw-review-{n}-{sessionId}.md` without dropping or preemptively editing findings.
 
-4. **PRESENT & GATE (Human Approval Gate)**:
-   - Present the comprehensive alignment scorecard, multi-dimension audit findings, and staged inline comments directly in chat.
-   - Prompt the user with explicit choice options via `ask_question`:
+4. **DELEGATE_VERIFICATION**:
+   - Orchestrator dispatches **Subagent 4 (`review-verifier`)** via `invoke_subagent`.
+   - Subagent 4 independently loads `.agents/results/raw-review-{n}-{sessionId}.md`, the diff patch, and directly inspects the target codebase repository files:
+     - Verifies and grounds every finding against actual source code and PR diff hunks.
+     - Checks diff hunks: demotes findings on untouched or unmodified lines to top-level summary findings (preventing invalid inline comments outside diff hunks).
+     - Validates and fixes ` ```suggestion ` replacement block syntax, ensuring exact whitespace matching and syntactically sound replacements.
+     - Deduplicates overlapping findings across the 3 detector subagents.
+     - Drops false positives with documented justification.
+     - Writes pristine, verified review deliverable at `.agents/results/review-pr-{n}-{sessionId}.md` conforming to `resources/review-template.md`.
+     - Determines the verified overall review verdict:
+       - 🔴 `REQUEST_CHANGES`: Any verified Critical/High security issue, broken acceptance criteria, or severe functional regression.
+       - 🟡 `COMMENT`: Medium/Low non-blocking improvements or questions.
+       - 🟢 `APPROVE`: All acceptance criteria met with high quality, no Critical/High findings, passing tests.
+
+5. **PRESENT & GATE (Human Approval Gate)**:
+   - Orchestrator loads pristine `.agents/results/review-pr-{n}-{sessionId}.md`.
+   - Displays verified Alignment Table, Scorecard, and Staged Suggestions directly in chat.
+   - Executes the single Human Approval Gate via `ask_question`:
      - Option 1 (Recommended): `Submit formal review ({VERDICT}) and publish {N} inline diff suggestions to the forge.`
      - Option 2: `Submit top-level summary review only (do not publish inline comments).`
      - Option 3: `Edit/revise staged review before publishing.`
      - Option 4: `Abort without publishing to the remote forge.`
    - **STRICT FORBIDDEN ACTION**: The orchestrator MUST NOT publish reviews or post comments to the remote forge without explicit user confirmation.
 
-5. **PUBLISH**:
+6. **PUBLISH**:
    - Upon receiving user approval, execute forge API operations per `_shared/runtime/providers.md`:
      - **GitHub (`gh`)**:
        - Submit batch review with top-level body and line comments via `gh api /repos/{owner}/{repo}/pulls/{n}/reviews`:
@@ -178,7 +196,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
        - Create discussion threads for inline suggestions via `glab api projects/:pid/merge_requests/:iid/discussions` with position metadata (`base_sha`, `head_sha`, `start_sha`, `new_path`, `new_line`).
    - Update `.agents/results/forge-review/<sessionId>/state.json` with published review IDs and timestamps.
 
-6. **FINALIZE**:
+7. **FINALIZE**:
    - Verify that the review and comments are live on the forge.
    - Provide clickable links to the published PR review and discussion threads.
    - Report immutable artifact paths on disk.
@@ -195,13 +213,45 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
                               └─────────────────┬────────────────┘
                                                 │
                  ┌──────────────────────────────┼──────────────────────────────┐
-                 │ (Dispatched in Parallel)     │                              │
+                 │ (Stage 1: Dispatched in Parallel)                           │
                  ▼                              ▼                              ▼
      ┌───────────────────────┐      ┌───────────────────────┐      ┌───────────────────────┐
      │   SUBAGENT 1 (Task)   │      │   SUBAGENT 2 (Task)   │      │   SUBAGENT 3 (Task)   │
      │   Contract Alignment  │      │  9-Dimension Deep QA  │      │   Security Auditor    │
      │   (Loads `review`)    │      │ (Loads `deep-review`) │      │   (Loads `deepsec`)   │
-     └───────────────────────┘      └───────────────────────┘      └───────────────────────┘
+     └───────────┬───────────┘      └───────────┬───────────┘      └───────────┬───────────┘
+                 │                              │                              │
+                 └──────────────────────────────┼──────────────────────────────┘
+                                                ▼
+                              ┌──────────────────────────────────┐
+                              │      Scene 3: RAW_SYNTHESIZE     │
+                              │ `.agents/results/raw-review.md`  │
+                              └─────────────────┬────────────────┘
+                                                │
+                                                ▼ (Stage 2: Verification Dispatch)
+                              ┌──────────────────────────────────┐
+                              │   SUBAGENT 4 (`review-verifier`) │
+                              │   Codebase Grounding, Hunk Check,│
+                              │   Syntax Fixes, & Deduplication  │
+                              └─────────────────┬────────────────┘
+                                                │
+                                                ▼
+                              ┌──────────────────────────────────┐
+                              │    PRISTINE REVIEW ARTIFACT      │
+                              │ `.agents/results/review-pr.md`   │
+                              └─────────────────┬────────────────┘
+                                                │
+                                                ▼
+                              ┌──────────────────────────────────┐
+                              │   Scene 5: PRESENT & GATE        │
+                              │   (Human Approval Gate)          │
+                              └─────────────────┬────────────────┘
+                                                │
+                                                ▼
+                              ┌──────────────────────────────────┐
+                              │   Scene 6: PUBLISH & FINALIZE    │
+                              │   (Forge API Submission)         │
+                              └──────────────────────────────────┘
 ```
 
 ### Transitions
@@ -219,10 +269,11 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 | Forge rejects inline line position | File renamed or line offset shifted | Verify commit SHA match; fallback to posting comment at file-level or top-level review. |
 | Secondary rate limit / 429 | Too many rapid API requests | Exponential backoff (5s, 15s, 45s); pace inline comment submissions; resume from `state.json`. |
 | Subagent audit timeout or failure | Process error in subagent | Resend prompt or re-spawn single failed subagent; do not re-run passed subagents. |
+| Verification hunk mismatch | Detector hallucinated line or target outside hunk | Subagent 4 demotes finding to top-level review body, preserving audit trail without API failure. |
 
 ### Exit
-- **Success**: PR/MR diff and contract thoroughly audited across all 3 domains; structured report synthesized; user approval obtained; formal review and inline suggestions published to remote forge; URLs reported.
-- **Partial Success**: Full audit completed and artifact saved locally, but forge publication skipped or declined by user.
+- **Success**: PR/MR diff and contract thoroughly audited across all 3 detector domains, verified and grounded by Subagent 4; structured report synthesized; user approval obtained; formal review and inline suggestions published to remote forge; URLs reported.
+- **Partial Success**: Full audit and verification completed and artifact saved locally, but forge publication skipped or declined by user.
 - **Failure**: Unrecoverable authentication error, missing target PR/diff, or fatal API failure; failure state recorded in `state.json`.
 
 ---
@@ -234,19 +285,22 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 |:---|:---|:---|
 | Detect provider & auth | `READ` | `_shared/runtime/providers.md`, `git remote get-url origin`, `gh/glab repo view` |
 | Resolve review target | `INFER` / `REQUEST` | PR metadata, closing keywords (`Closes #N`), `ask_question` |
-| Fetch diff & issue spec | `READ` / `WRITE` | `gh pr diff`, `gh issue view`, `glab mr diff`, `.agents/results/diff-pr-*.patch` |
-| Dispatch audit subagents | `TRANSFER` | `invoke_subagent` / `task` tool with pass-by-reference file paths |
+| Fetch diff & issue spec (Scene 1) | `READ` / `WRITE` | `gh pr diff`, `gh issue view`, `glab mr diff`, `.agents/results/diff-pr-*.patch` |
+| Dispatch detector subagents (Scene 2) | `TRANSFER` | `invoke_subagent` for Subagents 1, 2, 3 in parallel |
 | Audit contract alignment | `COMPARE` / `VALIDATE` | Subagent 1 report: `.agents/results/result-qa-alignment-pr-*.md` |
 | 9-dimension deep review | `VALIDATE` | Subagent 2 report: `.agents/results/result-deep-review-pr-*.md` |
 | Security & OWASP audit | `VALIDATE` | Subagent 3 report: `.agents/results/result-security-audit-pr-*.md` |
-| Synthesize review artifact | `WRITE` | `.agents/results/review-pr-{n}-{sessionId}.md` |
-| Human approval gate | `VALIDATE` / `REQUEST` | Chat presentation & `ask_question` interactive decision |
-| Publish formal review | `CALL_TOOL` | Forge CLI / API mutation (`gh api`, `glab api`) |
-| Report completion | `NOTIFY` | Chat output with URLs and standard 4-line completion summary |
+| Synthesize raw review (Scene 3) | `WRITE` | `.agents/results/raw-review-{n}-{sessionId}.md` |
+| Dispatch verification subagent (Scene 4) | `TRANSFER` | `invoke_subagent` for Subagent 4 (`review-verifier`) |
+| Codebase grounding & hunk verification | `VALIDATE` / `COMPARE` | Subagent 4 diff hunk check, syntax validation, deduplication |
+| Write pristine review artifact | `WRITE` | `.agents/results/review-pr-{n}-{sessionId}.md` |
+| Human approval gate (Scene 5) | `VALIDATE` / `REQUEST` | Chat presentation & `ask_question` interactive decision |
+| Publish formal review (Scene 6) | `CALL_TOOL` | Forge CLI / API mutation (`gh api`, `glab api`) |
+| Finalize and report completion (Scene 7) | `NOTIFY` | Chat output with URLs and standard 4-line completion summary |
 
 ### Tools and Instruments
 - `gh` (GitHub CLI) & `glab` (GitLab CLI) per `_shared/runtime/providers.md`.
-- `invoke_subagent` / `task` tool for parallel subagent execution.
+- `invoke_subagent` / `task` tool for parallel and verification subagent execution.
 - `ask_question` tool for interactive human approval gates.
 - `view_file` / `write_to_file` / `replace_file_content` for file-first state management.
 - `resources/comment-template.md` for inline diff suggestions.
@@ -258,27 +312,33 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 git remote get-url origin
 gh repo view || glab repo view
 
-# 2. Acquire diff and issue contract to disk
-gh pr diff 42 > .agents/results/diff-pr-42-${SESSION_ID}.patch
-gh issue view 154 --json title,body,labels > .agents/results/spec-issue-154-${SESSION_ID}.md
+# 2. Acquire diff and issue contract to disk (Scene 1: ACQUIRE)
+gh pr diff 42 > .agents/results/diff-pr-42.patch
+gh issue view 154 --json title,body,labels > .agents/results/spec-issue-154.md
 
-# 3. Delegate audits to subagents in parallel (Pass-by-Reference)
+# 3. Delegate audits to 3 detector subagents in parallel (Scene 2: DELEGATE_AUDIT)
 # Subagents write results to .agents/results/result-*-pr-42-${SESSION_ID}.md
 
-# 4. Synthesize review deliverable
-# Orchestrator compiles .agents/results/review-pr-42-${SESSION_ID}.md
+# 4. Synthesize raw review findings (Scene 3: RAW_SYNTHESIZE)
+# Orchestrator compiles raw findings into .agents/results/raw-review-42-${SESSION_ID}.md
 
-# 5. Present in chat & execute Human Approval Gate via ask_question
+# 5. Delegate verification to Subagent 4 (Scene 4: DELEGATE_VERIFICATION)
+# Subagent 4 (review-verifier) inspects codebase, checks diff hunks, fixes syntax, and writes:
+# .agents/results/review-pr-42-${SESSION_ID}.md
 
-# 6. Publish approved review and inline suggestions to Forge API
+# 6. Present in chat & execute Human Approval Gate via ask_question (Scene 5: PRESENT & GATE)
+
+# 7. Publish approved review and inline suggestions to Forge API (Scene 6: PUBLISH)
 gh api /repos/{owner}/{repo}/pulls/42/reviews --input payload.json
+
+# 8. Finalize and return 4-line chat summary (Scene 7: FINALIZE)
 ```
 
 ### Resource Scope
 | Scope | Resource Target |
 |:---|:---|
 | `CODEBASE` | Target repository git remote, PR branches, and working tree (read-only audit; no source edits) |
-| `LOCAL_FS` | `.agents/results/` (diff patches, issue specs, subagent audit results, review summary, `state.json`) |
+| `LOCAL_FS` | `.agents/results/` (diff patches, issue specs, subagent audit results, raw review, review summary, `state.json`) |
 | `PROCESS` | `gh` / `glab` CLI processes and git commands |
 | `NETWORK/FORGE` | GitHub REST/GraphQL API or GitLab API endpoints |
 
@@ -289,7 +349,7 @@ gh api /repos/{owner}/{repo}/pulls/42/reviews --input payload.json
 - Working directory is inside a valid git repository with remote `origin` configured.
 
 ### Effects and Side Effects
-- Audit artifacts and diff patches written to `.agents/results/`.
+- Audit artifacts, diff patches, raw findings, and verified review written to `.agents/results/`.
 - State file updated at `.agents/results/forge-review/<sessionId>/state.json`.
 - Formal review status and comments posted to remote forge (only after explicit human approval).
 - Zero source code files modified in the repository.
@@ -297,9 +357,10 @@ gh api /repos/{owner}/{repo}/pulls/42/reviews --input payload.json
 ### Guardrails
 1. **Human Approval Gate (NON-NEGOTIABLE)**: Never publish reviews, approve PRs, request changes, or post inline comments to the remote forge without presenting the staged review and receiving explicit confirmation via `ask_question`.
 2. **Anti-Context-Dilution Subagent Delegation**: Orchestrator is strictly forbidden from performing unified diff audits directly in the main context. Audits must be delegated to specialized subagents.
-3. **File-First State I/O**: Pass artifacts between orchestrator and subagents via disk references (`.agents/results/`), never via bloated in-memory prompt strings.
-4. **Self-Contained Inline Suggestions**: All inline comments proposing code changes MUST include syntactically valid, self-contained ` ```suggestion ` replacement blocks.
-5. **Rigorous Evidence Citation**: Every acceptance criterion and defect finding must cite explicit `file:line` references from the diff.
+3. **Mandatory 100% Subagent 4 Verification**: 100% of raw findings from Subagents 1, 2, and 3 MUST be independently verified, hunk-checked, syntax-validated, and grounded against real codebase files by Subagent 4 (`review-verifier`) before review presentation. Raw, unverified findings must never be presented directly to the user or published to the forge.
+4. **File-First State I/O**: Pass artifacts between orchestrator and subagents via disk references (`.agents/results/`), never via bloated in-memory prompt strings.
+5. **Self-Contained Inline Suggestions & Hunk Alignment**: All inline comments proposing code changes MUST include syntactically valid, self-contained ` ```suggestion ` replacement blocks that fall strictly within modified diff hunks. Untouched lines must be demoted to top-level summary comments.
+6. **Rigorous Evidence Citation**: Every acceptance criterion and defect finding must cite explicit `file:line` references from the diff.
 
 ---
 
