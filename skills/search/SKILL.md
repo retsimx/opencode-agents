@@ -163,15 +163,15 @@ Follow `.agents/skills/search/resources/execution-protocol.md` step by step.
 See `.agents/skills/search/resources/examples.md` for input/output examples.
 Use `.agents/skills/search/resources/intent-rules.md` for intent classification reference.
 Use `.agents/skills/search/resources/trust-registry.md` for domain trust scoring reference.
-Before submitting, run `.agents/skills/search/resources/checklist.md`.
+Before submitting, run `docs/checklists/search.md` (or `.agents/skills/search/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Execution steps: `.agents/skills/search/resources/execution-protocol.md`
 - Intent classification: `.agents/skills/search/resources/intent-rules.md`
 - Trust registry: `.agents/skills/search/resources/trust-registry.md`
 - Examples: `.agents/skills/search/resources/examples.md`
-- Checklist: `.agents/skills/search/resources/checklist.md`
+- Checklist: `docs/checklists/search.md` (fallback: `.agents/skills/search/resources/checklist.md`)
 - Error recovery: `.agents/skills/search/resources/error-playbook.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug post-mortems & RCAs: `.agents/results/bugs/`

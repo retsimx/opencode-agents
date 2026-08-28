@@ -3,12 +3,12 @@
 ## Step 0: Prepare
 1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Quick security + quality check | **Medium**: Full 4 steps | **Complex**: Full + prioritized scope
-2. **Check lessons**: read QA section in `.agents/skills/_shared/core/lessons-learned.md`
+2. **Check domain checklist**: read `docs/checklists/<domain>.md` (or `docs/checklists/qa.md`, fallback: `.agents/skills/review/resources/checklist.md`) and check relevant `.agents/results/bugs/`
 3. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: security/auth concerns, existing code conflict potential?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
 4. **Budget context**: follow `.agents/skills/_shared/core/context-budget.md` (prioritize high-risk files)
-5. **After review**: add recurring issues to `.agents/skills/_shared/core/lessons-learned.md`
+5. **After review**: record RCAs in `.agents/results/bugs/` and extract recurring prevention rules to `docs/checklists/<domain>.md`
 6. **If standards matter**: read `.agents/skills/review/resources/iso-quality.md`
 
 **Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
@@ -36,7 +36,7 @@ When applicable, map findings and gaps to:
 - **ISO/IEC 25010** quality characteristics
 - **ISO/IEC 29119** test planning, design, traceability, and exit criteria
 
-Use `.agents/skills/review/resources/checklist.md` (renamed review-checklist) as the comprehensive review guide.
+Use `docs/checklists/qa.md` or `docs/checklists/<domain>.md` (fallback: `.agents/skills/review/resources/checklist.md`) as the comprehensive review guide.
 
 ## Step 2.5: Runtime Verification
 
@@ -170,7 +170,8 @@ Generate structured report with:
 
 ## Step 4: Verify
 - Run `.agents/skills/review/resources/self-check.md` to verify your own review quality
-- Ensure no false positives (each finding is real and reproducible)
+- Verify against domain checklists (`docs/checklists/<domain>.md`) with explicit line-number citations (e.g. `- [x] Rule: Verified path/to/file:L42`)
+- Ensure no false positives (each finding is real and reproducible with exact line references)
 - Confirm remediation suggestions are correct and complete
 - Run `.agents/skills/_shared/core/common-checklist.md` for general quality
 

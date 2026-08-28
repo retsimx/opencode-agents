@@ -124,7 +124,7 @@ Then run the smallest reproduction command first, add a regression test, and re-
 3. Minimal fix: change only what's necessary
 4. Every fix gets a regression test
 5. Search for similar patterns elsewhere after fixing
-6. Document in `.agents/results/bugs/`
+6. Document in `.agents/results/bugs/` and extract 1-line guardrail to `docs/checklists/<domain>.md` (Bug Closure Gate)
 
 ### grep/glob/read
 - `grep("functionName")`: Locate the function
@@ -134,12 +134,12 @@ Then run the smallest reproduction command first, add a regression test, and re-
 ## References
 Follow `.agents/skills/debug/resources/execution-protocol.md` step by step.
 See `.agents/skills/debug/resources/examples.md` for input/output examples.
-Before submitting, run `.agents/skills/debug/resources/checklist.md`.
+Before submitting, run `docs/checklists/<domain>.md` (or `.agents/skills/debug/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Execution steps: `.agents/skills/debug/resources/execution-protocol.md`
 - Code examples: `.agents/skills/debug/resources/examples.md`
-- Checklist: `.agents/skills/debug/resources/checklist.md`
+- Checklist: `docs/checklists/<domain>.md` (fallback: `.agents/skills/debug/resources/checklist.md`)
 - Error recovery: `.agents/skills/debug/resources/error-playbook.md`
 - Bug report template: `.agents/skills/debug/resources/bug-report-template.md`
 - Common patterns: `.agents/skills/debug/resources/common-patterns.md`
@@ -147,4 +147,4 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug post-mortems & RCAs: `.agents/results/bugs/`

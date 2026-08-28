@@ -187,19 +187,19 @@ To extend: add `.agents/skills/frontend/resources/<name>.md` and append a row ab
 ## References
 
 1. Follow `.agents/skills/frontend/resources/execution-protocol.md` step by step.
-2. Before submitting, run `.agents/skills/frontend/resources/checklist.md`.
+2. Before submitting, run `docs/checklists/frontend.md` (or `.agents/skills/frontend/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 
 - Project frontend rules (MUST load before review/implementation): `../../rules/frontend.md`
 - Execution steps: `.agents/skills/frontend/resources/execution-protocol.md`
-- Checklist: `.agents/skills/frontend/resources/checklist.md`
+- Checklist: `docs/checklists/frontend.md` (fallback: `.agents/skills/frontend/resources/checklist.md`)
 - Error recovery: `.agents/skills/frontend/resources/error-playbook.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug investigations & RCAs: `.agents/results/bugs/`
 
 > [!IMPORTANT]
 > Treat `components/ui/*` as read-only. Create wrappers for customization.

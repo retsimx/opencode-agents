@@ -163,12 +163,12 @@ Before finalizing the report, walk `.agents/skills/review/resources/self-check.m
 
 ## References
 
-- Review checklist: `.agents/skills/review/resources/checklist.md`
+- Review checklist: `docs/checklists/qa.md` or `docs/checklists/<domain>.md` (fallback: `.agents/skills/review/resources/checklist.md`)
 - Self-check before report: `.agents/skills/review/resources/self-check.md`
 - Report examples: `.agents/skills/review/resources/examples.md`
 - Execution protocol: `.agents/skills/review/resources/execution-protocol.md`
 - ISO/IEC quality guide: `.agents/skills/review/resources/iso-quality.md`
 - Error recovery: `.agents/skills/review/resources/error-playbook.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug post-mortems & RCAs: `.agents/results/bugs/`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`

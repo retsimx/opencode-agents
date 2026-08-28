@@ -285,7 +285,7 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 If Quality Score was measured during this session:
 1. Measure final Quality Score
 2. Generate Experiment Ledger summary (total experiments, keep rate, net delta)
-3. Auto-generate lessons from discarded experiments (delta <= -5) into `.agents/skills/_shared/core/lessons-learned.md`
+3. Auto-generate post-mortems from discarded experiments (delta <= -5) into `.agents/results/bugs/` and extract guardrail rules into `docs/checklists/<domain>.md`
 4. Append Quality Score Progression and Experiment Summary to session metrics
 
 **Always** (regardless of Quality Score availability):
@@ -343,6 +343,6 @@ This workflow conditionally incorporates patterns from autoresearch:
 | **Keep/Discard** | When quality score is measured | quality-score delta rules |
 | **Experiment logging** | When baseline is established | `.agents/skills/_shared/conditional/experiment-ledger.md` (via coordination protocol) |
 | **Hypothesis exploration** | On repeated gate failures | `.agents/skills/_shared/conditional/exploration-loop.md` (loaded on trigger) |
-| **Auto-learning** | At session end, if experiments exist | lessons-learned auto-generation |
+| **Auto-learning** | At session end, if experiments exist | checklist guardrail & bug post-mortem auto-generation |
 
 All protocols are loaded **conditionally** per `.agents/skills/_shared/core/context-loading.md`, not at Phase 0.

@@ -7,7 +7,7 @@
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
 3. **Use reasoning templates**: for architecture decisions, use `.agents/skills/_shared/core/reasoning-templates.md` (decision matrix)
-4. **Check lessons**: read cross-domain section in `.agents/skills/_shared/core/lessons-learned.md`
+4. **Check architectural context & debt**: read ARCHITECTURE.md, docs/design-docs/, docs/product-specs/, and docs/plans/work/tech-debt-tracker.md
 5. **If governance, risk, or formal planning matters**: read `.agents/skills/plan/resources/iso-planning.md`
 
 **Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.

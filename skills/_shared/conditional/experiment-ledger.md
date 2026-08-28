@@ -93,11 +93,11 @@ IMPL: {score} → VERIFY: {score} → REFINE: {score} → Final: {score}
 
 ---
 
-## Integration with Lessons Learned
+## Integration with Checklists & Post-Mortems
 
-Discarded experiments with **delta <= -5** auto-generate lesson candidates at session end.
+Discarded experiments with **delta <= -5** auto-generate post-mortems in `.agents/results/bugs/` and guardrail rules into `docs/checklists/<domain>.md` at session end.
 
-Format (matches `.agents/skills/_shared/core/lessons-learned.md` RCA format):
+Format (saved as post-mortem in `.agents/results/bugs/`):
 
 ```markdown
 ### {YYYY-MM-DD}: {agent-type} - {hypothesis} (DISCARDED, delta: {delta})
@@ -107,7 +107,7 @@ Format (matches `.agents/skills/_shared/core/lessons-learned.md` RCA format):
 - **Source**: Experiment Ledger #{experiment_number}, Session {session_id}
 ```
 
-The orchestrate appends these to the relevant domain section in `.agents/skills/_shared/core/lessons-learned.md`.
+The orchestrate saves the post-mortem in `.agents/results/bugs/` and extracts a 1-line operational rule into `docs/checklists/<domain>.md`.
 
 ---
 
@@ -118,5 +118,5 @@ The orchestrate appends these to the relevant domain section in `.agents/skills/
 | **Quality Score** | Provides score measurements for delta calculation |
 | **Exploration Loop** | Records parallel experiments and winner selection |
 | **Session Metrics** | Experiment count and keep rate in session summary |
-| **Lessons Learned** | DISCARD experiments (delta <= -5) auto-generate lessons |
+| **Checklists & Post-Mortems** | DISCARD experiments (delta <= -5) auto-generate post-mortems in `.agents/results/bugs/` and guardrails in `docs/checklists/` |
 | **Coordination Protocol** | Ledger uses the same `read` / `write` / `edit` tools as other `.agents/results/` files |

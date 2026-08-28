@@ -183,17 +183,16 @@ Router (HTTP) → Service (Business Logic) → Repository (Data Access) → Mode
 
 Follow `.agents/skills/backend/resources/execution-protocol.md` step by step.
 See `.agents/skills/backend/resources/examples.md` for input/output examples.
-Use `.agents/skills/backend/resources/orm-reference.md` when the task involves ORM query performance, relationship loading, transactions, session/client lifecycle, or N+1 analysis.
-Before submitting, run `.agents/skills/backend/resources/checklist.md`.
+Before submitting, run `docs/checklists/backend.md` (or `.agents/skills/backend/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Execution steps: `.agents/skills/backend/resources/execution-protocol.md`
 - Code examples: `.agents/skills/backend/resources/examples.md`
-- Checklist: `.agents/skills/backend/resources/checklist.md`
+- Checklist: `docs/checklists/backend.md` (fallback: `.agents/skills/backend/resources/checklist.md`)
 - ORM reference: `.agents/skills/backend/resources/orm-reference.md`
 - Error recovery: `.agents/skills/backend/resources/error-playbook.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug investigations & RCAs: `.agents/results/bugs/`

@@ -5,13 +5,17 @@ This saves context window and prevents confusion from irrelevant information.
 
 **Path convention (host project root):** Agents run with cwd = the host project that contains `.agents/`. Every load path below is from that root.
 
-| Kind | Format |
-|------|--------|
-| Shared | `.agents/skills/_shared/{core\|conditional\|runtime}/file.md` |
-| Current skill resource | `.agents/skills/<skill-name>/resources/file.md` |
-| Results | `.agents/results/...` |
+| Kind | Format | Resolution Priority |
+|------|--------|---------------------|
+| Project Checklists (Tier 1) | `docs/checklists/<domain>.md` | Primary (checked first in host project root) |
+| Shared | `.agents/skills/_shared/{core\|conditional\|runtime}/file.md` | Common framework protocols |
+| Current skill resource | `.agents/skills/<skill-name>/resources/file.md` | Skill-specific fallback |
+| Results & Post-Mortems (Tier 2) | `.agents/results/...` (e.g. `.agents/results/bugs/`) | Session artifacts & RCA reports |
 
 Short names in the agent mapping tables mean files under that agent's `.agents/skills/<skill>/resources/` directory.
+
+### Checklist Path Resolution Rule (CRITICAL)
+When loading checklists (pre-flight or verification), agents and orchestrators MUST check `docs/checklists/<domain>.md` in the host project root first. If `docs/checklists/<domain>.md` does not exist, fall back to `.agents/skills/<skill>/resources/checklist.md`.
 
 ---
 
@@ -21,24 +25,25 @@ Short names in the agent mapping tables mean files under that agent's `.agents/s
 1. Skill `SKILL.md`: Auto-loaded by the runtime
 2. Execution protocol: `.agents/skills/<skill>/resources/execution-protocol.md` when present; otherwise `.agents/skills/_shared/runtime/execution-protocol.md`
 
-### Load at Task Start
-3. `.agents/skills/_shared/core/difficulty-guide.md`: Difficulty assessment (Step 0)
+### Load at Task Start (Pre-Flight Tier 0 Injection)
+3. **Pre-flight Tier 0 Checklist**: Load `docs/checklists/<domain>.md` from the host project root (fallback to `.agents/skills/<skill>/resources/checklist.md`). Tier 0 checklists are injected specifically for **Implementation Agents (`backend`, `frontend`, `db`) and Debug Agent** before starting implementation, while Planning Agent (`plan`) loads macro architectural context (`ARCHITECTURE.md`, `docs/design-docs/`, `docs/product-specs/`, `docs/plans/work/tech-debt-tracker.md`).
+4. `.agents/skills/_shared/core/difficulty-guide.md`: Difficulty assessment (Step 0)
 
 ### Load Based on Difficulty
-4. **Simple**: Proceed to implementation without additional loading
-5. **Medium**: skill-local `examples.md` under `.agents/skills/<skill>/resources/`
-6. **Complex**: skill-local `examples.md` + stack docs under that skill's `resources/` (e.g. `tech-stack.md`, `snippets.md`)
+5. **Simple**: Proceed to implementation without additional loading
+6. **Medium**: skill-local `examples.md` under `.agents/skills/<skill>/resources/`
+7. **Complex**: skill-local `examples.md` + stack docs under that skill's `resources/` (e.g. `tech-stack.md`, `snippets.md`)
 
 ### Load During Execution as Needed
-7. skill-local `checklist.md`: Load at Step 4 (Verify)
-8. skill-local `error-playbook.md`: Load only when errors occur
-9. `.agents/skills/_shared/core/common-checklist.md`: For final verification of Complex tasks
-10. `.agents/skills/_shared/runtime/coordination-protocol.md`: coordination for multi-agent sessions
+8. Domain checklist: Load `docs/checklists/<domain>.md` (fallback: skill-local `checklist.md`) at Step 4 (Verify)
+9. skill-local `error-playbook.md`: Load only when errors occur
+10. `.agents/skills/_shared/core/common-checklist.md`: For final verification of Complex tasks
+11. `.agents/skills/_shared/runtime/coordination-protocol.md`: coordination for multi-agent sessions
 
 ### Load on Measurement / Exploration (Conditional)
-11. `.agents/skills/_shared/conditional/quality-score.md`: Load when Quality Score measurement is needed (VERIFY/SHIP gates)
-12. `.agents/skills/_shared/conditional/experiment-ledger.md`: Load when recording experiment results (after implementation changes)
-13. `.agents/skills/_shared/conditional/exploration-loop.md`: Load only when a gate fails twice on the same issue
+12. `.agents/skills/_shared/conditional/quality-score.md`: Load when Quality Score measurement is needed (VERIFY/SHIP gates)
+13. `.agents/skills/_shared/conditional/experiment-ledger.md`: Load when recording experiment results (after implementation changes)
+14. `.agents/skills/_shared/conditional/exploration-loop.md`: Load only when a gate fails twice on the same issue
 
 ---
 
@@ -46,10 +51,13 @@ Short names in the agent mapping tables mean files under that agent's `.agents/s
 
 Unless noted, filenames below are under that agent's `.agents/skills/<skill>/resources/`.
 
+**Checklist Resolution Rule**: For all domains, load `docs/checklists/<domain>.md` from the host project root first as the primary Tier 1 checklist/guardrail; fall back to skill-local `checklist.md` only if the host checklist does not exist.
+
 ### Backend Agent
 
 | Task Type                     | Required Resources                          |
 | ----------------------------- | ------------------------------------------- |
+| Pre-flight / All tasks        | `docs/checklists/backend.md` (fallback: `checklist.md`) |
 | CRUD API creation             | snippets.md (route, schema, model, test)    |
 | Authentication implementation | snippets.md (JWT, password) + tech-stack.md |
 | DB migration                  | snippets.md (migration)                     |
@@ -60,6 +68,7 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 
 | Task Type           | Required Resources                                     |
 | ------------------- | ------------------------------------------------------ |
+| Pre-flight / All tasks | `docs/checklists/frontend.md` (fallback: `checklist.md`) |
 | Component creation  | snippets.md (component, test) + component-template.tsx |
 | Form implementation | snippets.md (form + Zod)                               |
 | API integration     | snippets.md (TanStack Query)                           |
@@ -70,6 +79,7 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 
 | Task Type        | Required Resources                                    |
 | ---------------- | ----------------------------------------------------- |
+| Pre-flight / All tasks | `docs/checklists/mobile.md` (fallback: `checklist.md`) |
 | Screen creation  | snippets.md (screen, provider) + screen-template.dart |
 | API integration  | snippets.md (repository, Dio)                         |
 | Navigation       | snippets.md (GoRouter)                                |
@@ -80,20 +90,21 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 
 | Task Type       | Required Resources                                                |
 | --------------- | ----------------------------------------------------------------- |
+| Pre-flight / All bugs | Relevant `docs/checklists/<domain>.md` + `.agents/results/bugs/` post-mortems |
 | Frontend bug    | common-patterns.md (Frontend section)                             |
 | Backend bug     | common-patterns.md (Backend section)                              |
 | Mobile bug      | common-patterns.md (Mobile section)                               |
 | Performance bug | common-patterns.md (Performance section) + debugging-checklist.md |
 | Security bug    | common-patterns.md (Security section)                             |
 
-### QA Agent
+### QA / Review Agent
 
 | Task Type            | Required Resources                                  |
 | -------------------- | --------------------------------------------------- |
-| Security review      | checklist.md (Security section)                     |
-| Performance review   | checklist.md (Performance section)                  |
-| Accessibility review | checklist.md (Accessibility section)                |
-| Full audit           | checklist.md (full) + self-check.md                 |
+| Pre-flight / All reviews | `docs/checklists/common.md` + `docs/checklists/<domain_being_reviewed>.md` (e.g. `backend.md`, `frontend.md`, `db.md`) (fallback: `checklist.md`) |
+| Domain Review (Backend / Frontend / DB) | `docs/checklists/common.md` + `docs/checklists/<domain_being_reviewed>.md` (fallback: `checklist.md`) |
+| Security / Performance / Accessibility review | `docs/checklists/common.md` + relevant domain checklist (`docs/checklists/<domain_being_reviewed>.md`) |
+| Full audit           | `docs/checklists/common.md` + `docs/checklists/` (all domain checklists) + `checklist.md` (full) + self-check.md |
 | Quality scoring      | `.agents/skills/_shared/conditional/quality-score.md` (measurement protocol via Bash)    |
 
 ### Architecture Agent
@@ -127,9 +138,9 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 
 | Task Type                 | Required Resources                                           |
 | ------------------------- | ------------------------------------------------------------ |
-| New project planning      | examples.md + task-template.json + `.agents/skills/_shared/core/api-contracts/template.md` |
-| Feature addition planning | examples.md + grep/glob/read (understand existing structure)     |
-| Refactoring planning      | grep/glob/read only                                              |
+| New project planning      | examples.md + task-template.json + `.agents/skills/_shared/core/api-contracts/template.md` + `ARCHITECTURE.md` + `docs/design-docs/` + `docs/product-specs/` + `docs/plans/work/tech-debt-tracker.md` |
+| Feature addition planning | examples.md + grep/glob/read (understand existing structure) + `ARCHITECTURE.md` + `docs/design-docs/` + `docs/product-specs/` + `docs/plans/work/tech-debt-tracker.md`    |
+| Refactoring planning      | grep/glob/read only + `ARCHITECTURE.md` + `docs/design-docs/` + `docs/plans/work/tech-debt-tracker.md`                          |
 
 ### Design Agent
 
@@ -153,10 +164,11 @@ to include only resource paths matching the task type in the prompt.
 ```
 Prompt composition:
 1. Agent SKILL.md's Core Rules section
-2. Execution protocol (.agents/skills/<skill>/resources/execution-protocol.md, else .agents/skills/_shared/runtime/execution-protocol.md)
-3. Resources matching task type (resolve under .agents/skills/<skill>/resources/)
-4. error-playbook.md (always include; recovery is essential)
-5. Coordination protocol: .agents/skills/_shared/runtime/coordination-protocol.md
+2. Pre-flight Tier 0 Checklist Injection: docs/checklists/<domain>.md in host root (fallback: .agents/skills/<skill>/resources/checklist.md)
+3. Execution protocol (.agents/skills/<skill>/resources/execution-protocol.md, else .agents/skills/_shared/runtime/execution-protocol.md)
+4. Resources matching task type (resolve under .agents/skills/<skill>/resources/)
+5. error-playbook.md (always include; recovery is essential)
+6. Coordination protocol: .agents/skills/_shared/runtime/coordination-protocol.md
 ```
 
 This approach avoids loading unnecessary resources, maximizing subagent context efficiency.

@@ -126,13 +126,13 @@ Then run the project's mobile verification commands, typically unit/widget tests
 ## References
 Follow `.agents/skills/mobile/resources/execution-protocol.md` step by step.
 See `.agents/skills/mobile/resources/examples.md` for input/output examples.
-Before submitting, run `.agents/skills/mobile/resources/checklist.md`.
+Before submitting, run `docs/checklists/mobile.md` (or `.agents/skills/mobile/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Execution steps: `.agents/skills/mobile/resources/execution-protocol.md`
 - Code examples: `.agents/skills/mobile/resources/examples.md`
 - Code snippets: `.agents/skills/mobile/resources/snippets.md`
-- Checklist: `.agents/skills/mobile/resources/checklist.md`
+- Checklist: `docs/checklists/mobile.md` (fallback: `.agents/skills/mobile/resources/checklist.md`)
 - Error recovery: `.agents/skills/mobile/resources/error-playbook.md`
 - Tech stack: `.agents/skills/mobile/resources/tech-stack.md`
 - Screen template: `.agents/skills/mobile/resources/screen-template.dart`
@@ -140,4 +140,4 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug post-mortems & RCAs: `.agents/results/bugs/`

@@ -193,7 +193,7 @@ Present session summary to the user.
 - Write final results to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 - If Quality Score was measured during this session:
   - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
-  - Auto-generate lessons from discarded experiments (delta <= -5) into `.agents/skills/_shared/core/lessons-learned.md`
+  - Auto-generate post-mortems from discarded experiments (delta <= -5) into `.agents/results/bugs/` and extract guardrail rules into `docs/checklists/<domain>.md`
   - Include agent effectiveness ranking in the report
 
 ---
@@ -286,7 +286,7 @@ When user sends feedback during session:
 ### Threshold Actions
 | CD Score | Action |
 |----------|--------|
-| CD >= 50 | **RCA Required**: review-agent must add entry to `.agents/skills/_shared/core/lessons-learned.md` |
+| CD >= 50 | **RCA Required**: review-agent must save RCA to `.agents/results/bugs/` and extract 1-line rule to `docs/checklists/<domain>.md` |
 | CD >= 80 | **Session Pause**: Request user to re-specify requirements |
 | `redo` >= 2 | **Scope Lock**: Request explicit allowlist confirmation before continuing |
 
@@ -295,8 +295,8 @@ After each user correction event, append event to `.agents/results/session-metri
 
 At session end, if CD >= 50:
 1. Include CD summary in final report
-2. Trigger review-agent RCA generation
-3. Update `.agents/skills/_shared/core/lessons-learned.md` with prevention measures
+2. Trigger review-agent RCA generation in `.agents/results/bugs/`
+3. Update `docs/checklists/<domain>.md` with prevention guardrail rules
 
 ---
 
@@ -350,4 +350,5 @@ All coordination is file-based in `.agents/results/`. See `.agents/skills/orches
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Domain checklists: `docs/checklists/`
+- Bug post-mortems & RCAs: `.agents/results/bugs/`

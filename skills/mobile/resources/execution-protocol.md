@@ -3,7 +3,7 @@
 ## Step 0: Prepare
 1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons**: read your domain section in `.agents/skills/_shared/core/lessons-learned.md`
+2. **Check domain checklist**: load pre-flight `docs/checklists/mobile.md` (fallback: `.agents/skills/mobile/resources/checklist.md`) and check relevant `.agents/results/bugs/`
 3. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
@@ -39,7 +39,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Follow Clean Architecture layers strictly
 
 ## Step 4: Verify
-- Run `.agents/skills/mobile/resources/checklist.md` items
+- Run `docs/checklists/mobile.md` (fallback: `.agents/skills/mobile/resources/checklist.md`) items with explicit line-number citations (e.g. `- [x] Rule: Verified lib/screen.dart:L45`)
 - Run `.agents/skills/_shared/core/common-checklist.md` items
 - Test on both iOS and Android (or emulators)
 - Verify 60fps performance (no jank)

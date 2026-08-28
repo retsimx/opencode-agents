@@ -37,7 +37,7 @@ Agents that frequently require re-direction consume more tokens and user time th
 
 | Threshold | Scope | Action |
 |-----------|-------|--------|
-| CD >= 50 | Single session | **MANDATORY**: Add RCA to `.agents/skills/_shared/core/lessons-learned.md` |
+| CD >= 50 | Single session | **MANDATORY**: Save RCA to `.agents/results/bugs/` and extract 1-line rule to `docs/checklists/<domain>.md` |
 | CD >= 30 | Same agent, 3 consecutive sessions | **REVIEW**: Examine agent prompt template |
 | CD >= 80 | Single session | **ESCALATE**: Halt session, request user re-specification |
 | `redo` count >= 2 | Single session | **PAUSE**: Orchestrator requests explicit scope confirmation |
@@ -100,7 +100,7 @@ At session end, if total CD >= 50:
    - **Prevention**: {prompt/process change to prevent recurrence}
    ```
 
-2. **Append** to `.agents/skills/_shared/core/lessons-learned.md` (this directory) in the relevant domain section
+2. **Save RCA report** in `.agents/results/bugs/` and extract a 1-line prevention rule into `docs/checklists/<domain>.md`
 
 ---
 

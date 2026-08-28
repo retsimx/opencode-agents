@@ -8,7 +8,7 @@ description: Verify documentation references against the current codebase and pr
 ## Scheduling
 
 ### Goal
-Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generated patch proposals for docs affected by recent code changes (sync mode). Both modes run on-demand; sync is always interactive.
+Detect broken references in `docs/**/*.md` (including domain checklists in `docs/checklists/**/*.md`) (verify mode) and propose LLM-generated patch proposals for docs affected by recent code changes (sync mode). Both modes run on-demand; sync is always interactive.
 
 ### Intent signature
 - User asks to check if docs are up to date, find broken doc links, verify file paths referenced in docs, or detect documentation drift.
@@ -44,8 +44,8 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 - Docs modified only on explicit user approval; `doc-refs.json` regenerated after applies.
 
 ### Dependencies
-- `cli/commands/docs/extract.ts`: markdown AST + L2 pattern extractor.
-- `cli/commands/docs/resolve.ts`: deterministic broken-ref checker.
+- `cli/commands/docs/extract.ts`: markdown AST + L2 pattern extractor (extracts file/URL/CLI/env/config refs and checklist `[Ref: ...]` incident/doc links from `docs/**/*.md` including `docs/checklists/**/*.md`).
+- `cli/commands/docs/resolve.ts`: deterministic broken-ref checker (verifies file targets, checklist `[Ref: ...]` paths and incident links, URLs, CLI tokens, scripts, env vars, config keys).
 - `cli/commands/docs/reporter.ts`: deterministic markdown/JSON report renderer (no LLM call; host LLM does narrative synthesis).
 - `cli/commands/docs/sync-propose.ts`: git diff intake, reverse lookup, candidate-doc selector with secret redaction (no LLM call; host LLM drafts patches).
 - `docs/generated/doc-refs.json`: single-direction reference index (git-tracked, regenerated on every verify run).
@@ -67,7 +67,7 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 
 ### Scenes
 1. **PREPARE**: Determine mode, resolve path/diff-range arguments, confirm tool availability.
-2. **ACQUIRE**: Run extractor (`extract.ts`) to regenerate `doc-refs.json` from `docs/**/*.md` (verify) or build in-memory reverse index from existing `doc-refs.json` (sync).
+2. **ACQUIRE**: Run extractor (`extract.ts`) to regenerate `doc-refs.json` from `docs/**/*.md` (including domain checklists in `docs/checklists/**/*.md`) (verify) or build in-memory reverse index from existing `doc-refs.json` (sync).
 3. **REASON**: Resolve each reference deterministically (verify) or correlate changed files to candidate docs via reverse lookup (sync).
 4. **ACT**: Render the deterministic drift report (verify) or list candidate docs with matched refs (sync). Host LLM does any natural-language synthesis or patch drafting on top of this output.
 5. **VERIFY**: Confirm output shape is valid (JSON schema check for `--json`; structured candidate list for sync).
@@ -98,8 +98,8 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 | Action | SSL primitive | Notes |
 |--------|---------------|-------|
 | Parse CLI args and mode | `READ` | First arg selects verify or sync |
-| Extract refs from docs | `CALL_TOOL` | `extract.ts`: remark AST + L2 patterns → `doc-refs.json` |
-| Check broken refs | `RESOLVE` | `resolve.ts`: file, url, cli, script, env, config checks |
+| Extract refs from docs | `CALL_TOOL` | `extract.ts`: remark AST + L2 patterns (including checklist `[Ref: ...]` links) → `doc-refs.json` |
+| Check broken refs | `RESOLVE` | `resolve.ts`: file, checklist `[Ref: ...]` incident/doc paths, url, cli, script, env, config checks |
 | Build reverse index | `INFER` | `sync-propose.ts`: in-memory map from `doc-refs.json` |
 | Match diff to candidate docs | `RESOLVE` | `sync-propose.ts`: git diff + reverse lookup |
 | Redact secrets from diff | `VALIDATE` | Exclude `.env*`, `*.pem`, `*.key`, `id_rsa*`; sanitize content |
@@ -109,8 +109,8 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 | Notify hook summary | `NOTIFY` | 1-3 line stdout summary for workflow hooks |
 
 ### Tools and instruments
-- `cli/commands/docs/extract.ts`: `remark` + `unified` markdown AST, L2 pattern extraction, escape hatch filter, `docs/generated/doc-refs.json` writer.
-- `cli/commands/docs/resolve.ts`: case-sensitive file existence, `which` for CLI tokens, `package.json` scripts lookup, ripgrep/git grep for env vars. Per-target dedupe caches (cli by first token, env, config) and per-directory listing cache for file resolution. URL kind is filtered out by the verify command and delegated to lychee.
+- `cli/commands/docs/extract.ts`: `remark` + `unified` markdown AST, L2 pattern extraction (including `docs/checklists/**/*.md` standardized checklist items and `[Ref: ...]` targets), escape hatch filter, `docs/generated/doc-refs.json` writer.
+- `cli/commands/docs/resolve.ts`: case-sensitive file existence (including `[Ref: ...]` target files, documentation links, and incident paths in checklists), `which` for CLI tokens, `package.json` scripts lookup, ripgrep/git grep for env vars. Per-target dedupe caches (cli by first token, env, config) and per-directory listing cache for file resolution. URL kind is filtered out by the verify command and delegated to lychee.
 - `cli/commands/docs/reporter.ts`: deterministic markdown + JSON renderer. **No LLM call.** Friendly summary, severity tagging, fix prioritization are the host LLM's responsibility.
 - `cli/commands/docs/sync-propose.ts`: git diff intake, reverse index build, secret-pattern + gitignore file exclusion. Returns candidate docs with matched refs only. **No LLM call.** Patch synthesis is the host LLM's responsibility.
 - External: [`lychee`](https://github.com/lycheeverse/lychee) (background URL link checking; install via `brew install lychee`).
@@ -136,7 +136,7 @@ After `docs-sync <range> --json`:
 **verify mode** runs a drift check against the current codebase:
 
 ```bash
-# Default: scan all docs/**/*.md, render markdown to stdout.
+# Default: scan all docs/**/*.md (including docs/checklists/**/*.md), render markdown to stdout.
 # URL link checking is delegated to lychee in the background
 # (install: `brew install lychee`). Core check ~8s on a 1k-doc repo.
 docs-verify
@@ -187,7 +187,7 @@ docs-verify --json
 ### Resource scope
 | Scope | Resource target |
 |-------|-----------------|
-| `LOCAL_FS` read | `docs/**/*.md` (extractor input), `docs/generated/doc-refs.json` (index), `.env.example`, `package.json` |
+| `LOCAL_FS` read | `docs/**/*.md` (including `docs/checklists/**/*.md`; extractor input), `docs/generated/doc-refs.json` (index), `.env.example`, `package.json` |
 | `LOCAL_FS` write | `docs/generated/doc-refs.json` (regenerated each verify run), approved sync patches |
 | `CODEBASE` read-only | Existence checks for file/cli/script/env/config refs; git diff intake |
 | `PROCESS` | `git diff`, `git apply`, `which`, HTTP HEAD requests |

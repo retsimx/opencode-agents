@@ -3,7 +3,7 @@
 ## Step 0: Prepare
 1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons**: read your domain section in `.agents/skills/_shared/core/lessons-learned.md`
+2. **Check domain checklist & past bugs**: load pre-flight `docs/checklists/<domain>.md` (fallback: `.agents/skills/debug/resources/checklist.md`) and review relevant post-mortems in `.agents/results/bugs/`
 3. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: security/auth related bugs, existing code conflict potential?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
@@ -42,9 +42,9 @@ Follow these steps in order (adjust depth by difficulty).
 - If found, fix proactively or report them
 
 ## Step 4: Document & Verify
-- Run `.agents/skills/debug/resources/checklist.md` items
+- Run `docs/checklists/<domain>.md` (fallback: `.agents/skills/debug/resources/checklist.md`) items with explicit line-number citations (e.g. `- [x] Rule: Verified path/to/file.py:L42`)
 - Save bug report to `.agents/results/bugs/` using `.agents/skills/debug/resources/bug-report-template.md`
-- Include: root cause, fix, prevention advice
+- **Bug Closure Gate**: Extract a 1-line operational rule into `docs/checklists/<domain>.md` to prevent recurrence
 - Verify no regressions in related functionality
 
 ## On Error

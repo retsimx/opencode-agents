@@ -81,7 +81,7 @@ If an existing codebase exists:
 
 Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references. Reuse patterns from similar work.
 
-Read cross-domain entries in `.agents/skills/_shared/core/lessons-learned.md` to avoid known traps.
+Read ARCHITECTURE.md, docs/design-docs/, docs/product-specs/, and docs/plans/work/tech-debt-tracker.md to understand domain boundaries and known tech debt.
 
 ---
 
@@ -300,4 +300,6 @@ Apply this lens when the project is enterprise/regulated, many stakeholders are 
 - Difficulty guide: `.agents/skills/_shared/core/difficulty-guide.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Architectural context: `ARCHITECTURE.md`
+- Design documents: `docs/design-docs/`
+- Tech debt tracker: `docs/plans/work/tech-debt-tracker.md`

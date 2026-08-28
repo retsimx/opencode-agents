@@ -175,11 +175,11 @@ Use `.agents/skills/db/resources/document-templates.md` when you need concrete d
 Use `.agents/skills/db/resources/anti-patterns.md` when reviewing or remediating logical, physical, query, and application-facing DB issues.
 Use `.agents/skills/db/resources/vector-db.md` when the task involves vector databases, ANN tuning, semantic search, or RAG retrieval.
 Use `.agents/skills/db/resources/iso-controls.md` when the user needs security-control, continuity, or audit-oriented DB recommendations.
-Before submitting, run `.agents/skills/db/resources/checklist.md`.
+Before submitting, run `docs/checklists/db.md` (or `.agents/skills/db/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Execution steps: `.agents/skills/db/resources/execution-protocol.md`
-- Self-check: `.agents/skills/db/resources/checklist.md`
+- Self-check: `docs/checklists/db.md` (fallback: `.agents/skills/db/resources/checklist.md`)
 - Examples: `.agents/skills/db/resources/examples.md`
 - Deliverable templates: `.agents/skills/db/resources/document-templates.md`
 - Anti-pattern review guide: `.agents/skills/db/resources/anti-patterns.md`
@@ -190,4 +190,4 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
-- Lessons learned: `.agents/skills/_shared/core/lessons-learned.md`
+- Bug post-mortems & RCAs: `.agents/results/bugs/`

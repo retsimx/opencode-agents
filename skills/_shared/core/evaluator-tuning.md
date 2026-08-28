@@ -76,7 +76,7 @@ This prevents tuning drift toward pure skepticism; QA must also know what it doe
 |--------|------|
 | `.agents/skills/_shared/core/session-metrics.md` (this directory) | EA event source (automatic collection) |
 | `retro` | Aggregation + tuning report generation (semi-automated) |
-| `.agents/skills/_shared/core/lessons-learned.md` (this directory) | QA Evaluation Lessons for persistent patterns |
+| `docs/checklists/qa.md` & `.agents/results/bugs/` | QA Evaluation guardrails and post-mortems for persistent patterns |
 | `.agents/skills/review/resources/checklist.md` | Primary patch target for missed checks |
 | `.agents/skills/review/resources/execution-protocol.md` | Patch target for process/severity issues |
 | `.agents/skills/_shared/core/common-checklist.md` (this directory) | Propagation target for generalized good patterns |

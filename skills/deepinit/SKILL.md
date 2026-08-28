@@ -52,6 +52,12 @@ What agents CANNOT discover from code alone, and what the harness must provide:
 AGENTS.md                           ← table of contents (~100 lines)
 ARCHITECTURE.md                     ← top-level domain map and package layering
 docs/
+├── checklists/                     ← domain-specific pre-flight & verification checklists
+│   ├── README.md                   ← 3-state graduation lifecycle & regex format spec
+│   ├── common.md                   ← universal test/lint/security checklist
+│   ├── backend.md                  ← backend domain checklist (stack-specific)
+│   ├── frontend.md                 ← frontend domain checklist (stack-specific)
+│   └── db.md                       ← database/migration checklist
 ├── design-docs/                    ← indexed, verified architectural decisions
 │   ├── index.md
 │   ├── core-beliefs.md             ← agent-first operating principles
@@ -151,6 +157,31 @@ Report findings to the user before proceeding.
 ## Step 3: Generate `docs/` Knowledge Base
 
 Generate only the files that are **relevant and discoverable** from the codebase.
+
+### `docs/checklists/`
+
+**Domain-specific pre-flight & verification checklists.**
+
+Provides actionable constraints and failure prevention rules discovered during analysis or seeded from domain best practices.
+
+- **`README.md`**: Specification and operational guide for checklists:
+  - **3-State Graduation Lifecycle**:
+    1. *Incident*: A regression, bug, or anti-pattern is discovered.
+    2. *Active Checklist*: The rule is added to the relevant domain checklist (`docs/checklists/<domain>.md`) with clear anti-pattern and required pattern.
+    3. *Graduated*: When an automated test, linter rule, or CI check permanently enforces the rule, the checklist entry is retired or graduated to preserve context headroom.
+  - **Hard Cap**: Maintain a strict limit of 20–25 items per checklist to avoid cognitive overload and context bloat.
+- **`common.md`**: Universal verification rules (testing, linting, security, hygiene) applicable across all areas.
+- **Starter Domain Checklists** (generate based on detected stack components from Step 1):
+  - **`backend.md`**: Backend domain rules (API error responses, transaction boundaries, auth token validation).
+  - **`frontend.md`**: Frontend domain rules (accessibility, state mutation, responsive layout, loading/error states).
+  - **`db.md`**: Database & migration rules (non-blocking migrations, indexed foreign keys, timezone handling).
+- **Standardized Regex Item Format**:
+  Every checklist item MUST follow the standardized regex format:
+  ```text
+  - [ ] **{Topic}**: {Rule} (❌ Anti-pattern: `{X}`, ✅ Required: `{Y}`) [Ref: {file_or_incident}]
+  ```
+  Example:
+  `- [ ] **Timezone**: Store all timestamps in UTC with timezone (❌ Anti-pattern: `datetime.now()`, ✅ Required: `datetime.now(timezone.utc)`) [Ref: src/db/models.py]`
 
 ### `docs/design-docs/`
 
@@ -268,6 +299,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full domain map.
 ## Quality & Planning
 - [Quality Score](docs/QUALITY-SCORE.md) — per-domain quality grades
 - [Code Review](docs/CODE-REVIEW.md) — review standards and checklist
+- [Domain Checklists](docs/checklists/README.md) — pre-flight & verification checklists
 - [Plans](docs/PLANS.md) — planning conventions
 - [Tech Debt](docs/plans/work/tech-debt-tracker.md) — known debt tracker
 - [Product Sense](docs/PRODUCT-SENSE.md) — product thinking framework
@@ -351,5 +383,6 @@ deepinit no longer detects drift on update runs; it only generates 0→1 bootstr
 7. Each boundary AGENTS.md is under 60 lines.
 8. `docs/design-docs/index.md` lists all design docs that exist.
 9. `docs/product-specs/index.md` lists all product specs that exist.
+10. `docs/checklists/` directory exists, checklist items conform to the standardized regex format (`- [ ] **{Topic}**: {Rule} (❌ Anti-pattern: `{X}`, ✅ Required: `{Y}`) [Ref: {file_or_incident}]`), and all `[Ref: ...]` links/incident paths resolve without dead references.
 
 Report validation results to the user.

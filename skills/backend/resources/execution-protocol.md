@@ -3,7 +3,7 @@
 ## Step 0: Prepare
 1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons**: read your domain section in `.agents/skills/_shared/core/lessons-learned.md`
+2. **Check domain checklist**: load pre-flight `docs/checklists/backend.md` (fallback: `.agents/skills/backend/resources/checklist.md`) and check relevant `.agents/results/bugs/`
 3. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
@@ -38,7 +38,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Follow clean architecture: router -> service -> repository -> models
 
 ## Step 4: Verify
-- Run `.agents/skills/backend/resources/checklist.md` items
+- Run `docs/checklists/backend.md` (fallback: `.agents/skills/backend/resources/checklist.md`) items with explicit line-number citations (e.g. `- [x] Rule: Verified path/to/file.py:L42`)
 - Run `.agents/skills/_shared/core/common-checklist.md` items
 - Ensure all tests pass
 - Confirm OpenAPI docs are complete
