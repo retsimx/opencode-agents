@@ -107,6 +107,16 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 | Full audit           | `docs/checklists/common.md` + `docs/checklists/` (all domain checklists) + `checklist.md` (full) + self-check.md |
 | Quality scoring      | `.agents/skills/_shared/conditional/quality-score.md` (measurement protocol via Bash)    |
 
+### Forge Review / PR Audit Agent
+
+| Task Type | Required Resources |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pre-flight / All forge reviews       | `comment-template.md` + `review-template.md` + `execution-protocol.md` + `providers.md` (fallback: `.agents/skills/_shared/runtime/providers.md`)                             |
+| PR / MR Code Review                  | `comment-template.md` + `review-template.md` + `execution-protocol.md` + `providers.md` + `.agents/skills/deep-review/SKILL.md`                                            |
+| PR / MR Review against Issue / Spec  | `comment-template.md` + `review-template.md` + `execution-protocol.md` + `providers.md` + `.agents/skills/deep-review/SKILL.md`                                            |
+| Full PR / MR Audit & Inline Comments | `comment-template.md` + `review-template.md` + `execution-protocol.md` + `providers.md` + `.agents/skills/deep-review/SKILL.md` + `docs/checklists/qa.md` (fallback: `checklist.md`) |
+| Branch vs Branch Audit               | `comment-template.md` + `review-template.md` + `execution-protocol.md` + `.agents/skills/deep-review/SKILL.md`                                                               |
+
 ### Architecture Agent
 
 | Task Type                    | Required Resources                                                         |
