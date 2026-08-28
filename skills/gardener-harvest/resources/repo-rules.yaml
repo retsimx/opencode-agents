@@ -61,7 +61,6 @@ high_risk_globs:
   - "*.tf"
 
 # Per-project overrides: append or trim this list as needed.
-# Example additions for a Django tutoring project:
-#   - "tutoring_system/settings/*.py"
-#   - "tutoring/xero/*.py"        # Xero integration is sensitive
-#   - "tutoring/models.py"
+# Example domain additions:
+#   - "app/settings/*.py"
+#   - "app/models.py"

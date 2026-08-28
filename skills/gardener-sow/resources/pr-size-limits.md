@@ -33,7 +33,7 @@ Invalid (too broad — reject or split):
 
 - "Refactor the views module"
 - "Fix all ruff errors"
-- "Improve test coverage across tutoring/"
+- "Improve test coverage across src/services/"
 - "Update dependencies" (unless exactly one pin with one-line rationale)
 - Touching unrelated files for convenience
 

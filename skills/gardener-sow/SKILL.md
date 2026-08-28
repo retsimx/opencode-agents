@@ -213,7 +213,7 @@ EXIT
 ### Resource scope
 | Scope | Resource target |
 |-------|-----------------|
-| `LOCAL_FS` | `.agents/results/gardener-state.md`, ephemeral `../sarahwebsite-gardener-{NNNN}` worktrees |
+| `LOCAL_FS` | `.agents/results/gardener-state.md`, ephemeral `../<project>-gardener-{NNNN}` worktrees |
 | `PROCESS` | task subagent processes |
 | `CODEBASE` | modified only by subagents inside worktrees, never main checkout or orchestrator |
 

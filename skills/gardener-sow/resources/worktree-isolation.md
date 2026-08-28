@@ -5,7 +5,7 @@
 ## Definitions
 
 - `MAIN_REPO` — the primary git checkout (where `.git` lives and `git worktree add` is run from)
-- `WORKTREE` — the iteration-specific path, e.g. `../sarahwebsite-gardener-0042`
+- `WORKTREE` — the iteration-specific path, e.g. `../<project>-gardener-0042`
 
 ## Rules
 

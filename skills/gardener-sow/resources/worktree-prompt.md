@@ -23,7 +23,7 @@ All commands MUST be wrapped with `timeout 300`.
 2. `timeout 300 git fetch origin main` (from `MAIN_REPO`).
 3. Compute:
    - `BRANCH=gardener/iter-{ITERATION}-{SLUG}` (or `gardener/iter-{ITERATION}-pending` if SETUP runs before SCAN — orchestrator may pass `SLUG=pending` and rename is NOT required; branch slug is finalized at SHIP)
-   - `WORKTREE=<repo-parent>/sarahwebsite-gardener-{ITERATION}`
+   - `WORKTREE=<repo-parent>/<project>-gardener-{ITERATION}`
 4. If `WORKTREE` path exists: `timeout 300 git worktree remove --force <WORKTREE>` or `rm -rf` + `timeout 300 git worktree prune`.
 5. Create worktree from `origin/main` — **works even if `MAIN_REPO` is dirty**:
    ```
@@ -61,6 +61,6 @@ Exactly one line:
 ## Rules
 
 - Never run SCAN/WORK/VERIFY/SHIP in `MAIN_REPO`
-- Never leave orphaned worktrees under `<repo-parent>/sarahwebsite-gardener-*`
+- Never leave orphaned worktrees under `<repo-parent>/<repo>-gardener-*`
 - CLEANUP runs even on `FATAL|main_modified`
 - Pass `WORKTREE` to every nested subagent

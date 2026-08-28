@@ -36,8 +36,8 @@ When spawned via the OpenCode `task` tool or subagent delegation, follow this pr
 
 ### Step 4: Verify & Checklists (Line-Number Citations Required)
 - **Checklist Verification with Explicit Citations**: When verifying against `docs/checklists/<domain>.md` and skill-local checklists, each checklist item MUST include explicit `file:line` citations showing where the rule was adhered to in the codebase.
-  - *Example*: `- [x] Timezone: Verified tutoring/views/staff.py:L45 uses timezone.localdate()`
-  - *Example*: `- [x] CSRF Protection: Verified tutoring/templates/form.html:L12 includes {% csrf_token %}`
+  - *Example*: `- [x] Timezone: Verified src/api/views.py:L45 uses timezone.localdate()`
+  - *Example*: `- [x] CSRF Protection: Verified templates/form.html:L12 includes {% csrf_token %}`
 - **Run automated test suites and linters**: ensure all tests pass with zero regressions.
 - **Runtime verification**: confirm behavior in the runtime environment.
 
@@ -53,7 +53,7 @@ Whenever `debug-agent` or any agent finishes investigating and resolving a bug:
      - [ ] **{Topic}**: {Rule} (❌ Anti-pattern: `{X}`, ✅ Required: `{Y}`) [Ref: .agents/results/bugs/{incident-file}.md]
      ```
    - *Conforming Example*:
-     `- [ ] **Timezone Local Date**: Use timezone.localdate() instead of timezone.now().date() or date.today() for date comparisons, weekday resolution, and calendar boundaries. (❌ Anti-pattern: `today = timezone.now().date()`, ✅ Required: `today = timezone.localdate()`) [Ref: .agents/results/bugs/issue-791-day-of-week-detection-uses-utc.md]`
+     `- [ ] **Timezone Local Date**: Use timezone.localdate() instead of timezone.now().date() or date.today() for date comparisons, weekday resolution, and calendar boundaries. (❌ Anti-pattern: `today = timezone.now().date()`, ✅ Required: `today = timezone.localdate()`) [Ref: .agents/results/bugs/issue-123-example-incident.md]`
 3. **Enforce Gate**: A bug resolution is NOT complete until the 1-line rule is committed to `docs/checklists/<domain>.md`.
 
 ---
