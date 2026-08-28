@@ -48,7 +48,8 @@ Activate PM Agent to:
 2. Define API contracts.
 3. Create a prioritized task breakdown.
 4. Save plan to `.agents/results/plan-{sessionId}.json`.
-5. Record plan completion in `.agents/results/session-work.md`.
+5. Return standardized 4-line chat completion summary with artifact link.
+6. Record plan completion in `.agents/results/session-work.md`.
 
 ---
 
@@ -75,27 +76,48 @@ Spawn agents using the OpenCode `task` tool:
 - Use `subagent_type="general"` for implementation agents
 - Use `subagent_type="explore"` for research/analysis agents
 - Spawn all same-priority tasks in parallel (multiple `task` tool calls in one message)
-- Assign clear task descriptions in the prompt
-- Include execution protocol instructions in the prompt
+- Inject context variables into each subagent prompt:
+  - `SESSION_ID`: Active session identifier (`{sessionId}`)
+  - `TASK_SLUG`: Concise kebab-case task identifier (`{taskSlug}`)
+  - `OUTPUT_FILE`: Designated artifact destination (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`)
+- Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/plan-{sessionId}.json`, upstream outputs) by file path reference.
+- Mandate **Universal File-First State I/O & 4-Line Chat Return Contract**:
+  - Subagents must write exhaustive deliverables to designated `OUTPUT_FILE`.
+  - Subagents must verify `OUTPUT_FILE` exists on disk before returning.
+  - Subagents MUST return ONLY the standardized 4-line chat completion summary:
+    ```markdown
+    ### Task Complete: {Role} — {Task Name}
+    - **Status**: SUCCESS | BLOCKED | FAILED
+    - **Summary**:
+      - {Key outcome or change 1}
+      - {Key outcome or change 2}
+      - {Key outcome or change 3}
+    - **Artifact**: `file:///.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`
+    ```
+- Include execution protocol instructions (`.agents/skills/_shared/runtime/execution-protocol.md`) in prompt.
 
 ---
 
 ## Step 5: Monitor Agent Progress
 
-- Use `read` to check `.agents/results/progress-{agent}.md` files
-- Use `grep` and `glob` to verify API contract alignment between agents
-- Record monitoring results in `.agents/results/session-work.md`
+1. Monitor subagents for 4-line chat completion returns.
+2. Use `read` to check `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` files for active progress if tracking turns.
+3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` files exist on disk upon completion.
+4. Record monitoring results and artifact links in `.agents/results/session-work.md`.
 
 ---
 
 ## Step 6: Run QA Agent Review
 
 After all implementation agents complete, use the OpenCode `task` tool to spawn a QA agent to review all deliverables:
-
-- Security (OWASP Top 10)
-- Performance
-- Accessibility (WCAG 2.1 AA)
-- Code quality
+- Inject `SESSION_ID`, `TASK_SLUG="qa-review"`, and `OUTPUT_FILE` (`.agents/results/result-qa-review-{sessionId}.md`).
+- Pass implementation `OUTPUT_FILE` paths and plan file by reference (**Zero-Context Relay**).
+- QA Agent audits deliverables directly from disk:
+  - Security (OWASP Top 10)
+  - Performance
+  - Accessibility (WCAG 2.1 AA)
+  - Code quality (with explicit file:line checklist citations)
+- QA Agent writes full audit report to `.agents/results/result-qa-review-{sessionId}.md`, verifies disk write, and returns the standard 4-line chat summary.
 
 ---
 
@@ -112,18 +134,19 @@ If automated measurement is available:
 
 If QA finds CRITICAL or HIGH issues:
 
-1. Re-spawn the responsible agent with QA findings. **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
-2. If Quality Score is active: measure after fix, apply Keep/Discard rule, record in Experiment Ledger.
-3. Repeat Steps 5-7.
-4. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (read `.agents/skills/_shared/conditional/exploration-loop.md` per context-loading guide):
+1. Re-spawn the responsible agent with QA findings passed by reference (`.agents/results/result-qa-review-{sessionId}.md`). **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
+2. Fix agent writes update to designated `OUTPUT_FILE` and returns 4-line chat summary.
+3. If Quality Score is active: measure after fix, apply Keep/Discard rule, record in Experiment Ledger.
+4. Repeat Steps 5-7.
+5. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (read `.agents/skills/_shared/conditional/exploration-loop.md` per context-loading guide):
    - Generate 2-3 alternative approaches via Exploration Decision template
    - Re-spawn the same agent type with different hypothesis prompts (separate workspaces)
    - QA scores each result
    - Best result adopted, others discarded
    - All experiments recorded in Experiment Ledger
-5. Continue until all critical issues are resolved.
-6. Write final results to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
-7. If Quality Score was measured: generate Experiment Ledger summary and auto-generate lessons from discarded experiments.
+6. Continue until all critical issues are resolved.
+7. Write final results to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
+8. If Quality Score was measured: generate Experiment Ledger summary and auto-generate lessons from discarded experiments.
 
 ---
 

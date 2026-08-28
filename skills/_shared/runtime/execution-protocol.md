@@ -92,41 +92,73 @@ Guardrails and operational lessons follow a strict 3-state progression to mainta
 
 ---
 
-## State Management
+## State Management: Universal File-First State I/O Architecture
 
-Use file-based I/O for coordination. Write results to `.agents/results/`.
+All subagent coordination, deliverables, reviews, and progress tracking MUST follow the **Universal File-First State I/O Architecture**. Subagents write exhaustive deliverables directly to disk, avoiding conversational context dilution and maintaining an auditable orchestration trail.
+
+### Universal Subagent Output Rule: File-First State I/O
+
+1. **Exhaustive Artifact Writing**:
+   - Every subagent task MUST write its full, detailed deliverables (code analysis, test evidence, architecture decisions, review matrices, checklists with line citations) to an explicit markdown file at:
+     `.agents/results/{type}-{role}-{taskSlug}-{sessionId}[-{index}].md`
+     - `{type}`: Artifact type (e.g., `result`, `progress`, `review`, `adr`, `test`, `benchmark`).
+     - `{role}`: Agent role identifier (e.g., `backend`, `frontend`, `qa`, `reviewer`, `pm`, `designer`).
+     - `{taskSlug}`: Concise kebab-case task identifier (e.g., `auth-jwt`, `cart-api`, `perf-audit`).
+     - `{sessionId}`: Session identifier (e.g., `issue-104`, `conv-97e0b488`, `20260828-160543`).
+     - `[-{index}]`: Optional numeric index when multiple artifacts or turns are produced.
+   - Example: `.agents/results/result-backend-auth-jwt-issue-104.md` or `.agents/results/review-security-cart-api-20260828-160543-1.md`.
+
+2. **Write Verification Before Chat Return**:
+   - Subagents MUST verify that the deliverable file was successfully written and non-empty on disk before outputting their chat completion message.
+
+3. **Standalone Fallback**:
+   - If `OUTPUT_FILE` is not explicitly passed in the subagent prompt template, the subagent MUST auto-generate a timestamped destination:
+     `.agents/results/result-{role}-{taskSlug}-$(date +%Y%m%d-%H%M%S).md`
+
+4. **Universal 4-Line Chat Return Contract**:
+   - Upon completing execution (whether SUCCESS, BLOCKED, or FAILED), subagents MUST return ONLY the concise 4-line standardized format in chat to conserve orchestrator context:
+     ```markdown
+     ### Task Complete: {Role} — {Task Name}
+     - **Status**: SUCCESS | BLOCKED | FAILED
+     - **Summary**:
+       - {Key outcome, finding, decision, or change 1}
+       - {Key outcome, finding, decision, or change 2}
+       - {Key outcome, finding, decision, or change 3}
+     - **Artifact**: `file:///path/to/{output-file}.md`
+     ```
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, and state files MUST be written to the **project root** `.agents/` directory, never to a subdirectory's `.agents/`.
-
-- **Project root** = the git repository root (where `.git` exists)
-- **Session-scoped naming**: when running under an orchestration session, append session ID as suffix:
-  - `result-{agent-id}-{sessionId}.md` (e.g., `result-frontend-session-20260405-100835.md`)
-  - `progress-{agent-id}-{sessionId}.md`
-- **Manual (non-orchestrated) runs**: no suffix, `result-{agent-id}.md`
+All result, progress, review, and state files MUST be written to the **project root** `.agents/results/` directory, never to a subdirectory or volatile temp directory.
+- **Project root** = the git repository root (where `.git` exists).
 
 ## On Start
 
-1. Read `.agents/results/task-board.md` to confirm your assigned task
-2. Pre-flight load `docs/checklists/<domain>.md`
-3. Create `.agents/results/progress-{agent-id}[-{sessionId}].md` with initial status
+1. Confirm assigned task parameters: `SESSION_ID`, `TASK_SLUG`, and designated `OUTPUT_FILE` (or apply Standalone Fallback).
+2. Read `.agents/results/task-board.md` (or parent task prompt) to confirm requirements and dependencies.
+3. Pre-flight load `docs/checklists/<domain>.md` in host root (fallback: `.agents/skills/<skill>/resources/checklist.md`).
+4. Initialize `.agents/results/progress-{role}-{taskSlug}-{sessionId}.md` with initial task status, plan, and target files.
 
 ## During Execution
 
-- Periodically update `progress-{agent-id}[-{sessionId}].md` with current state
-- Include: action taken, current status, files created/modified
+- Periodically update `.agents/results/progress-{role}-{taskSlug}-{sessionId}.md` with active execution milestones.
+- Include: actions taken, current phase/step status, files created/modified, and blockers.
 
 ## On Completion
 
-- Create `.agents/results/result-{agent-id}[-{sessionId}].md` with final result including:
-  - Status: `completed` or `failed`
-  - Summary of work done
-  - Files created/modified
-  - Acceptance criteria checklist with line-number citations
-  - Domain checklist verification evidence with line-number citations
+1. Write exhaustive deliverables to the designated `OUTPUT_FILE` (`.agents/results/{type}-{role}-{taskSlug}-{sessionId}[-{index}].md`), containing:
+   - Task metadata (Role, Task Slug, Session ID, Timestamp)
+   - Status: `SUCCESS` or `FAILED`
+   - Complete technical summary of work done
+   - Full list of files created / modified / deleted
+   - Acceptance criteria checklist with explicit line-number citations
+   - Domain checklist verification evidence with explicit `file:line` citations
+   - Test execution commands, outputs, and regression verification
+2. Verify file exists on disk.
+3. Return the standard 4-line chat return contract to the orchestrator/parent agent.
 
-## On Failure
+## On Failure / Blocked
 
-- Still create `result-{agent-id}[-{sessionId}].md` with Status: `failed`
-- Include detailed error description and what remains incomplete
+1. Still write exhaustive diagnostic report to `OUTPUT_FILE` with Status: `FAILED` or `BLOCKED`.
+2. Include full error stack traces, reproduction steps, root cause analysis, and remaining incomplete work.
+3. Return the standard 4-line chat return contract with Status: `FAILED` or `BLOCKED` and artifact link.

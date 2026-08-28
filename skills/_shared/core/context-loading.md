@@ -161,17 +161,29 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 When the Orchestrator composes subagent prompts, reference the mapping above
 to include only resource paths matching the task type in the prompt.
 
+Additionally, under the **Universal File-First State I/O Architecture**, the orchestrator MUST explicitly inject context variables and output mandates into every subagent prompt template:
+- `SESSION_ID`: Resolved session ID (`Issue Slug` -> `Conversation Prefix` -> `YYYYMMDD-HHMMSS`).
+- `TASK_SLUG`: Kebab-case identifier of the assigned task (e.g., `cart-api`, `auth-jwt`).
+- `OUTPUT_FILE`: Designated repository artifact path (`.agents/results/{type}-{role}-{taskSlug}-{sessionId}[-{index}].md`).
+- `UPSTREAM_ARTIFACTS`: Explicit file paths to upstream subagent outputs (Pass-by-Reference for Zero-Context Relay).
+
 ```
 Prompt composition:
-1. Agent SKILL.md's Core Rules section
-2. Pre-flight Tier 0 Checklist Injection: docs/checklists/<domain>.md in host root (fallback: .agents/skills/<skill>/resources/checklist.md)
-3. Execution protocol (.agents/skills/<skill>/resources/execution-protocol.md, else .agents/skills/_shared/runtime/execution-protocol.md)
-4. Resources matching task type (resolve under .agents/skills/<skill>/resources/)
-5. error-playbook.md (always include; recovery is essential)
-6. Coordination protocol: .agents/skills/_shared/runtime/coordination-protocol.md
+1. Context Variables & Output Mandate:
+   - SESSION_ID: <resolved-session-id>
+   - TASK_SLUG: <task-slug>
+   - OUTPUT_FILE: .agents/results/{type}-{role}-{taskSlug}-{sessionId}.md
+   - UPSTREAM_ARTIFACTS: [paths to upstream deliverable files, if applicable]
+   - Mandate: Write exhaustive deliverables to OUTPUT_FILE, verify write, return standard 4-line chat summary.
+2. Agent SKILL.md's Core Rules section
+3. Pre-flight Tier 0 Checklist Injection: docs/checklists/<domain>.md in host root (fallback: .agents/skills/<skill>/resources/checklist.md)
+4. Execution protocol (.agents/skills/<skill>/resources/execution-protocol.md, else .agents/skills/_shared/runtime/execution-protocol.md)
+5. Resources matching task type (resolve under .agents/skills/<skill>/resources/)
+6. error-playbook.md (always include; recovery is essential)
+7. Coordination protocol: .agents/skills/_shared/runtime/coordination-protocol.md
 ```
 
-This approach avoids loading unnecessary resources, maximizing subagent context efficiency.
+This approach avoids loading unnecessary resources and prevents context pollution, maximizing subagent and orchestrator context efficiency.
 
 ---
 

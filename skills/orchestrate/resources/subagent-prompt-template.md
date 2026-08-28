@@ -42,14 +42,25 @@ If you are running low on turns, prioritize:
 
 Use `.agents/results/` for shared state coordination:
 
+- **Target Output File**: `{OUTPUT_FILE}`
 - **On start**: Read `.agents/results/task-board.md` to confirm your task.
-  Write `.agents/results/progress-{AGENT_ID}-{SESSION_ID}.md` with initial status.
+  Write `.agents/results/progress-{AGENT_ID}-{TASK_SLUG}-{SESSION_ID}.md` with initial status.
 - **During execution**: Every 3-5 turns, edit
-  `.agents/results/progress-{AGENT_ID}-{SESSION_ID}.md` to append progress.
-- **On completion**: Write `.agents/results/result-{AGENT_ID}-{SESSION_ID}.md`
-  with final result including status, summary, files changed, and acceptance
-  criteria checklist.
-- **On failure**: Write the result file with Status: failed + error details.
+  `.agents/results/progress-{AGENT_ID}-{TASK_SLUG}-{SESSION_ID}.md` to append progress.
+- **On completion**: Write exhaustive deliverables to `{OUTPUT_FILE}`
+  with final result including status, technical summary, files changed, and acceptance
+  criteria checklist with line citations.
+- **On failure / blocked**: Write `{OUTPUT_FILE}` with Status: failed/blocked + diagnostic details.
+- **Chat Return Contract**: Verify `{OUTPUT_FILE}` exists on disk, then return ONLY the standardized 4-line chat completion summary:
+  ```markdown
+  ### Task Complete: {AGENT_ROLE} — {TASK_TITLE}
+  - **Status**: SUCCESS | BLOCKED | FAILED
+  - **Summary**:
+    - {Key outcome or change 1}
+    - {Key outcome or change 2}
+    - {Key outcome or change 3}
+  - **Artifact**: `file:///{OUTPUT_FILE}`
+  ```
 
 ## Charter (MANDATORY — output this block in your first response)
 
@@ -79,12 +90,14 @@ If you cannot fill this block completely, you are not ready to start. Ask for cl
 4. **Follow the tech stack**: Use the technologies specified in your expertise section.
 5. **Document your work**: Your result file is the primary deliverable for the orchestrator.
 6. **Charter first**: Always output CHARTER_CHECK before any implementation.
-7. **Use Task subagents for isolated work**: Delegate distinct subtasks to
+7. **Zero-Context Relay**: Reference prerequisite artifacts and contracts by file path.
+8. **File-First State I/O & 4-Line Chat Return**: Write full results to disk, and return only the 4-line summary in chat.
+9. **Use Task subagents for isolated work**: Delegate distinct subtasks to
    sub-subagents rather than doing everything inline. Subagents are cheap —
    they prevent context dilution and keep you on track.
-8. **Ask when uncertain**: Use the `question` tool whenever you face
-   ambiguity. Never make assumptions — guessing leads to wasted work.
-   It's better to ask a quick question than to build the wrong thing.
+10. **Ask when uncertain**: Use the `question` tool whenever you face
+    ambiguity. Never make assumptions — guessing leads to wasted work.
+    It's better to ask a quick question than to build the wrong thing.
 
 If you discover a necessary change outside your domain:
 1. Document it in your result file under "Out-of-Scope Dependencies"
@@ -98,6 +111,8 @@ If you discover a necessary change outside your domain:
 |-------------|--------|---------|
 | `{AGENT_ROLE}` | Agent SKILL.md title | "Backend Specialist" |
 | `{AGENT_ID}` | Task assignment | "backend" |
+| `{TASK_SLUG}` | Task assignment | "jwt-auth-api" |
+| `{OUTPUT_FILE}` | Orchestrator session | ".agents/results/result-backend-jwt-auth-api-session-20260405-100835.md" |
 | `{AGENT_SKILL_CONTENT}` | Agent SKILL.md body | Full markdown content |
 | `{TASK_ID}` | task-board.md | "task-1" |
 | `{TASK_TITLE}` | task-board.md | "JWT authentication API" |

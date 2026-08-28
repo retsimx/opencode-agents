@@ -215,9 +215,26 @@ You MUST NOT:
 
 ---
 
-## Output Format
+## Output Format & Deliverable Protocol
 
-You MUST produce one section per review dimension listed in §5, in order. If a dimension has no findings, state "No issues found" explicitly — do not omit the section.
+This skill enforces **File-First State I/O**:
+1. **Write Complete Review Report to File**:
+   Write the full 9-dimension review report to `.agents/results/result-deep-review-{sessionId}.md` (or designated `OUTPUT_FILE`).
+   The file MUST contain all sections below, in order. If a dimension has no findings, state `No issues found` explicitly — do not omit the section.
+
+2. **Return 4-Line Chat Summary**:
+   In the conversational context, return strictly the standard 4-line chat completion summary:
+   ```markdown
+   ### Task Complete: Deep Review — {Scope}
+   - **Status**: SUCCESS | BLOCKED | FAILED
+   - **Summary**:
+     - {Overall deep review verdict: PASS / WARNING / FAIL}
+     - {Dimension breakdown: X Critical, Y High, Z Medium issues found}
+     - {Key regression / architectural risk identified or "No regressions identified"}
+   - **Artifact**: `file:///path/to/.agents/results/result-deep-review-{sessionId}.md`
+   ```
+
+### File Deliverable Structure (`.agents/results/result-deep-review-{sessionId}.md`)
 
 ## Summary
 High-level overview of changes reviewed and intent inferred

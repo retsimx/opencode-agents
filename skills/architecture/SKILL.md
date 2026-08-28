@@ -39,7 +39,8 @@ Analyze, compare, and document software architecture decisions with explicit tra
 ### Expected outputs
 - Architecture diagnosis, recommendation, comparison, prioritization, or ADR
 - Assumptions, tradeoffs, risks, and validation steps
-- Saved architecture artifacts under `.agents/results/architecture/` when producing durable outputs
+- Complete ADR saved to `docs/design-docs/{ADR-NNN}-{title}.md` (or `.agents/results/result-architecture-{sessionId}.md`)
+- Concise 4-line chat return summary conforming to the standard coordination contract
 
 ### Dependencies
 - `.agents/skills/architecture/resources/execution-protocol.md` for workflow
@@ -92,8 +93,8 @@ Analyze, compare, and document software architecture decisions with explicit tra
 | Compare options | `COMPARE` | Design-twice or recommendation mode |
 | Infer risks and tradeoffs | `INFER` | ATAM/CBAM-style analysis |
 | Validate decision fit | `VALIDATE` | Checklist and validation steps |
-| Write artifact | `WRITE` | ADR or architecture result |
-| Notify outcome | `NOTIFY` | Final recommendation summary |
+| Write artifact | `WRITE` | `docs/design-docs/{ADR-NNN}-{title}.md` (or `.agents/results/result-architecture-{sessionId}.md`) |
+| Return 4-line summary | `NOTIFY` | 4-line chat return contract & handoff summary |
 
 ### Tools and instruments
 - Local file reading and search for codebase/docs
@@ -105,14 +106,15 @@ Analyze, compare, and document software architecture decisions with explicit tra
 rg --files
 rg "ADR|architecture|boundary|service|module|dependency|owner|interface" .
 ```
-
-Then choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or ADR mode before writing the artifact.
+1. Choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or ADR mode.
+2. Write complete ADR or architecture artifact to `docs/design-docs/{ADR-NNN}-{title}.md` (or `.agents/results/result-architecture-{sessionId}.md`).
+3. Return the standard 4-line chat return summary to the orchestrator/user.
 
 ### Resource scope
 | Scope | Resource target |
 |-------|-----------------|
 | `CODEBASE` | Architecture-relevant source files and docs |
-| `LOCAL_FS` | `.agents/results/architecture/` artifacts |
+| `LOCAL_FS` | `docs/design-docs/` and `.agents/results/architecture/` artifacts |
 | `MEMORY` | Assumptions, option matrix, tradeoff notes |
 
 ### Preconditions
@@ -133,7 +135,21 @@ Then choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or
 6. Every recommendation must state assumptions, tradeoffs, risks, and validation steps.
 7. Be cost-aware by default: implementation cost, operational cost, team complexity, and future change cost.
 8. When a decision is material, compare at least two genuinely different options before recommending one.
-9. Save architecture artifacts to `.agents/results/architecture/`.
+9. Save architecture artifacts to `docs/design-docs/{ADR-NNN}-{title}.md` (or `.agents/results/result-architecture-{sessionId}.md` / `.agents/results/architecture/`) and return the 4-line chat summary.
+
+### Output Contract (File-First State I/O & 4-Line Chat Return)
+All architecture deliverables must be written to disk before completing:
+1. **File-First Deliverable**: Write complete ADR to `docs/design-docs/{ADR-NNN}-{title}.md` (or `.agents/results/result-architecture-{sessionId}.md`).
+2. **Chat Return Contract**: Return strictly the standard 4-line summary:
+   ```markdown
+   ### Task Complete: Architecture — {Topic}
+   - **Status**: SUCCESS | BLOCKED | FAILED
+   - **Summary**:
+     - {Selected architectural decision / recommendation}
+     - {Primary tradeoff / quality attribute optimized}
+     - {Validation step or implementation impact}
+   - **Artifact**: `file:///path/to/docs/design-docs/{ADR-NNN}-{title}.md`
+   ```
 
 ### Method Selection Summary
 - **Diagnostic Mode**: vague pain, unclear architecture symptom

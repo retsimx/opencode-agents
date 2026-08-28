@@ -11,7 +11,8 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for code analysis and review.
   - Use `write` and `edit` to record review results.
-  - Use `.agents/results/` for output files.
+  - Write complete findings to `.agents/results/result-review-{taskSlug}-{sessionId}.md`.
+  - Always return the standard 4-line chat summary to the orchestrator/user.
 
 ---
 
@@ -102,7 +103,21 @@ Compile all findings into a prioritized report:
 - **LOW**: Backlog
 
 Each finding must include: `file:line`, description, and remediation code.
-Write the final report to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
+
+### File-First State I/O & Output Contract
+1. **Write Complete Review Report to File**:
+   Write the complete findings, 9-dimension evaluations, remediation diffs, and checklist verification evidence with line citations to `.agents/results/result-review-{taskSlug}-{sessionId}.md` (or designated `OUTPUT_FILE`).
+2. **Return 4-Line Chat Summary**:
+   Return strictly the standard 4-line chat summary to the orchestrator/user:
+   ```markdown
+   ### Task Complete: QA Reviewer — {Task Name}
+   - **Status**: SUCCESS | BLOCKED | FAILED
+   - **Summary**:
+     - {Overall audit verdict: PASS / WARNING / FAIL}
+     - {Key finding count: X CRITICAL, Y HIGH, Z MEDIUM}
+     - {Primary remediation / next step}
+   - **Artifact**: `file:///path/to/.agents/results/result-review-{taskSlug}-{sessionId}.md`
+   ```
 
 ---
 
@@ -110,7 +125,9 @@ Write the final report to `.agents/results/` per `.agents/skills/_shared/runtime
 
 For large review scopes, delegate Steps 2-7 to a review agent via the OpenCode `task` tool:
 - Use `subagent_type="general"`
+- Pass `SESSION_ID`, `TASK_SLUG`, and designated `OUTPUT_FILE` (`.agents/results/result-review-{taskSlug}-{sessionId}.md`)
 - Include the file list and review standards from the review skill in the prompt
+- Mandate writing the full report to `OUTPUT_FILE` and returning the 4-line chat summary
 
 ---
 
@@ -118,13 +135,13 @@ For large review scopes, delegate Steps 2-7 to a review agent via the OpenCode `
 
 When user wants fixes too, execute review then fix then re-review loop:
 
-1. Spawn review agent (via OpenCode `task` tool) to get issue list.
+1. Spawn review agent (via OpenCode `task` tool) to write issue report to `.agents/results/result-review-{taskSlug}-{sessionId}.md` and return 4-line summary.
 2. If CRITICAL/HIGH issues exist:
    - Spawn domain agent(s) to fix issues via OpenCode `task` tool:
-     - `subagent_type="general"` with fix instructions and file list in prompt
+     - `subagent_type="general"` with fix instructions, upstream review artifact via `UPSTREAM_ARTIFACTS=".agents/results/result-review-{taskSlug}-{sessionId}.md"`, and designated output file
      - For multi-domain fixes, spawn separate tasks per domain
 
-3. Re-spawn review agent (via OpenCode `task` tool) to re-review fixed code.
+3. Re-spawn review agent (via OpenCode `task` tool) to re-review fixed code and write updated `.agents/results/result-review-{taskSlug}-{sessionId}-verify.md`.
 4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.
 
 ---

@@ -155,18 +155,19 @@ Apply this posture when making verdict decisions in Step 3 and Step 4:
 - Use WARNING when all remaining issues are MEDIUM or lower and none block deployment.
 - When in doubt between PASS and FAIL, choose FAIL and explain why.
 
-## Step 3: Report
-Generate structured report with:
+## Step 3: Report & File-First Deliverable
+Write a complete, structured report to designated `OUTPUT_FILE` (`.agents/results/result-review-{taskSlug}-{sessionId}.md`) with:
 - Overall status:
   - PASS: no CRITICAL, no HIGH, and no MEDIUM issues
   - WARNING: no CRITICAL and no HIGH, but MEDIUM issues exist
   - FAIL: any CRITICAL or HIGH issue found
+- 9-Dimension review evaluations (Correctness, Regression Risk, State & Data, UI/Rendering, Tests, Dead Code, Security, Performance, DRY Violations)
 - Findings grouped by severity (CRITICAL > HIGH > MEDIUM > LOW)
 - Each finding: file:line, description, remediation code
+- Runtime verification results table
 - Performance metrics vs. targets
-- Standards suggestions when relevant:
-  - quality characteristics under-covered
-  - missing test design / traceability / exit criteria
+- Standards suggestions when relevant (ISO/IEC 25010 & 29119)
+- Domain checklist verification evidence with line-number citations
 
 ## Step 4: Verify
 - Run `.agents/skills/review/resources/self-check.md` to verify your own review quality
@@ -174,6 +175,19 @@ Generate structured report with:
 - Ensure no false positives (each finding is real and reproducible with exact line references)
 - Confirm remediation suggestions are correct and complete
 - Run `.agents/skills/_shared/core/common-checklist.md` for general quality
+
+## On Completion
+1. Confirm `.agents/results/result-review-{taskSlug}-{sessionId}.md` is fully written to disk.
+2. Return strictly the 4-line chat completion summary to the orchestrator:
+   ```markdown
+   ### Task Complete: QA Reviewer — {Task Name}
+   - **Status**: SUCCESS | BLOCKED | FAILED
+   - **Summary**:
+     - {Overall audit verdict: PASS / WARNING / FAIL}
+     - {Key finding count: X CRITICAL, Y HIGH, Z MEDIUM}
+     - {Primary remediation / next step}
+   - **Artifact**: `file:///path/to/.agents/results/result-review-{taskSlug}-{sessionId}.md`
+   ```
 
 ## On Error
 See `.agents/skills/review/resources/error-playbook.md` for recovery steps.

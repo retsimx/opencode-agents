@@ -116,16 +116,33 @@ Spawn agents using the OpenCode `task` tool. All same-priority tasks should be s
 Each `task` tool invocation receives:
 - `description`: short label
 - `subagent_type`: "general" (or "explore" for docs/analysis)
-- `prompt`: task description + execution protocol + relevant context + API contracts
+- `prompt`:
+  - **Injected Context Variables**:
+    - `SESSION_ID`: Active session identifier (`{sessionId}`)
+    - `TASK_SLUG`: Concise kebab-case task identifier (`{taskSlug}`)
+    - `OUTPUT_FILE`: Designated artifact path (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`)
+  - **Zero-Context Relay**: Reference prerequisite artifacts, plan paths (`.agents/results/plan-{sessionId}.json`), and contract files by file path instead of dumping full file content into prompt.
+  - **File-First State I/O Mandate**: Subagent must write exhaustive deliverables to `OUTPUT_FILE`, verify disk write, and return ONLY the standardized 4-line chat completion summary:
+    ```markdown
+    ### Task Complete: {Role} — {Task Name}
+    - **Status**: SUCCESS | BLOCKED | FAILED
+    - **Summary**:
+      - {Key outcome or change 1}
+      - {Key outcome or change 2}
+      - {Key outcome or change 3}
+    - **Artifact**: `file:///.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`
+    ```
+  - Task description + execution protocol (`.agents/skills/_shared/runtime/execution-protocol.md`) + relevant context + API contracts
 
 ---
 
 ### Step 4: Monitor Progress
 
-Use `read` to check `.agents/results/progress-{agent}.md` for logic updates.
-
-- Use `edit` to update `.agents/results/task-board.md` with turn counts and status changes.
-- Watch for: completion, failures, crashes.
+1. Monitor subagents for 4-line chat completion returns.
+2. Use `read` to check `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` for active status and turn tracking if needed.
+3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` exists on disk upon completion.
+4. Use `edit` to update `.agents/results/task-board.md` with turn counts, status changes, and artifact paths.
+5. Watch for: completion, failures, crashes.
 
 #### Context Anxiety Check (per polling cycle)
 
@@ -165,7 +182,7 @@ For each completed agent, run automated verification:
   > 1. Retry count for this agent has reached the configured maximum (default: 2 retries). Do not start another retry cycle.
   > 2. Session cost cap exceeded: check the configured budget. If exceeded, save the current agent's partial results before stopping, then report early termination due to quota. Do not spawn the next retry or any remaining agents in the tier.
   >
-  > If neither condition is met, re-spawn the agent with error context and increment the retry counter.
+  > If neither condition is met, re-spawn the agent with error context (passing error artifact by reference) and increment the retry counter.
 
 - FAIL (after 2 retries, and cost cap not yet exceeded): Activate **Exploration Loop** (read `.agents/skills/_shared/conditional/exploration-loop.md` per `.agents/skills/_shared/core/context-loading.md`):
   1. Generate 2-3 alternative hypotheses for the failing task
@@ -179,8 +196,8 @@ For each completed agent, run automated verification:
 ### Step 6: Collect Results
 
 // turbo
-After all agents complete, use `read` to read all `.agents/results/result-{agent}-{sessionId}.md` files.
-Compile summary: completed tasks, failed tasks, files changed, remaining issues.
+After all agents complete, verify that all designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` files exist on disk.
+Use `read` to inspect them and compile summary: completed tasks, failed tasks, files changed, remaining issues.
 
 ---
 
@@ -190,7 +207,7 @@ Present session summary to the user.
 
 - If any tasks failed after retries, list them with error details.
 - Suggest next steps: manual fix, re-run specific agents, or run the review skill for QA.
-- Write final results to `.agents/results/` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
+- Write final results to `.agents/results/orchestrator-session.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 - If Quality Score was measured during this session:
   - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
   - Auto-generate post-mortems from discarded experiments (delta <= -5) into `.agents/results/bugs/` and extract guardrail rules into `docs/checklists/<domain>.md`
@@ -210,10 +227,10 @@ Agent completes work
 [1] Mechanical Self-Check: lint, type-check, tests, diff scope
     ↓
 [2] Verify: Run the agent's verification commands (build, test, lint)
-    ↓ FAIL → Agent receives feedback, fixes, back to [1]
+    ↓ FAIL → Agent receives feedback (via file reference), fixes, back to [1]
     ↓ PASS
 [3] Cross-Review: QA agent reviews the changes
-    ↓ FAIL → Agent receives review feedback, fixes, back to [1]
+    ↓ FAIL → Agent receives review feedback (via file reference), fixes, back to [1]
     ↓ PASS
 Accept result
 ```
@@ -237,10 +254,11 @@ Reason: Self-evaluation bias causes agents to consistently overrate their own ou
 - **FAIL (exit 1)**: Feed verify output back to the agent as correction context
 
 **[3] Cross-Review**: Spawn QA agent to review the changes:
-- QA agent reads the diff, runs checks, evaluates against acceptance criteria
-- If `docs/CODE-REVIEW.md` exists, QA agent uses it as the review checklist
-- QA agent outputs: PASS (with optional nits) or FAIL (with specific issues)
-- On FAIL: issues are fed back to the implementation agent for fixing
+- Pass implementation `OUTPUT_FILE` (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`) and diff references via **Zero-Context Relay**.
+- QA agent writes comprehensive audit to designated `OUTPUT_FILE` (`.agents/results/result-qa-{taskSlug}-{sessionId}.md`).
+- If `docs/CODE-REVIEW.md` exists, QA agent uses it as the review checklist.
+- QA agent outputs standardized 4-line chat completion summary with PASS / FAIL verdict and artifact link.
+- On FAIL: issues and artifact path are fed back to the implementation agent for fixing.
 
 ### Loop Limits
 
@@ -257,6 +275,7 @@ When feeding review results back to the implementation agent:
 ## Review Feedback (iteration {n}/{max})
 **Reviewer**: {self / verify / review-agent}
 **Verdict**: FAIL
+**Issues File**: `.agents/results/result-qa-{taskSlug}-{sessionId}.md`
 **Issues**:
 1. {specific issue with file and line reference}
 2. {specific issue}
@@ -267,8 +286,8 @@ This replaces single-pass verification. Most "nitpicking" should happen agent-to
 Human review is reserved for final approval, not catching lint errors.
 
 ### Retry Logic (after review loop exhaustion)
-- 1st retry: Re-spawn agent with full review history as context
-- 2nd retry: Re-spawn with "Try a different approach" + review history
+- 1st retry: Re-spawn agent with full review history artifact path as context
+- 2nd retry: Re-spawn with "Try a different approach" + review history artifact path
 - Final failure: Report to user with complete review trail, ask whether to continue or abort
 
 ---
@@ -323,8 +342,8 @@ All coordination is file-based in `.agents/results/`. See `.agents/skills/orches
 |------|-------|--------|
 | `orchestrator-session.md` | orchestrate | read-only |
 | `task-board.md` | orchestrate | read-only |
-| `progress-{agent}[-{sessionId}].md` | that agent | orchestrate reads |
-| `result-{agent}[-{sessionId}].md` | that agent | orchestrate reads |
+| `progress-{agent}*.md` | that agent | orchestrate reads |
+| `result-{agent}*.md` | that agent | orchestrate reads |
 
 ---
 

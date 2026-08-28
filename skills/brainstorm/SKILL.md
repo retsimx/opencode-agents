@@ -36,7 +36,8 @@ Explore user intent, constraints, and alternative approaches before planning or 
 - Clarified intent and constraints
 - Two or three approaches with tradeoffs and a recommended option
 - Section-by-section approved design document
-- Saved design artifact before handoff to planning
+- Saved design artifact at `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`) before handoff to planning
+- Concise 4-line chat return summary conforming to the standard coordination contract
 
 ### Dependencies
 - Shared context loading, reasoning templates, clarification protocol, quality principles, and skill routing
@@ -85,18 +86,19 @@ Explore user intent, constraints, and alternative approaches before planning or 
 | Compare approaches | `COMPARE` | Tradeoff matrix |
 | Infer recommendation | `INFER` | Recommended option |
 | Validate approval | `VALIDATE` | Section-by-section confirmation |
-| Write design artifact | `WRITE` | `docs/plans/designs/` and memory |
-| Transition to plan | `NOTIFY` | Handoff summary |
+| Write design artifact | `WRITE` | `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`) and memory |
+| Return 4-line summary & transition | `NOTIFY` | 4-line chat return contract & handoff summary |
 
 ### Tools and instruments
 - Context loading, reasoning templates, clarification protocol
-- Project memory and `docs/plans/designs/` for persisted designs
+- Project memory and `docs/plans/designs/` (or `.agents/results/`) for persisted designs
 
 ### Canonical workflow path
 ```text
 1. Ask one clarifying question at a time.
 2. Present 2-3 approaches with tradeoffs and a recommended option.
-3. Save the approved design to `docs/plans/designs/` before handing off to planning.
+3. Write full design matrices and tradeoff analyses to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`).
+4. Return the standard 4-line chat summary to the orchestrator/user before handing off to planning.
 ```
 
 ### Resource scope
@@ -104,7 +106,7 @@ Explore user intent, constraints, and alternative approaches before planning or 
 |-------|-----------------|
 | `MEMORY` | User intent, assumptions, decisions |
 | `CODEBASE` | Existing project context when relevant |
-| `LOCAL_FS` | Approved design artifacts |
+| `LOCAL_FS` | Approved design artifacts (`docs/plans/designs/` or `.agents/results/`) |
 
 ### Preconditions
 - The user is still exploring or the request is ambiguous.
@@ -120,7 +122,7 @@ Explore user intent, constraints, and alternative approaches before planning or 
 3. **Always propose 2-3 approaches** - include a recommended option with trade-off analysis
 4. **Section-by-section design** - present design incrementally with user confirmation at each step
 5. **YAGNI** - do not over-engineer; design only what is needed for the stated goal
-6. **Save design, then transition** - persist the approved design document before handing off to `/plan`
+6. **Save design, then return 4-line summary** - persist the approved design document to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`) and return the 4-line chat summary before handing off to `/plan`
 
 ### Execution Phases
 Follow the brainstorm workflow step by step:
@@ -128,8 +130,22 @@ Follow the brainstorm workflow step by step:
 2. **Phase 2 - Questions**: Ask clarifying questions one at a time to understand intent and constraints
 3. **Phase 3 - Approaches**: Propose 2-3 approaches with a recommended option and trade-off matrix
 4. **Phase 4 - Design**: Present the detailed design section by section, getting user approval at each step
-5. **Phase 5 - Documentation**: Save the approved design to `docs/plans/designs/` and project memory
-6. **Phase 6 - Transition**: Hand off to `/plan` for task decomposition
+5. **Phase 5 - Documentation**: Save the full design matrices and tradeoff analysis to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`) and project memory
+6. **Phase 6 - Transition**: Return the standard 4-line chat return contract and hand off to `/plan` for task decomposition
+
+### Output Contract (File-First State I/O & 4-Line Chat Return)
+All design artifacts must be written to disk before finishing:
+1. **File-First Artifact**: Write complete design doc with tradeoff matrix to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`).
+2. **Chat Return Contract**: Return strictly the 4-line summary:
+   ```markdown
+   ### Task Complete: Brainstorm — {Topic}
+   - **Status**: SUCCESS | BLOCKED | FAILED
+   - **Summary**:
+     - {Key architectural approach selected}
+     - {Primary tradeoff/constraint resolved}
+     - {Approved next step / handoff target}
+   - **Artifact**: `file:///path/to/docs/plans/designs/{NNN}-{topic}.md`
+   ```
 
 ### Common Pitfalls
 - **Jumping to solutions**: Asking "how" before fully understanding "what" and "why"

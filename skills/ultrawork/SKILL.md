@@ -79,8 +79,26 @@ Spawn Implementation Agents (Backend/Frontend/Mobile) in parallel.
 
 Spawn implementation agents in parallel using the OpenCode `task` tool:
 - Use `subagent_type="general"` for all implementation agents
-- Include execution protocol, task description, and context-loading rules in the prompt
-- Spawn all same-priority agents in a single message for parallel execution
+- Inject explicit context parameters into each subagent prompt:
+  - `SESSION_ID`: Active session identifier (e.g. `{sessionId}`)
+  - `TASK_SLUG`: Concise kebab-case task identifier (e.g. `{taskSlug}`)
+  - `OUTPUT_FILE`: Designated markdown artifact destination (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`)
+- Enforce **Zero-Context Relay**: Pass prerequisite artifacts and API contracts by file reference path, not raw text dump.
+- Mandate the **Universal File-First State I/O Architecture**:
+  - Subagent must write exhaustive deliverables directly to designated `OUTPUT_FILE`.
+  - Subagent must verify `OUTPUT_FILE` exists and is non-empty on disk before responding in chat.
+  - Subagent MUST return ONLY the standardized 4-line chat completion summary:
+    ```markdown
+    ### Task Complete: {Role} — {Task Name}
+    - **Status**: SUCCESS | BLOCKED | FAILED
+    - **Summary**:
+      - {Key outcome or change 1}
+      - {Key outcome or change 2}
+      - {Key outcome or change 3}
+    - **Artifact**: `file:///.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`
+    ```
+- Include execution protocol (`.agents/skills/_shared/runtime/execution-protocol.md`) and context-loading rules in prompt.
+- Spawn all same-priority agents in a single message for parallel execution.
 
 ---
 
@@ -88,10 +106,10 @@ Spawn implementation agents in parallel using the OpenCode `task` tool:
 
 **Wait for all implementation agents to complete before proceeding.**
 
-1. Read `.agents/results/progress-{agent}[-{sessionId}].md` files
-2. Use `grep` and `glob` to verify implementation alignment
-3. Check for `.agents/results/result-{agent}[-{sessionId}].md` files to confirm completion
-4. Update `.agents/results/session-ultrawork.md` with monitoring results
+1. Monitor subagent 4-line chat completion returns.
+2. Read `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` files if tracking active turns.
+3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` deliverable files exist on disk.
+4. Update `.agents/results/session-ultrawork.md` with monitoring results and artifact paths.
 
 **Continue polling until all agents report completion or failure.**
 
@@ -124,7 +142,25 @@ If no measurement tools: skip; gates fall back to binary checklist.
 // turbo
 Spawn QA Agent to execute Steps 6-8.
 
-Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
+Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
+- Inject context parameters into the QA Agent prompt:
+  - `SESSION_ID`: Active session identifier (`{sessionId}`)
+  - `TASK_SLUG`: `qa-verify`
+  - `OUTPUT_FILE`: `.agents/results/result-qa-verify-{sessionId}.md`
+- Enforce **Zero-Context Relay**: Pass implementation `OUTPUT_FILE` paths (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`) and plan path (`.agents/results/plan-{sessionId}.json`) by reference. Instruct QA Agent to audit these files directly from disk.
+- Mandate **File-First State I/O**:
+  - QA Agent must write full verification matrices, checklist audits (with line citations), security checks, and regression results to `.agents/results/result-qa-verify-{sessionId}.md`.
+  - QA Agent must verify `OUTPUT_FILE` exists on disk before returning.
+  - QA Agent MUST return ONLY the standardized 4-line chat completion summary:
+    ```markdown
+    ### Task Complete: QA Agent — QA Verification
+    - **Status**: SUCCESS | BLOCKED | FAILED
+    - **Summary**:
+      - {Key verification finding or verdict 1}
+      - {Key verification finding or verdict 2}
+      - {Key verification finding or verdict 3}
+    - **Artifact**: `file:///.agents/results/result-qa-verify-{sessionId}.md`
+    ```
 
 ---
 
@@ -132,9 +168,9 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 
 **Wait for QA Agent to complete verification before proceeding.**
 
-1. Read `.agents/results/progress-review-agent[-{sessionId}].md`
-2. Check for `.agents/results/result-review-agent[-{sessionId}].md` to confirm completion
-3. Update `.agents/results/session-ultrawork.md` with QA results
+1. Monitor QA Agent 4-line chat completion return.
+2. Verify `.agents/results/result-qa-verify-{sessionId}.md` exists on disk.
+3. Update `.agents/results/session-ultrawork.md` with QA results and artifact link.
 
 **Continue polling until QA Agent reports completion.**
 
@@ -171,7 +207,7 @@ If baseline was measured at Step 5.2:
 >
 > If neither condition is met, return to Step 5 and continue.
 
-**Root-cause-first fix mandate:** when re-spawning implementation agents to address QA findings, the fix prompt MUST require root-cause remediation. Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
+**Root-cause-first fix mandate:** when re-spawning implementation agents to address QA findings, the fix prompt MUST require root-cause remediation and pass the QA `OUTPUT_FILE` reference (`.agents/results/result-qa-verify-{sessionId}.md`). Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
 
 **Gate failure (2nd time on same issue, and termination conditions not yet met)** → Activate **Exploration Loop**:
 1. Read `.agents/skills/_shared/conditional/exploration-loop.md` (conditional, per context-loading guide)
@@ -190,7 +226,25 @@ If baseline was measured at Step 5.2:
 // turbo
 Spawn Debug Agent (or Senior Dev Agent) to execute Steps 9-13.
 
-Spawn Debug Agent via OpenCode `task` tool (subagent_type="general").
+Spawn Debug Agent via OpenCode `task` tool (subagent_type="general"):
+- Inject context parameters into the Debug Agent prompt:
+  - `SESSION_ID`: Active session identifier (`{sessionId}`)
+  - `TASK_SLUG`: `refine`
+  - `OUTPUT_FILE`: `.agents/results/result-refine-{sessionId}.md`
+- Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/result-qa-verify-{sessionId}.md`, implementation output files) by reference. Instruct Debug Agent to inspect them on disk.
+- Mandate **File-First State I/O**:
+  - Debug Agent must write all refactoring notes, file split details, duplicate analysis, and side-effect reviews to `.agents/results/result-refine-{sessionId}.md`.
+  - Debug Agent must verify `OUTPUT_FILE` exists on disk before returning.
+  - Debug Agent MUST return ONLY the standardized 4-line chat completion summary:
+    ```markdown
+    ### Task Complete: Debug Agent — Deep Refinement
+    - **Status**: SUCCESS | BLOCKED | FAILED
+    - **Summary**:
+      - {Key refactor or finding 1}
+      - {Key refactor or finding 2}
+      - {Key refactor or finding 3}
+    - **Artifact**: `file:///.agents/results/result-refine-{sessionId}.md`
+    ```
 
 ---
 
@@ -198,9 +252,9 @@ Spawn Debug Agent via OpenCode `task` tool (subagent_type="general").
 
 **Wait for Debug Agent to complete refinement before proceeding.**
 
-1. Read `.agents/results/progress-debug-agent[-{sessionId}].md`
-2. Check for `.agents/results/result-debug-agent[-{sessionId}].md` to confirm completion
-3. Update `.agents/results/session-ultrawork.md` with refinement results
+1. Monitor Debug Agent 4-line chat completion return.
+2. Verify `.agents/results/result-refine-{sessionId}.md` exists on disk.
+3. Update `.agents/results/session-ultrawork.md` with refinement results and artifact link.
 
 **Continue polling until Debug Agent reports completion.**
 
@@ -254,7 +308,25 @@ If baseline was measured at Step 5.2:
 // turbo
 Spawn QA Agent to execute Steps 14-17.
 
-Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
+Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
+- Inject context parameters into the QA Agent prompt:
+  - `SESSION_ID`: Active session identifier (`{sessionId}`)
+  - `TASK_SLUG`: `qa-ship`
+  - `OUTPUT_FILE`: `.agents/results/result-qa-ship-{sessionId}.md`
+- Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/result-refine-{sessionId}.md`, implementation output files) by reference.
+- Mandate **File-First State I/O**:
+  - QA Agent writes full final audit, UX verification, cascade checks, and deployment checklists to `.agents/results/result-qa-ship-{sessionId}.md`.
+  - QA Agent must verify `OUTPUT_FILE` exists on disk before returning.
+  - QA Agent MUST return ONLY the standardized 4-line chat completion summary:
+    ```markdown
+    ### Task Complete: QA Agent — Final QA & Deployment Readiness
+    - **Status**: SUCCESS | BLOCKED | FAILED
+    - **Summary**:
+      - {Key final check outcome 1}
+      - {Key final check outcome 2}
+      - {Key final check outcome 3}
+    - **Artifact**: `file:///.agents/results/result-qa-ship-{sessionId}.md`
+    ```
 
 ---
 
@@ -262,9 +334,9 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general").
 
 **Wait for QA Agent to complete final review before proceeding.**
 
-1. Read `.agents/results/progress-review-agent[-{sessionId}].md`
-2. Check for `.agents/results/result-review-agent[-{sessionId}].md` to confirm completion
-3. Update `.agents/results/session-ultrawork.md` with final QA results
+1. Monitor QA Agent 4-line chat completion return.
+2. Verify `.agents/results/result-qa-ship-{sessionId}.md` exists on disk.
+3. Update `.agents/results/session-ultrawork.md` with final QA results and artifact link.
 
 **Continue polling until QA Agent reports completion.**
 

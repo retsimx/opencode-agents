@@ -85,13 +85,26 @@
   - scoped correctly
   - explicit about risks and assumptions
 
-## Step 7: Document
-- Save artifact to `.agents/results/architecture/`
+## Step 7: Document & File-First Deliverable
+- Save complete ADR to `docs/design-docs/{ADR-NNN}-{title}.md` (or designated `OUTPUT_FILE` `.agents/results/result-architecture-{sessionId}.md`).
 - Recommended filename patterns:
-  - `architecture-recommendation-<topic>.md`
-  - `architecture-review-<topic>.md`
-  - `adr-<topic>.md`
-  - `cbam-<topic>.md`
+  - `docs/design-docs/ADR-{NNN}-{topic}.md`
+  - `.agents/results/result-architecture-{sessionId}.md`
+  - `.agents/results/architecture/architecture-recommendation-<topic>.md`
+  - `.agents/results/architecture/cbam-<topic>.md`
+
+## On Completion
+1. Confirm deliverable file is written to disk.
+2. Return strictly the 4-line chat completion summary to the orchestrator:
+   ```markdown
+   ### Task Complete: Architecture — {Topic}
+   - **Status**: SUCCESS | BLOCKED | FAILED
+   - **Summary**:
+     - {Selected architectural decision / recommendation}
+     - {Primary tradeoff / quality attribute optimized}
+     - {Validation step or implementation impact}
+   - **Artifact**: `file:///path/to/docs/design-docs/{ADR-NNN}-{title}.md`
+   ```
 
 ## Escalation
 - If the question is really about task sequencing -> hand off to plan
