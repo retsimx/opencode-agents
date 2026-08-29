@@ -148,7 +148,7 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 
 3. **Step 3: Check 2 — Diff Hunk Line Bounds & 422 Error Prevention**:
    - Parse `diff-pr.patch` to compute exact hunk boundaries: `[start_line, start_line + line_count]`.
-   - *Demotion Rule*: If a finding identifies a valid bug on an unmodified line outside the PR diff, DO NOT attach it as an inline comment (which causes HTTP 422 Unprocessable Entity from GitHub/GitLab). Instead, DEMOTE the finding to Section 3.A of the top-level review body (`review-template.md`).
+   - *Demotion Rule*: If a finding identifies a valid bug on an unmodified line outside the PR diff, DO NOT attach it as an inline comment (which causes HTTP 422 Unprocessable Entity from GitHub/GitLab). Instead, DEMOTE the finding to Section 5 (Out-of-Diff Observations) of the top-level review body (`review-template.md`).
 
 4. **Step 4: Check 3 — Suggestion Syntax & Indentation Normalization**:
    - Validate every ` ```suggestion ` block:

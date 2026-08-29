@@ -10,11 +10,11 @@ This document defines the authoritative technical execution protocol and operati
 
 1. **Subagent 0 (`context-ingestion`)**: Interacts with the target forge CLI (`gh` or `glab`), extracts PR/MR metadata, diffs, and issue specifications, prunes bot noise, excludes lockfiles/minified assets, sanitizes untrusted input with entity-encoding and dynamic session nonces, normalizes author roles, and persists unconstrained artifacts to disk with **ZERO token limits**.
 2. **Phase 2 (Parallel Detector Sweep)**: Orchestrator concurrently dispatches three domain specialists:
-   - **Subagent 1 (`qa-agent`)**: Reads `spec-issue.md`, `pr-context.md`, `diff-pr.patch`, and `.agents/skills/review/SKILL.md` to evaluate 100% of Acceptance Criteria and contract commitments.
-   - **Subagent 2 (`deep-reviewer`)**: Reads `pr-context.md`, `diff-pr.patch`, `.agents/skills/deep-review/SKILL.md`, and `docs/checklists/{domain}.md` to perform an exhaustive 9-dimension code audit and stage line-level inline suggestions.
-   - **Subagent 3 (`security-agent`)**: Reads `diff-pr.patch` **ONLY** under an isolated **STRICT ZERO-TRUST MANDATE** (completely barred from author explanations, narrative justifications, or issue descriptions).
+   - **Subagent 1 (`qa-agent`)**: Reads `spec-issue.md`, `pr-context.md`, `diff-pr.patch`, and `.agents/skills/review/SKILL.md` to evaluate 100% of Acceptance Criteria and contract commitments for Section 1.
+   - **Subagent 2 (`deep-reviewer`)**: Reads `pr-context.md`, `diff-pr.patch`, `.agents/skills/deep-review/SKILL.md`, and `docs/checklists/{domain}.md` to perform an exhaustive 9-dimension code audit for Section 3 (9-Dimension Quality Scorecard) and stage candidate diff suggestions.
+   - **Subagent 3 (`security-agent`)**: Reads `diff-pr.patch` **ONLY** under an isolated **STRICT ZERO-TRUST MANDATE** (completely barred from author explanations, narrative justifications, or issue descriptions) to generate Section 2 Dedicated Threat Model Matrix across 6 threat vectors with exploit scenarios.
 3. **Phase 3 (Intermediate Synthesis)**: Orchestrator aggregates specialist outputs into an intermediate raw synthesis (`.agents/results/raw-findings-pr-{n}-{sessionId}.md`).
-4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **5-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **Immutable Security Pass-Through Invariant** and emitting the pristine review deliverable (`.agents/results/review-pr-{n}-{sessionId}.md`).
+4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **5-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **Immutable Security Pass-Through Invariant**, formatting Section 4 (Staged Inline Diff Suggestions with Badge + Location + Problem + Remediation + ` ```suggestion ` blocks) and Section 5 (Out-of-Diff Observations), and emitting the complete 6-section master deliverable (`.agents/results/review-pr-{n}-{sessionId}.md`).
 5. **Phase 4 (Presentation, Gate, & Publication)**: Orchestrator presents the verified scorecard in chat, enforces the Human Approval Gate via `ask_question`, and publishes verified batch reviews and inline diff comments via atomic REST API payloads.
 
 ```
@@ -45,7 +45,8 @@ This document defines the authoritative technical execution protocol and operati
 │    diff-pr.patch,        │ │    diff-pr.patch, │ │  - STRICT ZERO-TRUST:    │
 │    skills/review         │ │    deep-review    │ │    Barred from author    │
 │  - Acceptance Criteria   │ │  - 9-Dimension    │ │    narrative or excuses  │
-│    & Contract Alignment  │ │    Code Quality   │ │  - OWASP Top 10 & Auth   │
+│    & Contract Alignment  │ │    Code Quality   │ │  - Threat Model Matrix   │
+│    (Section 1)           │ │    (Section 3)    │ │    (6 Vectors) (Section 2│
 └─────────────┬────────────┘ └────────┬──────────┘ └──────────┬───────────────┘
               │                       │                       │
               └───────────────────────┼───────────────────────┘
@@ -65,7 +66,9 @@ This document defines the authoritative technical execution protocol and operati
 │  - Check 3: Suggestion Syntax & Indentation Normalization                 │
 │  - Check 4: Cross-Specialist Deduplication & Severity Recalibration       │
 │  - Check 5: Immutable Security Pass-Through Invariant (Subagent 3 Locked) │
+│  - Format Section 4 Staged Suggestions & Section 5 Out-of-Diff Obs        │
 │  - Write: OUTPUT_FILE (.agents/results/review-pr-{n}-{sessionId}.md)      │
+│    (Complete 6-Section Master Deliverable)                                │
 └─────────────────────────────────────┬─────────────────────────────────────┘
                                       │
                                       ▼
@@ -250,7 +253,7 @@ When submitting an inline suggestion to GitHub/GitLab:
 2. **Recovery Procedure**:
    - **Step 1**: Attempt to re-fetch the latest commit SHA and diff.
    - **Step 2**: Re-anchor line numbers against the refreshed diff hunk.
-   - **Step 3 (Graceful Fallback)**: If re-anchoring fails, DO NOT fail the review. Downgrade the unplaced inline comment to a labeled finding inside **Section 3.A (Blocking Findings)** or **Section 3.B** of the top-level review body (`review-template.md`), citing the target `file:line` directly in markdown text.
+   - **Step 3 (Graceful Fallback)**: If re-anchoring fails, DO NOT fail the review. Downgrade the unplaced inline comment to a labeled finding inside **Section 5 (Out-of-Diff Observations)** of the top-level review body (`review-template.md`), citing the target `file:line` directly in markdown text.
 
 ---
 
@@ -260,7 +263,7 @@ GitHub imposes a 65,536-character limit on review comments and issue bodies.
 1. **Detection**: Measure character count of synthesized `review-summary-${SESSION_ID}.md`.
 2. **Handling**:
    - If length > 60,000 characters:
-     - Retain full Acceptance Criteria Matrix and 9-Dimension summary table.
+     - Retain full Acceptance Criteria Matrix (Section 1), Threat Model Matrix (Section 2), and 9-Dimension summary table (Section 3).
      - Move extended stack traces or voluminous duplicate code snippets to an attached report artifact `.agents/results/result-forge-review-extended-${SESSION_ID}.md`.
      - Ensure the primary review comment remains clean, actionable, and strictly under the 65 KiB threshold.
 
