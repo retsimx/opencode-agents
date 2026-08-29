@@ -8,7 +8,7 @@ This document defines the authoritative technical execution protocol and operati
 
 `forge-review` operates under **Universal File-First State I/O**, **Zero-Context Relay**, and **Isolated Zero-Trust Security**:
 
-1. **Subagent 0 (`context-ingestion`)**: Interacts with the target forge CLI (`gh` or `glab`), extracts PR/MR metadata, diffs, and issue specifications, prunes bot noise, excludes lockfiles/minified assets, sanitizes untrusted input with entity-encoding and dynamic session nonces, normalizes author roles, and persists unconstrained artifacts to disk with **ZERO token limits**.
+1. **Subagent 0 (`context-ingestion`)**: Interacts with the target forge CLI (`gh` or `glab`), extracts PR/MR metadata, diffs, and issue specifications, prunes bot noise, excludes lockfiles/minified assets, sanitizes untrusted markdown metadata with entity-encoding and dynamic session nonces, guarantees raw uncorrupted code diff syntax in `diff-pr.patch` wrapped inside `<untrusted_diff session_nonce="...">`, normalizes author roles, and persists unconstrained artifacts to disk with **ZERO token limits**.
 2. **Phase 2 (Parallel Detector Sweep)**: Orchestrator concurrently dispatches three domain specialists:
    - **Subagent 1 (`qa-agent`)**: Reads `spec-issue.md`, `pr-context.md`, `diff-pr.patch`, and `.agents/skills/review/SKILL.md` to evaluate 100% of Acceptance Criteria and contract commitments for Section 1.
    - **Subagent 2 (`deep-reviewer`)**: Reads `pr-context.md`, `diff-pr.patch`, `.agents/skills/deep-review/SKILL.md`, and `docs/checklists/{domain}.md` to perform an exhaustive 9-dimension code audit for Section 3 (9-Dimension Quality Scorecard) and stage candidate diff suggestions.
@@ -25,7 +25,8 @@ This document defines the authoritative technical execution protocol and operati
 │  - Prune Bot Accounts (*[bot], codecov, github-actions, dependabot)       │
 │  - Strip CI Tables, Badges, HTML Comments, and Redundant Logs             │
 │  - Exclude Lockfiles (*.lock, pnpm-lock.yaml) & Minified Assets (*.min.*) │
-│  - Entity-Encode (<, >) & Wrap Content with Cryptographic Session Nonces  │
+│  - Entity-Encode Text Metadata (<, >) & Wrap Nonce Boundaries             │
+│  - Preserve Raw Diff Syntax Wrapped in <untrusted_diff session_nonce="...">│
 │  - Normalize Maintainer Roles (MAINTAINER / CONTRIBUTOR / EXTERNAL)       │
 │  - Write: spec-issue.md, pr-context.md, diff-pr.patch (ZERO Token Limits) │
 └─────────────────────────────────────┬─────────────────────────────────────┘
@@ -167,7 +168,7 @@ glab api /projects/:id/merge_requests/<MR_IID>/versions > .agents/results/review
 ```
 
 #### 2. Inline Discussion Submission via REST API
-GitLab posts inline comments as discussion threads using exact diff version coordinate hashes:
+GitLab posts inline comments as discussion threads using exact diff version coordinate hashes. Both single-line and multi-line discussion schemas are supported:
 
 ```bash
 # Extract base_sha, start_sha, and head_sha from latest MR version
@@ -175,7 +176,7 @@ BASE_SHA=$(jq -r '.[0].base_commit_sha' .agents/results/review-inputs-${SESSION_
 START_SHA=$(jq -r '.[0].start_commit_sha' .agents/results/review-inputs-${SESSION_ID}/versions.json)
 HEAD_SHA=$(jq -r '.[0].head_commit_sha' .agents/results/review-inputs-${SESSION_ID}/versions.json)
 
-# Submit inline diff discussion
+# A. Single-Line Discussion Submission
 glab api \
   --method POST \
   /projects/:id/merge_requests/<MR_IID>/discussions \
@@ -186,7 +187,27 @@ glab api \
   -f "position[head_sha]=${HEAD_SHA}" \
   -f "position[new_path]=tutoring/views.py" \
   -F "position[new_line]=88"
+
+# B. Multiline Discussion Submission (line_range schema)
+glab api \
+  --method POST \
+  /projects/:id/merge_requests/<MR_IID>/discussions \
+  -f body="**[BUG]**: Handle None return from get_active_term().\n\n```suggestion\n    term = get_active_term(target_date)\n    if not term:\n        return []\n    max_slots = term.max_daily_sessions\n```" \
+  -f "position[position_type]=text" \
+  -f "position[base_sha]=${BASE_SHA}" \
+  -f "position[start_sha]=${START_SHA}" \
+  -f "position[head_sha]=${HEAD_SHA}" \
+  -f "position[new_path]=tutoring/views.py" \
+  -F "position[line_range][start][new_line]=42" \
+  -f "position[line_range][start][type]=new" \
+  -F "position[line_range][end][new_line]=45" \
+  -f "position[line_range][end][type]=new"
 ```
+
+> **GitLab Diff Positioning Rules**:
+> - Single-line comment: `"position[new_line]": <line_number>` (integer via `-F`).
+> - Multiline comment: `"position[line_range][start][new_line]": <start_line>`, `"position[line_range][start][type]": "new"`, `"position[line_range][end][new_line]": <end_line>`, `"position[line_range][end][type]": "new"`.
+> - Base, Start, and Head SHAs MUST match the MR version metadata to avoid HTTP 400/422 errors.
 
 #### 3. Top-Level Review Summary & Approval
 ```bash

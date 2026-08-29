@@ -25,9 +25,11 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
 │   - Filter minified bundles: *.min.js, *.min.css, *.map                  │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Step 4: Sanitization, Entity-Encoding, & Nonce Injection                 │
-│   - Entity-encode dangerous characters: < -> &lt;, > -> &gt;             │
+│   - Entity-encode untrusted text metadata ONLY: < -> &lt;, > -> &gt;     │
 │   - Generate dynamic session nonce (NONCE_xxxxxxxx)                      │
 │   - Wrap untrusted author text in dynamic nonce boundary blocks          │
+│   - Preserve raw uncorrupted code syntax in diff-pr.patch wrapped        │
+│     inside <untrusted_diff session_nonce="..."> without entity-encoding  │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Step 5: Cross-Forge Role Normalization                                   │
 │   - GitHub & GitLab author roles -> MAINTAINER / CONTRIBUTOR / EXTERNAL  │
@@ -66,9 +68,14 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
      - Minified assets & maps: `*.min.js`, `*.min.css`, `*.map`, `dist/*.js`, `build/*.js`.
    - Retain all source code, template, migration, configuration, and documentation diffs intact.
 
-4. **Step 4: Entity-Encoding & Dynamic Session Nonce Generation**:
-   - To neutralize indirect prompt injection attacks embedded inside issue descriptions or PR titles:
-     - Replace `<` with `&lt;` and `>` with `&gt;` in all untrusted text fields.
+4. **Step 4: Entity-Encoding & Dynamic Session Nonce Generation (Metadata vs Raw Diff Protection)**:
+   - **Strict Scope Rule for Entity-Encoding**:
+     - HTML entity-encoding (`<` -> `&lt;`, `>` -> `&gt;`) is **strictly applied to untrusted markdown text metadata ONLY** (issue descriptions, PR bodies, author comments, review threads, and PR titles).
+     - Entity-encoding prevents indirect prompt injection payloads embedded in human narratives from tricking LLM parsers.
+   - **Diff Syntax Protection Invariant**:
+     - Raw code diffs written to `diff-pr.patch` **MUST NEVER undergo HTML entity-encoding**.
+     - Diffs MUST retain their **raw, uncorrupted source code syntax** (e.g., C++ templates / generics `vector<int>`, boolean operators `if x < y:`, and JSX/HTML markup `<Component />`) so that downstream detectors, AST parsers, linters, and verification checkers receive exact source syntax.
+   - **Dynamic Nonce Boundary Wrapping**:
      - Generate a cryptographically secure 16-character hexadecimal nonce: `NONCE=$(openssl rand -hex 8)`.
      - Wrap untrusted PR/Issue descriptions with explicit nonce boundaries:
        ```markdown
@@ -76,6 +83,18 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
        Title: &lt;fix&gt; Fix user authentication bypass
        Body: Resolves issue with token validation...
        <<</UNTRUSTED_PR_BODY_NONCE_a7f9b1c3e4d20918>>>
+       ```
+     - Wrap raw unified code diffs in `diff-pr.patch` cleanly inside an `<untrusted_diff session_nonce="...">` XML boundary:
+       ```markdown
+       <untrusted_diff session_nonce="a7f9b1c3e4d20918">
+       diff --git a/tutoring/views.py b/tutoring/views.py
+       --- a/tutoring/views.py
+       +++ b/tutoring/views.py
+       @@ -42,5 +42,5 @@
+       -    if x > y:
+       +    if x < y:
+       +        return <Component items={vector<int>{1, 2}} />
+       </untrusted_diff>
        ```
 
 5. **Step 5: Cross-Forge Role Normalization**:
@@ -85,10 +104,10 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
      - `EXTERNAL_AUTHOR`: GitHub (`FIRST_TIME_CONTRIBUTOR`, `FIRST_TIMER`, `NONE`) | GitLab (`Guest` [10], `External`).
 
 6. **Step 6: Zero-Token-Limit Artifact Output**:
-   - Write formatted markdown files to disk without arbitrary truncation:
-     - `spec-issue.md`: Complete issue requirements, acceptance criteria, and epic context.
-     - `pr-context.md`: PR metadata, normalized roles, sanitized description, and comment history.
-     - `diff-pr.patch`: Clean, filtered unified diff ready for detector consumption.
+   - Write formatted markdown and patch files to disk without arbitrary truncation (ZERO token limits):
+     - `spec-issue.md`: Complete issue requirements, acceptance criteria, and epic context (with sanitized metadata).
+     - `pr-context.md`: PR metadata, normalized roles, sanitized description, and comment history (with sanitized metadata).
+     - `diff-pr.patch`: Clean, filtered unified diff retaining raw uncorrupted code syntax wrapped inside `<untrusted_diff session_nonce="...">`.
 
 ---
 
@@ -170,3 +189,43 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 
 7. **Step 7: Final Review Emission**:
    - Write the pristine verified review artifact to `OUTPUT_FILE` (`.agents/results/review-pr-{PR_NUMBER}-{SESSION_ID}.md`).
+
+---
+
+## 3. Forge Discussion Payload Reference: GitLab Multiline Discussion Schema
+
+When publishing verified inline comments and multiline suggestions from Section 4 to GitLab via `glab api`, format the payload using the exact GitLab REST API multiline discussion schema:
+
+### GitLab REST API Multiline Discussion Payload Schema:
+
+```bash
+# Submit multiline inline suggestion on a GitLab Merge Request
+glab api \
+  --method POST \
+  /projects/:id/merge_requests/<MR_IID>/discussions \
+  -f body="**[BUG]**: ..." \
+  -f "position[position_type]=text" \
+  -f "position[base_sha]=${BASE_SHA}" \
+  -f "position[start_sha]=${START_SHA}" \
+  -f "position[head_sha]=${HEAD_SHA}" \
+  -f "position[new_path]=tutoring/views.py" \
+  -F "position[line_range][start][new_line]=42" \
+  -f "position[line_range][start][type]=new" \
+  -F "position[line_range][end][new_line]=45" \
+  -f "position[line_range][end][type]=new"
+```
+
+### Parameter Specification:
+| Parameter | Type | Required | Description |
+|:---|:---|:---|:---|
+| `body` | string (`-f`) | Yes | Markdown content containing the finding header and ` ```suggestion ` block |
+| `position[position_type]` | string (`-f`) | Yes | Set to `text` for code diff discussions |
+| `position[base_sha]` | string (`-f`) | Yes | Base commit SHA from MR versions API (`.[0].base_commit_sha`) |
+| `position[start_sha]` | string (`-f`) | Yes | Start commit SHA from MR versions API (`.[0].start_commit_sha`) |
+| `position[head_sha]` | string (`-f`) | Yes | Target head commit SHA from MR versions API (`.[0].head_commit_sha`) |
+| `position[new_path]` | string (`-f`) | Yes | Target file path in the repository (e.g. `tutoring/views.py`) |
+| `position[line_range][start][new_line]` | integer (`-F`) | Yes | Starting line number of the multiline range on the modified (`+`) side |
+| `position[line_range][start][type]` | string (`-f`) | Yes | `new` for newly added/modified lines, or `old` for removed lines |
+| `position[line_range][end][new_line]` | integer (`-F`) | Yes | Ending line number of the multiline range on the modified (`+`) side |
+| `position[line_range][end][type]` | string (`-f`) | Yes | `new` for newly added/modified lines, or `old` for removed lines |
+
