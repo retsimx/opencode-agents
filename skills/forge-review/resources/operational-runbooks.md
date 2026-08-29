@@ -1,6 +1,6 @@
-# Forge Review: Operational Runbooks (Subagent 0 & Subagent 4)
+# Forge Review: Operational Runbooks & Presentation Protocols
 
-This resource provides step-by-step operational runbooks for Subagent 0 (`context-ingestion`) and Subagent 4 (`review-verifier`).
+This resource provides step-by-step operational runbooks for Subagent 0 (`context-ingestion`), Subagent 4 (`review-verifier`), Forge Payload Submissions, and the Orchestrator Scene 5 Presentation & Human Gating protocol.
 
 ---
 
@@ -150,6 +150,7 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Step 7: Final Review Emission                                            │
 │   - Write verified deliverable to OUTPUT_FILE (review-template.md)       │
+│   - Guarantee full 6-section uncollapsed rich markdown structure         │
 │   - Output standard 4-line chat completion summary with metrics          │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -188,7 +189,8 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
    - If Subagent 4 verifies an exploit path is difficult to trigger, it may add an explanatory reachability note, but the security finding MUST remain in the final review.
 
 7. **Step 7: Final Review Emission**:
-   - Write the pristine verified review artifact to `OUTPUT_FILE` (`.agents/results/review-pr-{PR_NUMBER}-{SESSION_ID}.md`).
+   - Write the pristine verified review artifact to `OUTPUT_FILE` (`.agents/results/review-pr-{PR_NUMBER}-{SESSION_ID}.md` or `.agents/results/forge-review/<sessionId>/review-pr-{PR_NUMBER}-verified.md`).
+   - Guarantee that all 6 sections (Acceptance Criteria Matrix, Dedicated Security Audit, 9-Dimension Quality Scorecard, Staged Inline Diff Suggestions, Out-of-Diff Observations, and Author Next Steps) are fully populated with complete markdown tables, exact `file:line` proof citations, exploit traces, and complete ` ```suggestion ` replacement blocks without placeholder abbreviations or summarized omissions.
 
 ---
 
@@ -228,4 +230,105 @@ glab api \
 | `position[line_range][start][type]` | string (`-f`) | Yes | `new` for newly added/modified lines, or `old` for removed lines |
 | `position[line_range][end][new_line]` | integer (`-F`) | Yes | Ending line number of the multiline range on the modified (`+`) side |
 | `position[line_range][end][type]` | string (`-f`) | Yes | `new` for newly added/modified lines, or `old` for removed lines |
+
+---
+
+## 4. GitHub Atomic Batch Review Payload Reference & Submission Protocol
+
+When publishing reviews to GitHub Pull Requests via `gh api`, submit the top-level review markdown and all inline diff comments atomically in a single REST payload (`POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews`):
+
+### GitHub REST API Review Payload Schema:
+
+```bash
+gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  /repos/{owner}/{repo}/pulls/{pull_number}/reviews \
+  --input - << 'EOF'
+{
+  "commit_id": "{HEAD_SHA}",
+  "body": "{TOP_LEVEL_REVIEW_MARKDOWN}",
+  "event": "REQUEST_CHANGES",
+  "comments": [
+    {
+      "path": "tutoring/views.py",
+      "line": 88,
+      "side": "RIGHT",
+      "body": "**[BUG]**: Using `timezone.now().date()` causes timezone offset errors.\n\n```suggestion\n    today = timezone.localdate()\n```"
+    },
+    {
+      "path": "tutoring/services/slot_calculator.py",
+      "start_line": 42,
+      "line": 45,
+      "start_side": "RIGHT",
+      "side": "RIGHT",
+      "body": "**[BUG]**: Handle `None` return from `get_active_term()`.\n\n```suggestion\n    term = get_active_term(target_date)\n    if not term:\n        return []\n    max_slots = term.max_daily_sessions\n```"
+    }
+  ]
+}
+EOF
+```
+
+---
+
+## 5. Scene 5: Orchestrator Presentation & Human Gate Runbook
+
+This runbook defines the mandatory operational protocol for the Orchestrator during **Scene 5 (PRESENT & GATE)** prior to executing the Human Approval Gate via `ask_question`.
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│         Scene 5: Orchestrator Presentation & Human Gate Runbook          │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 1: Ingest Verified Review Deliverable                               │
+│   - Read .agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md│
+│     (or .agents/results/review-pr-{n}-{sessionId}.md) via view_file      │
+│   - Validate presence of full 6-section structure                        │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 2: Complete Uncollapsed Chat Presentation Mandate                   │
+│   - Print 100% of complete, untruncated, uncollapsed markdown contents   │
+│     directly to the active chat window before calling ask_question       │
+│   - Render all 6 rich sections, tables, citations, & suggestion blocks   │
+│   - STRICT PROHIBITION: Do NOT summarize into one-liners or file links   │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 3: Interactive Human Approval Gate Execution                        │
+│   - Invoke ask_question with 4 structured decision options               │
+│   - Options: 1) Publish Review + Inline Comments, 2) Publish Summary     │
+│     Only, 3) Request Adjustments, 4) Decline & Exit                      │
+│   - HARD GATE: Never mutate remote forge without explicit confirmation   │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Detailed Operational Specifications for Scene 5:
+
+1. **Step 1: Ingest Verified Review Deliverable**:
+   - The Orchestrator MUST read the final verified review artifact from disk using `view_file`:
+     - Path: `.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` (or `.agents/results/review-pr-{n}-{sessionId}.md`).
+   - Ensure the artifact contains the complete, authoritative 6-section review deliverable:
+     - **Header & Verdict**: PR metadata, evaluated scope, target branch, associated issue/epic, top-level review verdict.
+     - **Executive Summary**: 2–4 sentence high-level synthesis of code quality and blocking findings.
+     - **Section 1: Acceptance Criteria & Contract Alignment Matrix**: Complete table with `#`, `Requirement`, `Source Ref`, `Status`, `Code Proof (file:line)`, and `Notes`.
+     - **Section 2: Dedicated Security & Threat Model Audit (Subagent 3 Zero-Trust Pass)**: Threat Model Matrix across all 6 threat vectors with Exploit Scenarios, Impact Analysis, and precise Remediations.
+     - **Section 3: 9-Dimension Code Quality & Architecture Audit Scorecard (Subagent 2 Deep Review)**: 9-Dimension status matrix and detailed findings tables per dimension.
+     - **Section 4: Staged Inline Diff Suggestions & Detailed Remediation (Subagent 4 Verified)**: Verified findings formatted with Badge + Location (`file:line`) + Problem + Remediation + ` ```suggestion ` replacement code blocks.
+     - **Section 5: Out-of-Diff Observations (Demoted from Inline)**: Table of valid defects on untouched lines outside PR diff hunks.
+     - **Section 6: Recommended Next Steps for Author**: Actionable checklist for the PR author.
+
+2. **Step 2: Complete Uncollapsed Chat Presentation Mandate**:
+   - **Mandatory Direct Output**: The Orchestrator MUST print the **complete, untruncated, uncollapsed markdown contents of the verified review deliverable directly to the chat window** before invoking `ask_question`.
+   - **Chat as the Authoritative Communication Channel**: In accordance with Anti-Context-Dilution and Communication Policy (Rule 3.1 & Rule 3.3), chat is the authoritative communication channel. Users must never be required or expected to open local artifact files, inspect external links, or decipher truncated one-liners to discover review findings, acceptance criteria matrices, or diff suggestions.
+   - **Strict Prohibitions**:
+     - ❌ **FORBIDDEN**: Summarizing rich markdown tables (Acceptance Criteria, Threat Model, 9-Dimension Quality Scorecard, Out-of-Diff Observations) into abbreviated bullet points or high-level one-liners (e.g. writing "All criteria passed" instead of printing the full table).
+     - ❌ **FORBIDDEN**: Replacing Section 4 inline diff suggestions or ` ```suggestion ` blocks with descriptive summaries or file citations (e.g. writing "2 suggestions staged in file.py; see report for details").
+     - ❌ **FORBIDDEN**: Emitting only artifact path links or high-level verdicts without printing the underlying markdown sections.
+   - **Presentation Completeness Invariant**: Every table row, status badge, code location citation (`file:line`), detailed exploit path, problem description, remediation rationale, and ` ```suggestion ` block MUST be rendered in chat exactly as generated in the verified deliverable.
+
+3. **Step 3: Interactive Human Gate Execution (`ask_question`)**:
+   - Immediately after the full 6-section markdown review has been emitted to the chat window, the Orchestrator MUST execute `ask_question` to obtain explicit user confirmation.
+   - **Structured Question Options**:
+     - `(Recommended) Publish formal review and all staged inline diff comments to forge`: Submits top-level review and inline suggestions via batch API (`gh api` or `glab api`).
+     - `Publish top-level summary review only (skip inline diff comments)`: Submits top-level review note without attaching line-level suggestions.
+     - `Request adjustments or revise review findings`: Allows user to provide feedback, request re-audit, or modify verdicts.
+     - `Do not publish to forge (save report locally and exit)`: Retains local review artifacts without mutating remote forge state.
+   - **Hard Synchronization Barrier**: The Orchestrator MUST halt execution and wait for the user's interactive response. Proceeding to Scene 6 (PUBLISH) or executing any forge mutation commands (`gh pr review`, `gh api`, `glab mr note`, `glab mr approve`, `glab api`) without explicit user approval is **STRICTLY PROHIBITED**.
+
 
