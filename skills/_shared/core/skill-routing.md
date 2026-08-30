@@ -36,6 +36,8 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | automatic, parallel, orchestrate | **orchestrate** | |
 | workflow, guide, manual, step-by-step | **coordination** | |
 | configuration management, SCM, CM, git, commit, gitflow, GitHub Flow, GitLab Flow, trunk-based branching, merge conflict, rebase, worktree, baseline, tag, release branch, signed commits, merge queue, conventional commits | **scm** | SCM + Conventional Commits in one skill |
+| issue, resolve issue, fix issue, issue autopilot, autopilot, automated issue resolution, forge issue, GitHub issue, GitLab issue, end-to-end issue fix | **issue-autopilot** | Complete automated issue resolution engine: Ingests GitHub/GitLab issue -> Brainstorms architecture -> Decomposes plan -> Auto-implements via ultrawork (Plan-Ingestion Mode) -> Runs Fast-Fail Local CI Sanity Gate -> Generates Conventional Commits & Draft PR -> Posts plain-English issue comment — all inside an isolated worktree. |
+| ultrawork, rigorous development, 5-phase workflow, multi-review, high-assurance implementation | **ultrawork** | High-quality 5-phase development workflow (PLAN, IMPL, VERIFY, REFINE, SHIP) with 11 review gates. Can run standalone or in Plan-Ingestion Mode when invoked by issue-autopilot. |
 
 ---
 
@@ -43,6 +45,9 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 
 | Request Pattern | Execution Order |
 |----------------|-----------------|
+| "Fix issue #123" | issue-autopilot (Phase 0 Init → Phase 1 Brainstorm → Phase 2 Plan → Phase 3 Ultrawork IMPL → Phase 4 Forge Ship w/ CI Sanity Gate → Phase 5 Issue Comment) |
+| "Resolve issue from GitHub/GitLab" | issue-autopilot |
+| "Auto-implement issue" | issue-autopilot |
 | "Create a fullstack app" | plan → (backend + frontend) parallel → review |
 | "Create a mobile app" | plan → (backend + mobile) parallel → review |
 | "Fullstack + mobile" | plan → (backend + frontend + mobile) parallel → review |
@@ -64,6 +69,36 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | "audit MR !10" | forge-review (fetch GitLab MR diff → deep-review subagent → review report) |
 | "review PR against issue" | forge-review (fetch issue context + PR diff → deep-review subagent → audit against requirements) |
 | "review branch against main" | forge-review (diff branch against main → deep-review subagent → review report) |
+
+---
+
+## End-to-End Orchestration & Issue Resolution Boundaries
+
+| Skill | Primary Purpose | Scope & Input Mode | Output / Deliverables | Mutates Code/Forge? |
+|-------|-----------------|--------------------|-----------------------|---------------------|
+| **`issue-autopilot`** | End-to-end autonomous issue resolution lifecycle from forge issue to draft PR and comment | Forge issue number/URL (GitHub/GitLab) | Isolated worktree, design doc, plan JSON, implemented feature, draft PR/MR, issue comment | Yes (creates branch, commits, opens PR/MR, comments) |
+| **`brainstorm`** | Architecture design and exploration with blind review rounds | Feature idea, problem statement, or issue context | Approved design document (`docs/plans/designs/<NNN>-<name>.md`) | No (creates design doc) |
+| **`plan`** | Structured task breakdown and contract definition | Approved design doc or requirements | Machine plan (`plan-{sessionId}.json`) & tracker (`docs/plans/work/<NNN>-<name>.md`) | No (creates plan files) |
+| **`ultrawork`** | High-assurance 5-phase implementation and multi-review framework (PLAN, IMPL, VERIFY, REFINE, SHIP) | Task plan JSON or direct user feature spec | Implemented code, test suites, multi-stage review reports | Yes (modifies codebase within active workspace/worktree) |
+| **`scm`** | Configuration management, branching strategy, worktree management, Conventional Commits | Local repo / worktree, git history, staging area | Worktrees, branches, tags, atomic Conventional Commits | Yes (git state and history) |
+
+### Boundary and Cross-Routing Rules for Issue Resolution:
+1. **Issue-Driven Autopilot (`issue-autopilot`)**:
+   - Primary entry point when a user provides a GitHub/GitLab issue to resolve end-to-end.
+   - Orchestrates the full lifecycle inside an isolated worktree:
+     - Invokes `brainstorm` (Phase 1) for architecture discovery and design.
+     - Invokes `plan` (Phase 2) for task decomposition and contract specification.
+     - Invokes `ultrawork` in **Plan-Ingestion Mode** (Phase 3), bypassing redundant PM re-planning and directly executing IMPL -> VERIFY -> REFINE.
+     - Enforces a mandatory **Fast-Fail Local CI Sanity Gate** (Phase 4) before creating commits or pushing.
+     - Leverages `scm` conventions (Phase 4) for atomic Conventional Commits and draft PR/MR generation.
+     - Generates and posts a plain-English issue comment (Phase 5).
+2. **Architecture Discovery (`brainstorm`) vs Planning (`plan`)**:
+   - `brainstorm` is for exploring design tradeoffs, user journeys, and architectural choices before implementation tasks exist.
+   - `plan` is strictly for breaking down an approved design into discrete, prioritized tasks with API contracts and dependencies.
+3. **Execution Engine (`ultrawork`) vs Autopilot (`issue-autopilot`)**:
+   - `ultrawork` is the rigorous implementation and multi-review engine. When run standalone, it performs its own initial PLAN phase. When called by `issue-autopilot`, it operates in **Plan-Ingestion Mode**, directly consuming `plan-{sessionId}.json`.
+4. **Git Operations & Standards (`scm`)**:
+   - `scm` provides standardized branching, worktree isolation, and Conventional Commits protocols consumed by `issue-autopilot` and domain agents.
 
 ---
 
@@ -135,3 +170,5 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | review | 15 | 20 |
 | forge-review | 15 | 25 |
 | deep-review | 10 | 15 |
+| ultrawork | 25 | 40 |
+| issue-autopilot | 30 | 50 |
