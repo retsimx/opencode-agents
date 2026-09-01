@@ -8,13 +8,13 @@ This document defines the authoritative technical execution protocol and operati
 
 `forge-review` operates under **Universal File-First State I/O**, **Zero-Context Relay**, and **Isolated Zero-Trust Security**:
 
-1. **Subagent 0 (`context-ingestion`)**: Interacts with the target forge CLI (`gh` or `glab`), extracts PR/MR metadata, diffs, and issue specifications, prunes bot noise, excludes lockfiles/minified assets, sanitizes untrusted markdown metadata with entity-encoding and dynamic session nonces, guarantees raw uncorrupted code diff syntax in `diff-pr.patch` wrapped inside `<untrusted_diff session_nonce="...">`, normalizes author roles, and persists unconstrained artifacts to disk with **ZERO token limits**.
+1. **Subagent 0 (`context-ingestion`)**: Interacts with the target forge CLI (`gh` or `glab`), extracts PR/MR metadata, diffs, and issue specifications, prunes bot noise, excludes lockfiles/minified assets, sanitizes untrusted markdown metadata with entity-encoding and dynamic session nonces, guarantees raw uncorrupted code diff syntax in `diff-pr.patch` wrapped inside `<untrusted_diff session_nonce="...">`, normalizes author roles, and persists unconstrained artifacts to disk with **ZERO token limits**. It separates **current-state** (`pr-context.md`: metadata, head SHA, author intent, documented deviations, sanitized description) from **historical review findings** (`pr-history.md`: prior-round findings under a clearly-marked "HISTORICAL REVIEW ROUNDS (may describe already-fixed code)" section), tagging provenance at ingestion without determining staleness.
 2. **Phase 2 (Parallel Detector Sweep)**: Orchestrator concurrently dispatches three domain specialists:
    - **Subagent 1 (`qa-agent`)**: Reads `spec-issue.md`, `pr-context.md`, `diff-pr.patch`, and `.agents/skills/review/SKILL.md` to evaluate 100% of Acceptance Criteria and contract commitments for Section 1 (Acceptance Criteria & Contract Alignment Matrix with `file:line` proof citations).
    - **Subagent 2 (`deep-reviewer`)**: Reads `pr-context.md`, `diff-pr.patch`, `.agents/skills/deep-review/SKILL.md`, and `docs/checklists/{domain}.md` to perform an exhaustive 9-dimension code audit for Section 3 (9-Dimension Quality Scorecard) and stage candidate diff suggestions with ` ```suggestion ` blocks.
    - **Subagent 3 (`security-agent`)**: Reads `diff-pr.patch` **ONLY** under an isolated **STRICT ZERO-TRUST MANDATE** (completely barred from author explanations, narrative justifications, or issue descriptions) to generate Section 2 Dedicated Threat Model Matrix across 6 threat vectors with exploit scenarios, reachability paths, and remediation code.
 3. **Phase 3 (Intermediate Synthesis)**: Orchestrator aggregates specialist outputs into an intermediate raw synthesis (`.agents/results/raw-findings-pr-{n}-{sessionId}.md`).
-4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **5-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **Immutable Security Pass-Through Invariant**, formatting Section 4 (Staged Inline Diff Suggestions with Badge + Location + Problem + Remediation + ` ```suggestion ` blocks) and Section 5 (Out-of-Diff Observations), and emitting the complete 6-section master deliverable (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`).
+4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **5-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **provenance gate** (every finding must cite a current-head `file:line`; no citation → demote to Section 5 or drop) and the **Immutable Security Pass-Through Invariant**, formatting Section 4 (Staged Inline Diff Suggestions with Badge + Location + Problem + Remediation + ` ```suggestion ` blocks) and Section 5 (Out-of-Diff Observations), and emitting the complete 6-section master deliverable (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`). If `pr-history.md` is provided, Subagent 4 MAY cross-reference prior-round findings to note "previously raised, now verified fixed" as an optional courtesy.
 5. **Phase 4 (Presentation, Gate, & Publication)**:
    - **Scene 5 (Orchestrator Presentation & Human Gate)**: Orchestrator reads `.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` (or `.agents/results/review-pr-{n}-{sessionId}.md`) and prints its **complete, untruncated, uncollapsed markdown contents directly to the chat window** (including all rich tables, `file:line` proof citations, exploit scenarios, and ` ```suggestion ` replacement blocks) before executing `ask_question`. Replacing rich tables or suggestion blocks with summarized one-liners or file references is strictly forbidden. The orchestrator halts at the mandatory Human Approval Gate (`ask_question`).
    - **Scene 6 (Forge Publication)**: Upon explicit human approval, submits verified atomic batch reviews and inline diff comments via provider REST API payloads (`gh api` or `glab api`).
@@ -30,7 +30,10 @@ This document defines the authoritative technical execution protocol and operati
 │  - Entity-Encode Text Metadata (<, >) & Wrap Nonce Boundaries             │
 │  - Preserve Raw Diff Syntax Wrapped in <untrusted_diff session_nonce="...">│
 │  - Normalize Maintainer Roles (MAINTAINER / CONTRIBUTOR / EXTERNAL)       │
-│  - Write: spec-issue.md, pr-context.md, diff-pr.patch (ZERO Token Limits) │
+│  - Separate current-state (pr-context.md) from historical findings       │
+│    (pr-history.md); tag provenance, do not determine staleness           │
+│  - Write: spec-issue.md, pr-context.md, pr-history.md, diff-pr.patch    │
+│    (ZERO Token Limits)                                                  │
 └─────────────────────────────────────┬─────────────────────────────────────┘
                                       │
                                       ▼
@@ -65,6 +68,8 @@ This document defines the authoritative technical execution protocol and operati
 │             Phase 3.5: Review Verifier & Critic Specialist Pass           │
 │  invoke_subagent([review-verifier])                                       │
 │  - Check 1: Ground Truth Fact-Check (Verify against live codebase)        │
+│    + Provenance Gate: every finding MUST cite a current-head file:line;   │
+│      no citation -> demote to Section 5 or drop                        │
 │  - Check 2: Diff Hunk Line Bounds & 422 Demotion (Validate hunk spans)    │
 │  - Check 3: Suggestion Syntax & Indentation Normalization                 │
 │  - Check 4: Cross-Specialist Deduplication & Severity Recalibration       │

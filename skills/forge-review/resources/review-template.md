@@ -194,6 +194,16 @@ The following valid findings target unmodified lines outside active diff hunks. 
 
 ---
 
+## 5.5 Previously Raised, Now Verified Fixed (Optional — Verifier Courtesy)
+
+> **OPTIONAL**: This subsection is a courtesy note produced only when the verifier cross-references prior-round findings (`pr-history.md`). It is not required and does not affect the verdict. Each entry must cite a current-head `file:line` proving the prior finding is now resolved.
+
+| # | Previously Raised (Source Round) | Current Location (`file:line`) | Verification Detail |
+|---|----------------------------------|-------------------------------|---------------------|
+| 1 | `{prior finding summary} — round {N}` | `path/to/file.py:L88` | {How the current head resolves the prior finding, verified at this location} |
+
+---
+
 ## 6. Recommended Next Steps for Author
 
 - [ ] **Apply Inline Suggestions**: Review and accept/commit the verified inline suggestion blocks on the diff.

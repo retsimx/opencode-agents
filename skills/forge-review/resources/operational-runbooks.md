@@ -36,6 +36,12 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Step 6: Zero-Token-Limit Artifact Output                                 │
 │   - Write: spec-issue.md, pr-context.md, diff-pr.patch                   │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Step 7: Current-State vs. Historical Separation                         │
+│   - pr-context.md: current-state only (metadata, head SHA, author        │
+│     intent, documented deviations, sanitized description)                │
+│   - pr-history.md: historical review findings from prior rounds          │
+│     (tag provenance at ingestion; do NOT determine staleness)            │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -106,8 +112,14 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
 6. **Step 6: Zero-Token-Limit Artifact Output**:
    - Write formatted markdown and patch files to disk without arbitrary truncation (ZERO token limits):
      - `spec-issue.md`: Complete issue requirements, acceptance criteria, and epic context (with sanitized metadata).
-     - `pr-context.md`: PR metadata, normalized roles, sanitized description, and comment history (with sanitized metadata).
+     - `pr-context.md`: PR metadata, normalized roles, sanitized description, and comment history (with sanitized metadata) — **current-state only** (head SHA, author intent, documented design deviations, sanitized current description). NO historical review findings.
+     - `pr-history.md`: Historical review findings from prior rounds written under a clearly-marked "HISTORICAL REVIEW ROUNDS (may describe already-fixed code)" section.
      - `diff-pr.patch`: Clean, filtered unified diff retaining raw uncorrupted code syntax wrapped inside `<untrusted_diff session_nonce="...">`.
+
+7. **Step 7: Current-State vs. Historical Separation**:
+   - `pr-context.md` contains **current-state only**: MR metadata, head SHA, author intent, documented design deviations, and sanitized current description.
+   - Historical review findings from prior rounds are written to `pr-history.md` under a clearly-marked "HISTORICAL REVIEW ROUNDS (may describe already-fixed code)" section.
+   - **Tag provenance at ingestion; do NOT determine staleness.** Staleness is checked by the verifier (Subagent 4) against the current head.
 
 ---
 
@@ -128,6 +140,8 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 │   - view_file on workspace target source files at cited lines            │
 │   - Verify defect existence in AST and runtime context                   │
 │   - Action: DROP finding if hallucinated, already handled, or refuted    │
+│   - Provenance gate: every finding MUST cite a current-head file:line;   │
+│     no citation -> DEMOTE to Section 5 (Out-of-Diff) or DROP           │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ Step 3: Check 2 — Diff Hunk Line Bounds & 422 Demotion                   │
 │   - Parse DIFF_FILE hunk boundaries (@@ -a,b +c,d @@)                    │
@@ -164,6 +178,7 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 2. **Step 2: Check 1 — Ground Truth Fact-Checking**:
    - Read the real repository source code using `view_file` at each cited location.
    - Test logic claims against surrounding imports, helper functions, and class definitions.
+   - *Provenance gate*: Every finding must cite a `file:line` that exists in the current head. Any finding without a current-head citation is auto-demoted to Section 5 (Out-of-Diff Observations) or dropped.
    - *Drop Condition*: If a finding claims a function lacks null-checking, but an upstream guard or framework middleware guarantees non-null execution, DROP the finding and document the refutation in the internal verification log.
 
 3. **Step 3: Check 2 — Diff Hunk Line Bounds & 422 Error Prevention**:
