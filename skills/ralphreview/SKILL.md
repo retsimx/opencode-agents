@@ -8,6 +8,15 @@ description: >
 
 # Ralph Review — Iterative QA Loop
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
+
+
 ## Scheduling
 
 ### Goal
@@ -146,7 +155,7 @@ while clean_review_streak < 3:
          STATE_FILE: <STATE_FILE>
 
          1. DELEGATE: Use the built-in `task` tool to spawn a nested subagent
-            that loads the `deep-review` skill and reviews the scope.
+            that loads the `deep-review` skill and reviews the scope (incl. Grug Compliance).
 
             Call `task` with:
               subagent_type: "general"
@@ -298,6 +307,7 @@ exit  # clean_review_streak == 3
 15. **TOOL RESTRICTION — Diff: You may only run `git diff --stat` (file names only) to check whether files changed. Never the full diff.**
 16. **CRITICAL: The `task` tool is a built-in agent function call, the same as `read`, `write`, or `grep`. It is NOT a bash command. Never run `$ task ...` in a shell — use the agent's tool-calling interface instead.**
 17. **Nested delegation is required for review and remediation.** The review coordinator MUST delegate deep-review to a nested subagent. The remediation coordinator MUST spawn one fix subagent per NEW finding. Do NOT load deep-review skill or perform fixes directly in the coordinator.
+- **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 
 ## References
 - Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`

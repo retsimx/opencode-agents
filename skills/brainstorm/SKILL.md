@@ -5,6 +5,13 @@ description: Design-first ideation that explores user intent, constraints, and a
 
 # Brainstorm - Design-First Ideation
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+
+
 ## Scheduling
 
 ### Goal

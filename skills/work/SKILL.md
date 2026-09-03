@@ -16,6 +16,14 @@ description: Coordinate multiple agents for a complex multi-domain project using
 - **Read the coordination skill BEFORE starting.** Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
+
 ---
 
 ## Step 0: Preparation (DO NOT SKIP)
@@ -81,6 +89,7 @@ Spawn agents using the OpenCode `task` tool:
   - `SESSION_ID`: Active session identifier (`{sessionId}`)
   - `TASK_SLUG`: Concise kebab-case task identifier (`{taskSlug}`)
   - `OUTPUT_FILE`: Designated artifact destination (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`)
+- **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 - Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/plan-{sessionId}.json`, upstream outputs) by file path reference.
 - Mandate **Universal File-First State I/O & 4-Line Chat Return Contract**:
   - Subagents must write exhaustive deliverables to designated `OUTPUT_FILE`.

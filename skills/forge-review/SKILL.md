@@ -9,6 +9,15 @@ description: >
 
 # Forge-Review — PR/MR Deep Audit & Review Engine
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
+
+
 ## Scheduling
 
 ### Goal
@@ -128,6 +137,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 
 1. **ACQUIRE (Stage 1: Context Ingestion & Sanitization)**:
    - Orchestrator dispatches **Subagent 0: `context-ingestion`** via the subagent tool.
+   - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
    - Subagent 0 queries forge API, prunes bot noise, excludes lockfiles/assets, entity-encodes untrusted markdown metadata while preserving raw code diffs unencoded within `<untrusted_diff session_nonce="...">` to prevent source code syntax corruption, applies dynamic session nonces, and writes `spec-issue.md`, `pr-context.md`, `diff-pr.patch` with **ZERO token limits**.
    - Initializes run state file at `.agents/results/forge-review/<sessionId>/state.json`.
 
@@ -141,7 +151,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
    - Orchestrator aggregates specialist outputs from disk into `.agents/results/raw-findings-pr-{n}-{sessionId}.md` without dropping findings, mapping candidate findings toward the 6-Section review schema:
      - *Section 1*: Acceptance Criteria & Contract Alignment Matrix (from Subagent 1)
      - *Section 2*: Dedicated Security & Threat Model Audit (from Subagent 3)
-     - *Section 3*: 9-Dimension Code Quality & Architecture Audit (from Subagent 2)
+     - *Section 3*: 9-Dimension Code Quality & Architecture Audit, incl. Grug Compliance (from Subagent 2)
      - *Section 4*: Staged Inline Diff Suggestions & Detailed Remediation (from Subagents 2 & 3)
      - *Section 5*: Out-of-Diff Observations (Demoted from inline) (candidate out-of-hunk findings)
      - *Section 6*: Recommended Next Steps for Author

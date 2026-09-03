@@ -5,6 +5,14 @@ description: Frontend specialist for React, Next.js, TypeScript with FSD-lite ar
 
 # Frontend Agent - UI/UX Specialist
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+
+
 ## Scheduling
 
 ### Goal

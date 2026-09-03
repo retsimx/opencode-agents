@@ -14,6 +14,14 @@ description: Automated parallel agent execution that spawns subagents via OpenCo
   - Do NOT rely on MCP-specific tools or memory providers
 - **Read required documents BEFORE starting.**
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
+
 ---
 
 ## Scheduling
@@ -122,6 +130,7 @@ Each `task` tool invocation receives:
     - `TASK_SLUG`: Concise kebab-case task identifier (`{taskSlug}`)
     - `OUTPUT_FILE`: Designated artifact path (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`)
   - **Zero-Context Relay**: Reference prerequisite artifacts, plan paths (`.agents/results/plan-{sessionId}.json`), and contract files by file path instead of dumping full file content into prompt.
+- **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
   - **File-First State I/O Mandate**: Subagent must write exhaustive deliverables to `OUTPUT_FILE`, verify disk write, and return ONLY the standardized 4-line chat completion summary:
     ```markdown
     ### Task Complete: {Role} — {Task Name}

@@ -5,6 +5,13 @@ description: Architecture specialist for software/system design, module and serv
 
 # Architecture Agent - Software Architecture Specialist
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+
+
 ## Scheduling
 
 ### Goal

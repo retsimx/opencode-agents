@@ -17,6 +17,13 @@ description: Initialize or reinitialize a project's AI harness — AGENTS.md tab
   - Respect the project's `.gitignore` as the source of truth for excluding directories.
   - Automatically skip framework-generated cross-platform build/project directories (e.g., Flutter/React Native's `android`, `ios`, `macos`, `linux`, `windows`, `web` folders).
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+
 ---
 
 > **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native file exploration, code analysis, and file writing tools.

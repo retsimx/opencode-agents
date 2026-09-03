@@ -5,6 +5,14 @@ description: Database specialist for SQL, NoSQL, and vector database modeling, s
 
 # DB Agent - Data Modeling & Database Architecture Specialist
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+
+
 ## Scheduling
 
 ### Goal

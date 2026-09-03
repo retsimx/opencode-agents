@@ -14,6 +14,14 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
   - Write complete findings to `.agents/results/result-review-{taskSlug}-{sessionId}.md`.
   - Always return the standard 4-line chat summary to the orchestrator/user.
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/rules/i18n-guide.md` — response language
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+
 ---
 
 ## When to use
@@ -103,6 +111,8 @@ Compile all findings into a prioritized report:
 - **LOW**: Backlog
 
 Each finding must include: `file:line`, description, and remediation code.
+
+Include a **Grug Compliance** section in the report assessing: unnecessary vs. necessary complexity, gold-plating, premature abstraction, unused extension points, and whether an existing project mechanism could have been used instead of new machinery.
 
 ### File-First State I/O & Output Contract
 1. **Write Complete Review Report to File**:

@@ -5,6 +5,15 @@ description: Guide for coordinating Plan, Frontend, Backend, Mobile, and Review 
 
 # Multi-Agent Workflow Guide
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
+
+
 ## Scheduling
 
 ### Goal
@@ -96,6 +105,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 - Plan: Call Task with subagent_type="general", prompt=<plan task>, and workdir=<workspace>/plan
 - Backend: Call Task with subagent_type="general", prompt=<backend task>, and workdir=<workspace>/backend (run in parallel)
 - Frontend: Call Task with subagent_type="general", prompt=<frontend task>, and workdir=<workspace>/frontend (run in parallel)
+- **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 ```
 
 ### Resource scope

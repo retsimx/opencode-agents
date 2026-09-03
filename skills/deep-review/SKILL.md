@@ -8,6 +8,15 @@ description: >
 
 # /deep-review — Deep Post-Implementation Review Skill
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/rules/i18n-guide.md` — response language
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+
+
 > Load `.agents/rules/grug-principles.md` before reviewing. Apply its rules when
 > assessing whether added complexity is justified by the requirement.
 
@@ -169,6 +178,14 @@ You MUST evaluate:
 - parallel conditional branches with the same body
 - duplicated template fragments or partials
 - repeated test setup/assertion patterns
+
+#### Grug Compliance (Complexity)
+- unnecessary complexity introduced vs. necessary complexity paid deliberately
+- gold-plating or speculative features not required by the change
+- premature abstraction / over-engineering (abstractions without repeated concrete cases)
+- unused extension points, configuration, or compatibility layers for hypothetical needs
+- whether an existing project mechanism could have been used instead of new machinery
+- whether the change could be smaller or simpler while satisfying the requirement
 
 ---
 

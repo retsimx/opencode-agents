@@ -13,6 +13,12 @@ description: Product-management planning workflow that turns ambiguous or comple
   - Use `write` and `edit` to record planning results.
   - Use `.agents/results/` for output files.
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+
 ---
 
 > **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native code analysis tools. Plan artifacts (`.agents/results/plan-{sessionId}.json` and `docs/plans/work/{NNN}-{name}.md`) are consumed by the orchestrate or work skills, which handle their own vendor detection.

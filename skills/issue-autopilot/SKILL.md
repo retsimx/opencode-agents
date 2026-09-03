@@ -16,8 +16,17 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 - **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases.
 - **MUST use the question tool to ask the user anything.** Never use plain text output for user gates or clarification questions.
 - **MUST use subagent tools for delegated subagents.** All Task subagent delegations (Phase 4 commit messages/PR descriptions, Phase 5 issue comment, and Phase 3 implementation/QA/debug agents) must be dispatched cleanly via subagent tools.
+- **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 - **Subagents are cheap; use them aggressively.** Spawn focused implementation, review, and fix agents rather than doing everything inline.
 - **Enforce Zero-Context Relay and File-First State I/O**: Pass context by file path reference; subagents write full deliverables to designated markdown files in `${RESULTS_DIR}` and return standardized 4-line chat summaries.
+
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
 
 ---
 

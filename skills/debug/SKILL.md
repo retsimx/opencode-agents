@@ -5,6 +5,14 @@ description: Bug diagnosis and fixing specialist - analyzes errors, identifies r
 
 # Debug Agent - Bug Fixing Specialist
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+
+
 ## Scheduling
 
 ### Goal

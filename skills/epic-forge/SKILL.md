@@ -10,6 +10,13 @@ description: >
 
 # Epic-Forge — Epic & Issue Decomposition to the Forge
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+
+
 ## Scheduling
 
 ### Goal

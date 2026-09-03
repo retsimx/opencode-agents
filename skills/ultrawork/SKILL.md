@@ -16,6 +16,14 @@ description: High-quality 5-phase development workflow with 11 review steps out 
 - **Read the coordination skill BEFORE starting.** Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
+## Rules to Load
+
+Before starting, load and follow:
+- `.agents/rules/grug-principles.md` — universal engineering rules
+- `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/core/context-loading.md` — resource loading strategy
+
 ---
 
 ## Phase 0: Initialization (DO NOT SKIP)
@@ -99,6 +107,11 @@ Spawn implementation agents in parallel using the OpenCode `task` tool:
     - **Artifact**: `file:///.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`
     ```
 - Include execution protocol (`.agents/skills/_shared/runtime/execution-protocol.md`) and context-loading rules in prompt.
+- **Rule loading (MANDATORY)**: instruct each implementation subagent to load before starting:
+  - `.agents/rules/grug-principles.md`
+  - `.agents/rules/tool-compatibility.md`
+  - `.agents/skills/_shared/core/quality-principles.md`
+  - plus its domain skill (backend/frontend/mobile) which carries its own rules.
 - Spawn all same-priority agents in a single message for parallel execution.
 
 ---
@@ -149,8 +162,14 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
   - `TASK_SLUG`: `qa-verify`
   - `OUTPUT_FILE`: `.agents/results/result-qa-verify-{sessionId}.md`
 - Enforce **Zero-Context Relay**: Pass implementation `OUTPUT_FILE` paths (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`) and plan path (`.agents/results/plan-{sessionId}.json`) by reference. Instruct QA Agent to audit these files directly from disk.
+- **Rule loading (MANDATORY)**: instruct the QA subagent to load before starting:
+  - `.agents/rules/grug-principles.md`
+  - `.agents/rules/tool-compatibility.md`
+  - `.agents/rules/i18n-guide.md`
+  - `.agents/skills/_shared/core/quality-principles.md`
 - Mandate **File-First State I/O**:
   - QA Agent must write full verification matrices, checklist audits (with line citations), security checks, and regression results to `.agents/results/result-qa-verify-{sessionId}.md`.
+  - QA Agent must also include a **Grug compliance** section in `result-qa-verify-{sessionId}.md` assessing: unnecessary vs necessary complexity, gold-plating, premature abstraction, unused extension points, and whether an existing mechanism could have been used.
   - QA Agent must verify `OUTPUT_FILE` exists on disk before returning.
   - QA Agent MUST return ONLY the standardized 4-line chat completion summary:
     ```markdown
@@ -233,6 +252,10 @@ Spawn Debug Agent via OpenCode `task` tool (subagent_type="general"):
   - `TASK_SLUG`: `refine`
   - `OUTPUT_FILE`: `.agents/results/result-refine-{sessionId}.md`
 - Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/result-qa-verify-{sessionId}.md`, implementation output files) by reference. Instruct Debug Agent to inspect them on disk.
+- **Rule loading (MANDATORY)**: instruct the Debug subagent to load before starting:
+  - `.agents/rules/grug-principles.md`
+  - `.agents/rules/tool-compatibility.md`
+  - `.agents/skills/_shared/core/quality-principles.md`
 - Mandate **File-First State I/O**:
   - Debug Agent must write all refactoring notes, file split details, duplicate analysis, and side-effect reviews to `.agents/results/result-refine-{sessionId}.md`.
   - Debug Agent must verify `OUTPUT_FILE` exists on disk before returning.
@@ -315,6 +338,11 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
   - `TASK_SLUG`: `qa-ship`
   - `OUTPUT_FILE`: `.agents/results/result-qa-ship-{sessionId}.md`
 - Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/result-refine-{sessionId}.md`, implementation output files) by reference.
+- **Rule loading (MANDATORY)**: instruct the QA subagent to load before starting:
+  - `.agents/rules/grug-principles.md`
+  - `.agents/rules/tool-compatibility.md`
+  - `.agents/rules/i18n-guide.md`
+  - `.agents/skills/_shared/core/quality-principles.md`
 - Mandate **File-First State I/O**:
   - QA Agent writes full final audit, UX verification, cascade checks, and deployment checklists to `.agents/results/result-qa-ship-{sessionId}.md`.
   - QA Agent must verify `OUTPUT_FILE` exists on disk before returning.
