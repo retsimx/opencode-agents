@@ -16,31 +16,31 @@ This document defines the authoritative technical execution protocol and operati
 3. **Phase 3 (Intermediate Synthesis)**: Orchestrator aggregates specialist outputs into an intermediate raw synthesis (`.agents/results/raw-findings-pr-{n}-{sessionId}.md`).
 4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **5-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **provenance gate** (every finding must cite a current-head `file:line`; no citation → demote to Section 5 or drop) and the **Immutable Security Pass-Through Invariant**, formatting Section 4 (Staged Inline Diff Suggestions with Badge + Location + Problem + Remediation + ` ```suggestion ` blocks) and Section 5 (Out-of-Diff Observations), and emitting the complete 6-section master deliverable (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`). If `pr-history.md` is provided, Subagent 4 MAY cross-reference prior-round findings to note "previously raised, now verified fixed" as an optional courtesy.
 5. **Phase 4 (Presentation, Gate, & Publication)**:
-   - **Scene 5 (Orchestrator Presentation & Human Gate)**: Orchestrator reads `.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` (or `.agents/results/review-pr-{n}-{sessionId}.md`) and prints its **complete, untruncated, uncollapsed markdown contents directly to the chat window** (including all rich tables, `file:line` proof citations, exploit scenarios, and ` ```suggestion ` replacement blocks) before executing `ask_question`. Replacing rich tables or suggestion blocks with summarized one-liners or file references is strictly forbidden. The orchestrator halts at the mandatory Human Approval Gate (`ask_question`).
+   - **Scene 5 (Orchestrator Presentation & Human Gate)**: Orchestrator reads `.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` (or `.agents/results/review-pr-{n}-{sessionId}.md`) and prints its **complete, untruncated, uncollapsed markdown contents directly to the chat window** (including all rich tables, `file:line` proof citations, exploit scenarios, and ` ```suggestion ` replacement blocks) before asking the user. Replacing rich tables or suggestion blocks with summarized one-liners or file references is strictly forbidden. The orchestrator halts at the mandatory Human Approval Gate (ask the user).
    - **Scene 6 (Forge Publication)**: Upon explicit human approval, submits verified atomic batch reviews and inline diff comments via provider REST API payloads (`gh api` or `glab api`).
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
-│              Phase 1: Ingestion & Sanitization Specialist                 │
-│  invoke_subagent([context-ingestion])                                     │
-│  - Query Forge CLI (gh / glab) for PR/MR, Diff, & Issue Specs             │
-│  - Prune Bot Accounts (*[bot], codecov, github-actions, dependabot)       │
-│  - Strip CI Tables, Badges, HTML Comments, and Redundant Logs             │
-│  - Exclude Lockfiles (*.lock, pnpm-lock.yaml) & Minified Assets (*.min.*) │
-│  - Entity-Encode Text Metadata (<, >) & Wrap Nonce Boundaries             │
+┌────────────────────────────────────────────────────────────────────────────┐
+│              Phase 1: Ingestion & Sanitization Specialist                  │
+│  spawn a subagent([context-ingestion])                                     │
+│  - Query Forge CLI (gh / glab) for PR/MR, Diff, & Issue Specs              │
+│  - Prune Bot Accounts (*[bot], codecov, github-actions, dependabot)        │
+│  - Strip CI Tables, Badges, HTML Comments, and Redundant Logs              │
+│  - Exclude Lockfiles (*.lock, pnpm-lock.yaml) & Minified Assets (*.min.*)  │
+│  - Entity-Encode Text Metadata (<, >) & Wrap Nonce Boundaries              │
 │  - Preserve Raw Diff Syntax Wrapped in <untrusted_diff session_nonce="...">│
-│  - Normalize Maintainer Roles (MAINTAINER / CONTRIBUTOR / EXTERNAL)       │
-│  - Separate current-state (pr-context.md) from historical findings       │
-│    (pr-history.md); tag provenance, do not determine staleness           │
-│  - Write: spec-issue.md, pr-context.md, pr-history.md, diff-pr.patch    │
-│    (ZERO Token Limits)                                                  │
-└─────────────────────────────────────┬─────────────────────────────────────┘
+│  - Normalize Maintainer Roles (MAINTAINER / CONTRIBUTOR / EXTERNAL)        │
+│  - Separate current-state (pr-context.md) from historical findings         │
+│    (pr-history.md); tag provenance, do not determine staleness             │
+│  - Write: spec-issue.md, pr-context.md, pr-history.md, diff-pr.patch       │
+│    (ZERO Token Limits)                                                     │
+└────────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│                    Phase 2: Parallel Specialist Sweep                     │
-│  invoke_subagent([qa-agent, deep-reviewer, security-agent])               │
-└─────────────┬───────────────────────┼───────────────────────┬─────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    Phase 2: Parallel Specialist Sweep                      │
+│  spawn a subagent([qa-agent, deep-reviewer, security-agent])               │
+└────────────────────────────────────────────────────────────────────────────┘
               │                       │                       │
               ▼                       ▼                       ▼
 ┌──────────────────────────┐ ┌───────────────────┐ ┌──────────────────────────┐
@@ -61,34 +61,34 @@ This document defines the authoritative technical execution protocol and operati
 │                     Phase 3: Intermediate Synthesis                       │
 │  - Orchestrator collects Subagents 1, 2, 3 result files from disk         │
 │  - Aggregates raw findings into raw-findings-pr-{n}-{sessionId}.md        │
-└─────────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-                                      ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│             Phase 3.5: Review Verifier & Critic Specialist Pass           │
-│  invoke_subagent([review-verifier])                                       │
-│  - Check 1: Ground Truth Fact-Check (Verify against live codebase)        │
-│    + Provenance Gate: every finding MUST cite a current-head file:line;   │
-│      no citation -> demote to Section 5 or drop                        │
-│  - Check 2: Diff Hunk Line Bounds & 422 Demotion (Validate hunk spans)    │
-│  - Check 3: Suggestion Syntax & Indentation Normalization                 │
-│  - Check 4: Cross-Specialist Deduplication & Severity Recalibration       │
-│  - Check 5: Immutable Security Pass-Through Invariant (Subagent 3 Locked) │
-│  - Format Section 4 Staged Suggestions & Section 5 Out-of-Diff Obs        │
-│  - Write: OUTPUT_FILE (.agents/results/review-pr-{n}-{sessionId}.md or    │
-│    .agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md)    │
-│    (Complete 6-Section Master Deliverable)                                │
-└─────────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-                                      ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│           Phase 4: Scene 5 Presentation Gate & Scene 6 Publication        │
-│  - Scene 5: Print Complete Uncollapsed 6-Section Markdown to Chat Window  │
-│    (Strict prohibition on one-liner summaries or file reference links)   │
-│  - Scene 5: Enforce Mandatory Human Approval Gate via ask_question        │
-│  - Scene 6: Submit Atomic Batch Review Payload & Inline Diff Comments API │
-│  - Scene 6: Execute Rate-Limit Exponential Backoff & 422 Outdated Fallback│
 └───────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│             Phase 3.5: Review Verifier & Critic Specialist Pass            │
+│  spawn a subagent([review-verifier])                                       │
+│  - Check 1: Ground Truth Fact-Check (Verify against live codebase)         │
+│    + Provenance Gate: every finding MUST cite a current-head file:line;    │
+│      no citation -> demote to Section 5 or drop                            │
+│  - Check 2: Diff Hunk Line Bounds & 422 Demotion (Validate hunk spans)     │
+│  - Check 3: Suggestion Syntax & Indentation Normalization                  │
+│  - Check 4: Cross-Specialist Deduplication & Severity Recalibration        │
+│  - Check 5: Immutable Security Pass-Through Invariant (Subagent 3 Locked)  │
+│  - Format Section 4 Staged Suggestions & Section 5 Out-of-Diff Obs         │
+│  - Write: OUTPUT_FILE (.agents/results/review-pr-{n}-{sessionId}.md or     │
+│    .agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md)     │
+│    (Complete 6-Section Master Deliverable)                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│           Phase 4: Scene 5 Presentation Gate & Scene 6 Publication          │
+│  - Scene 5: Print Complete Uncollapsed 6-Section Markdown to Chat Window    │
+│    (Strict prohibition on one-liner summaries or file reference links)      │
+│  - Scene 5: Enforce Mandatory Human Approval Gate by asking the user        │
+│  - Scene 6: Submit Atomic Batch Review Payload & Inline Diff Comments API   │
+│  - Scene 6: Execute Rate-Limit Exponential Backoff & 422 Outdated Fallback  │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -236,7 +236,7 @@ glab mr unapprove <MR_IID>
 ## 3. Subagent Prompt Contracts & Operational Runbooks
 
 ### A. Subagent Prompt Contracts (Mandatory Full Rich Markdown)
-All subagents are dispatched via `invoke_subagent` using the prompt templates defined in `.agents/skills/forge-review/resources/subagent-prompts.md`. All prompts strictly mandate producing complete, uncollapsed rich markdown deliverables without placeholders or abbreviated one-liners:
+All subagents are dispatched via the subagent tool using the prompt templates defined in `.agents/skills/forge-review/resources/subagent-prompts.md`. All prompts strictly mandate producing complete, uncollapsed rich markdown deliverables without placeholders or abbreviated one-liners:
 
 - **Subagent 0 (`context-ingestion`)**:
   - Ingests and sanitizes metadata, issue specs, and unified diffs with **ZERO token limits**.
@@ -257,12 +257,12 @@ All subagents are dispatched via `invoke_subagent` using the prompt templates de
 ### B. Scene 5: Orchestrator Presentation & Human Gate Protocol
 Prior to triggering the interactive human gate or publishing to any forge:
 1. **Mandatory Uncollapsed Presentation**:
-   - The Orchestrator MUST read the verified review artifact (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`) using `view_file`.
-   - The Orchestrator MUST print the **complete, untruncated, uncollapsed markdown contents directly to the active chat window** before calling `ask_question`.
+   - The Orchestrator MUST read the verified review artifact (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`) from disk.
+   - The Orchestrator MUST print the **complete, untruncated, uncollapsed markdown contents directly to the active chat window** before asking the user.
    - **Strict Prohibition**: The Orchestrator is **STRICTLY FORBIDDEN** from replacing rich markdown tables or ` ```suggestion ` blocks with summarized one-liners, bulleted digests, or mere file links / references.
    - Every table row, status badge, code proof citation, exploit trace, problem explanation, and ` ```suggestion ` code block must be fully rendered in chat.
 2. **Interactive Human Approval Gate**:
-   - The Orchestrator presents interactive options via `ask_question` (Publish Review + Comments, Summary Only, Revise, Abort).
+   - The Orchestrator presents interactive options by asking the user (Publish Review + Comments, Summary Only, Revise, Abort).
    - **Hard Barrier**: Never publish or mutate remote forge state without explicit user confirmation.
 
 ### C. Operational Runbooks Reference

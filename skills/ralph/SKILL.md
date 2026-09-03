@@ -274,4 +274,5 @@ Phase 3: REPLAN → Extract remaining, narrow scope
 ## References
 - Judge protocol: `.agents/skills/ralph/resources/judge-protocol.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Coordination protocol: `.agents/skills/_shared/runtime/coordination-protocol.md`

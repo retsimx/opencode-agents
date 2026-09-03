@@ -334,6 +334,7 @@ Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 
 ## References
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`
 - Difficulty assessment: `.agents/skills/_shared/core/difficulty-guide.md`

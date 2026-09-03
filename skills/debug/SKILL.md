@@ -144,6 +144,8 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Bug report template: `.agents/skills/debug/resources/bug-report-template.md`
 - Common patterns: `.agents/skills/debug/resources/common-patterns.md`
 - Debugging checklist: `.agents/skills/debug/resources/debugging-checklist.md`
+- Grug principles (MUST load before diagnosis): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`

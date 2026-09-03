@@ -187,5 +187,7 @@ Before finalizing the report, walk `.agents/skills/review/resources/self-check.m
 - ISO/IEC quality guide: `.agents/skills/review/resources/iso-quality.md`
 - Error recovery: `.agents/skills/review/resources/error-playbook.md`
 - Bug post-mortems & RCAs: `.agents/results/bugs/`
+- Grug principles (MUST load before review): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`

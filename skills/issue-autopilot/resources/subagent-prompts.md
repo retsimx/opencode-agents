@@ -6,7 +6,7 @@ This resource provides standardized prompt templates for Task subagents dispatch
 
 ## 1. SCM Specialist Subagent Prompt (Phase 4 Step 2)
 
-Dispatched via `invoke_subagent` to generate Conventional Commit messages and draft PR descriptions based on worktree diffs.
+Dispatched via the subagent tool to generate Conventional Commit messages and draft PR descriptions based on worktree diffs.
 
 ```markdown
 Role: "SCM Specialist Agent"
@@ -44,7 +44,7 @@ Return ONLY the standard 4-line chat completion summary:
 
 ## 2. Issue Communicator Subagent Prompt (Phase 5 Step 1)
 
-Dispatched via `invoke_subagent` to synthesize non-technical release notes and post a plain-English comment to the forge issue.
+Dispatched via the subagent tool to synthesize non-technical release notes and post a plain-English comment to the forge issue.
 
 ```markdown
 Role: "Issue Communicator Agent"
@@ -97,7 +97,7 @@ Return ONLY the standard 4-line chat completion summary with the posted comment 
 
 ## 3. Fast-Fail Local CI Remediation Debug Subagent Prompt (Phase 4 Step 1 Fallback)
 
-Dispatched via `invoke_subagent` if local CI sanity checks fail prior to committing.
+Dispatched via the subagent tool if local CI sanity checks fail prior to committing.
 
 ```markdown
 Role: "Debug Agent — CI Remediation"

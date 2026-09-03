@@ -186,6 +186,8 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Vector DB and RAG guide: `.agents/skills/db/resources/vector-db.md`
 - ISO control guide: `.agents/skills/db/resources/iso-controls.md`
 - Error recovery: `.agents/skills/db/resources/error-playbook.md`
+- Grug principles (MUST load before implementation): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`

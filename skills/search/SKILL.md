@@ -173,5 +173,6 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Checklist: `docs/checklists/search.md` (fallback: `.agents/skills/search/resources/checklist.md`)
 - Error recovery: `.agents/skills/search/resources/error-playbook.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Context budget: `.agents/skills/_shared/core/context-budget.md`
 - Bug post-mortems & RCAs: `.agents/results/bugs/`

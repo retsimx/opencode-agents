@@ -296,6 +296,8 @@ Apply this lens when the project is enterprise/regulated, many stakeholders are 
 - ISO planning guide: `.agents/skills/plan/resources/iso-planning.md`
 - Error recovery: `.agents/skills/plan/resources/error-playbook.md`
 - API contracts: `.agents/skills/_shared/core/api-contracts/`
+- Grug principles (MUST load before planning): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Difficulty guide: `.agents/skills/_shared/core/difficulty-guide.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`

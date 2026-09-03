@@ -191,7 +191,9 @@ To extend: add `.agents/skills/frontend/resources/<name>.md` and append a row ab
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 
-- Project frontend rules (MUST load before review/implementation): `../../rules/frontend.md`
+- Grug principles (MUST load before implementation): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
+- Project frontend rules (MUST load before review/implementation): `.agents/rules/frontend.md`
 - Execution steps: `.agents/skills/frontend/resources/execution-protocol.md`
 - Checklist: `docs/checklists/frontend.md` (fallback: `.agents/skills/frontend/resources/checklist.md`)
 - Error recovery: `.agents/skills/frontend/resources/error-playbook.md`

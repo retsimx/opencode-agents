@@ -186,11 +186,12 @@ convention (run-scoped artifacts).
 
 ### Guardrails
 1. **No-assumption rule (MANDATORY):** any ambiguity → ask via the `question` tool. Never make an assumption the user should answer. Follow `_shared/core/clarification-protocol.md` (LOW → proceed, MEDIUM → present options, HIGH → ask immediately).
-2. **No local-docs/gitignored references:** all detail inline in epic/issue bodies; never cite `docs/`, `.agents/`, or gitignored files as the source of detail.
-3. **Completion = forge state**, never the epic task table.
-4. **Spec divergence is never auto-detected** — the user must describe it.
-5. **No source edits** — the skill only creates/updates forge issues and local artifacts.
-6. **Dry-run artifacts before any forge write** (create mode) so nothing is lost on failure.
+2. **Decompose to the minimum viable issue set** — do not over-granularize. If a design needs an excessive number of issues, you are over-abstracting it. Fewer, well-scoped issues beat many small ones.
+3. **No local-docs/gitignored references:** all detail inline in epic/issue bodies; never cite `docs/`, `.agents/`, or gitignored files as the source of detail.
+4. **Completion = forge state**, never the epic task table.
+5. **Spec divergence is never auto-detected** — the user must describe it.
+6. **No source edits** — the skill only creates/updates forge issues and local artifacts.
+7. **Dry-run artifacts before any forge write** (create mode) so nothing is lost on failure.
 
 ## References
 - Epic template: `.agents/skills/epic-forge/resources/epic-template.md`
@@ -198,6 +199,8 @@ convention (run-scoped artifacts).
 - Style guide: `.agents/skills/epic-forge/resources/style-guide.md`
 - Worked example: `.agents/skills/epic-forge/resources/examples/README.md`
 - Forge CLI map: `.agents/skills/_shared/runtime/providers.md`
+- Grug principles (MUST load before decomposition): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Design skill: `.agents/skills/brainstorm/SKILL.md`
 - Plan skill: `.agents/skills/plan/SKILL.md`

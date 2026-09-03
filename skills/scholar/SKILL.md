@@ -275,4 +275,4 @@ Project-specific settings: `config/scholar-config.yaml`
 - CLI subcommands: `scholar-search|resolve|get|lint` (implementation under `cli/commands/scholar/`)
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Quality principles: `.agents/skills/_shared/core/quality-principles.md`
-- i18n rules: `../../rules/i18n-guide.md`
+- i18n rules: `.agents/rules/i18n-guide.md`

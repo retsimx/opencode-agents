@@ -136,6 +136,8 @@ Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Error recovery: `.agents/skills/mobile/resources/error-playbook.md`
 - Tech stack: `.agents/skills/mobile/resources/tech-stack.md`
 - Screen template: `.agents/skills/mobile/resources/screen-template.dart`
+- Grug principles (MUST load before implementation): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification: `.agents/skills/_shared/core/clarification-protocol.md`

@@ -8,6 +8,11 @@ description: >
 
 # /deep-review — Deep Post-Implementation Review Skill
 
+> Load `.agents/rules/grug-principles.md` before reviewing. Apply its rules when
+> assessing whether added complexity is justified by the requirement.
+
+Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
+
 ## Purpose
 
 This skill performs a **deterministic, evidence-based review of code changes** after implementation.

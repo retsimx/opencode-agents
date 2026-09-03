@@ -483,4 +483,5 @@ rg "<source-key-or-term>" .
 - Translation rubric: `.agents/skills/translator/resources/translation-rubric.md` (5-criterion scoring: naturalness, accuracy, register, terminology, technical integrity)
 - Anti-AI patterns: `.agents/skills/translator/resources/anti-ai-patterns.md` (AI output patterns + Europeanized/translation-ese patterns to avoid)
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Quality principles: `.agents/skills/_shared/core/quality-principles.md`

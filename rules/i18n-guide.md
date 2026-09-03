@@ -1,9 +1,3 @@
----
-description: Response language rules for agents and workflows
-globs:
-alwaysApply: true
----
-
 # i18n Guide — Response Language Rules
 
 Rules for determining and applying response language across agents and workflows.

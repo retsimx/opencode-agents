@@ -1,6 +1,6 @@
 # Forge Review: Subagent Prompt Templates (Zero-Context Relay)
 
-This resource contains the authoritative JSON prompt templates for dispatching all 5 specialized subagents in the `forge-review` 3-stage architecture via `invoke_subagent`.
+This resource contains the authoritative JSON prompt templates for dispatching all 5 specialized subagents in the `forge-review` 3-stage architecture via the subagent tool.
 
 All heavy inputs (`DIFF_FILE`, `SPEC_FILE`, `PR_CONTEXT_FILE`, `RAW_REVIEW_FILE`) are passed **strictly by filesystem path on disk**, enforcing the Zero-Context Relay invariant and preventing main-turn conversational context bloating.
 

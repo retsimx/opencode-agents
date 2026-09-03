@@ -272,4 +272,5 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 - Execution protocol (state, batching, rate limits, drafts, verification): `.agents/skills/gardener-harvest/resources/execution-protocol.md`
 - Sibling skills: `gardener-sow` (create PRs), `gardener-tend` (maintain PRs)
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`

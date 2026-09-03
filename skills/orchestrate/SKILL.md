@@ -365,6 +365,7 @@ All coordination is file-based in `.agents/results/`. See `.agents/skills/orches
 - Session metrics: `.agents/skills/_shared/core/session-metrics.md`
 - API contracts: `.agents/skills/_shared/core/api-contracts/`
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Difficulty guide: `.agents/skills/_shared/core/difficulty-guide.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`

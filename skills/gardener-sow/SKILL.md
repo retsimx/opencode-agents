@@ -252,6 +252,7 @@ EXIT
 20. **Provider-agnostic** — detect `PROVIDER` once; pass to every subagent; never hardcode `gh` or `glab`
 
 ## References
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
 - Sibling skills: `gardener-tend` (maintain PRs), `gardener-harvest` (merge queue)
 - Provider CLI map: `.agents/skills/_shared/runtime/providers.md`

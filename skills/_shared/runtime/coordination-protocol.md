@@ -58,7 +58,7 @@ When orchestrators or subagents resolve `SESSION_ID`, follow this strict priorit
 To prevent orchestrator context degradation, orchestrators MUST operate on a **pass-by-reference** model:
 1. **Never Ingest Full Artifacts**: The orchestrator must NOT read full subagent result files into its context window.
 2. **Downstream Injection**: When a downstream subagent (e.g. QA, Reviewer, dependent Implementation agent) requires outputs from an upstream task, the orchestrator passes the upstream artifact file path (`file:///.../.agents/results/{type}-{role}-{taskSlug}-{sessionId}.md`) as a reference in `UPSTREAM_ARTIFACTS`.
-3. **Direct Subagent Ingestion**: Downstream subagents view and parse upstream deliverable files directly in their isolated contexts using `view_file` / `read`.
+3. **Direct Subagent Ingestion**: Downstream subagents view and parse upstream deliverable files directly in their isolated contexts.
 4. **4-Line Ingestion Only**: The orchestrator context receives ONLY the concise 4-line chat completion summary from each subagent.
 
 ### 30-Day LRU Purge Hook

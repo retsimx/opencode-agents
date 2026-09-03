@@ -167,6 +167,8 @@ Use `.agents/skills/architecture/resources/stakeholder-synthesis.md` when stakeh
 Use `.agents/skills/architecture/resources/output-templates.md` to format the final artifact.
 Before submitting, run `.agents/skills/architecture/resources/checklist.md`.
 - Execution steps: `.agents/skills/architecture/resources/execution-protocol.md`
+- Grug principles (MUST load before architecture work): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Checklist: `.agents/skills/architecture/resources/checklist.md`
 - Examples: `.agents/skills/architecture/resources/examples.md`
 - Method selection: `.agents/skills/architecture/resources/methodology-selection.md`

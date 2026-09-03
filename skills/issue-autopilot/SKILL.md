@@ -14,8 +14,8 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 - **Provider-agnostic.** Detect GitHub (`gh`) vs GitLab (`glab`) from `origin` per `.agents/skills/_shared/runtime/providers.md`. Never hardcode one CLI.
 - **Strictly follow ALL rules in the project's `AGENTS.md` and `TESTING.md`** (if they exist).
 - **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases.
-- **MUST use the `ask_question` / `question` tool to ask the user anything.** Never use plain text output for user gates or clarification questions.
-- **MUST use subagent tools (`invoke_subagent` / `task`) for delegated subagents.** All Task subagent delegations (Phase 4 commit messages/PR descriptions, Phase 5 issue comment, and Phase 3 implementation/QA/debug agents) must be dispatched cleanly via subagent tools.
+- **MUST use the question tool to ask the user anything.** Never use plain text output for user gates or clarification questions.
+- **MUST use subagent tools for delegated subagents.** All Task subagent delegations (Phase 4 commit messages/PR descriptions, Phase 5 issue comment, and Phase 3 implementation/QA/debug agents) must be dispatched cleanly via subagent tools.
 - **Subagents are cheap; use them aggressively.** Spawn focused implementation, review, and fix agents rather than doing everything inline.
 - **Enforce Zero-Context Relay and File-First State I/O**: Pass context by file path reference; subagents write full deliverables to designated markdown files in `${RESULTS_DIR}` and return standardized 4-line chat summaries.
 
@@ -62,7 +62,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 ### Procedure
 
-1. Ask the user for the issue number or URL if not provided. **Use `ask_question` — NOT plain text.**
+1. Ask the user for the issue number or URL if not provided. **Use the question tool — not plain text.**
 2. Detect provider from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Record `PROVIDER` (`github`|`gitlab`) and matching CLI (`gh`|`glab`).
 3. Verify the provider CLI is authenticated with a functional request against the repo (`gh repo view` or `glab repo view`). If the request fails, report error and abort.
 4. Fetch issue details using the Issues table in `.agents/skills/_shared/runtime/providers.md` (normalize title, body, labels, comments, assignees, state).
@@ -135,12 +135,12 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 3. Analyze requirements, define API contracts, and decompose work into prioritized tasks with explicit acceptance criteria and sizing.
 4. Save the machine-readable plan to `${RESULTS_DIR}/plan-${sessionId}.json`.
 5. Save the human-readable tracker to `${PARENT_REPO}/docs/plans/work/<NNN>-<issue-title>.md` (for Medium/Complex plans).
-6. **You MUST get explicit user confirmation (`ask_question`) before proceeding to Phase 3.**
+6. **You MUST get explicit user confirmation (ask the user) before proceeding to Phase 3.**
 
 ### GATE EXIT
 - [ ] Machine-readable plan saved at `${RESULTS_DIR}/plan-${sessionId}.json`
 - [ ] Human-readable tracker saved at `${PARENT_REPO}/docs/plans/work/<NNN>-<issue-title>.md`
-- [ ] User explicitly confirmed the plan via `ask_question`
+- [ ] User explicitly confirmed the plan when asked
 - [ ] No application code files modified outside `$WORKTREE`
 
 **You CANNOT proceed to Phase 3 without satisfying ALL gate exit items.**
@@ -209,16 +209,16 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
    - **Pass (Exit Code 0)**: Proceed to Step 2.
    - **Fail (Exit Code != 0)**:
      - Auto-fix simple mechanical issues (e.g. `ruff format`, `prettier --write`) if safe.
-     - For test failures or type errors, dispatch a targeted Debug Agent via `invoke_subagent` with the failure logs to apply a root-cause fix.
+     - For test failures or type errors, dispatch a targeted Debug Agent via the subagent tool with the failure logs to apply a root-cause fix.
      - Re-run the CI Sanity Gate.
      - If CI fails after retry: **DO NOT COMMIT. DO NOT PUSH.** Preserve worktree intact (Guardrail 4), halt, and report failure output to the user.
 
 #### Step 2: Generate Conventional Commit & PR Description (Task Subagent)
 
-**CRITICAL: Delegate commit message and PR description generation to a Task subagent via `invoke_subagent`. Do not write them inline.**
+**CRITICAL: Delegate commit message and PR description generation to a Task subagent. Do not write them inline.**
 
 1. `cd $WORKTREE`
-2. Spawn an SCM Task subagent using `invoke_subagent` per [Subagent Prompts](file:///home/lewis/Projects/sarahwebsite/.agents/skills/issue-autopilot/resources/subagent-prompts.md#1-scm-specialist-subagent-prompt):
+2. Spawn an SCM Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#1-scm-specialist-subagent-prompt):
    - `Role`: `"SCM Specialist Agent"`
    - `Prompt`: Instruct agent to inspect `WORKTREE` diffs, adhere to `.agents/skills/scm/SKILL.md` Conventional Commits (`Closes #<number>`), write `/tmp/commit-msg.txt` and `/tmp/pr-body.txt`, and write execution technical summary to `${RESULTS_DIR}/result-scm-ship-${sessionId}.md`.
 3. Wait for the subagent to complete and confirm `/tmp/commit-msg.txt` and `/tmp/pr-body.txt` exist.
@@ -280,9 +280,9 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 ### Procedure
 
-**CRITICAL: Delegate this entire phase to a Task subagent via `invoke_subagent`. Do not write the comment inline.**
+**CRITICAL: Delegate this entire phase to a Task subagent. Do not write the comment inline.**
 
-1. Spawn a Task subagent via `invoke_subagent` per [Subagent Prompts](file:///home/lewis/Projects/sarahwebsite/.agents/skills/issue-autopilot/resources/subagent-prompts.md#2-issue-communicator-subagent-prompt):
+1. Spawn a Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#2-issue-communicator-subagent-prompt):
    - `Role`: `"Issue Communicator Agent"`
    - `Prompt`: Instruct agent to read `.agents/skills/_shared/runtime/providers.md`, inspect merged diff from `$PARENT_REPO`, write non-technical plain-English summary (no code references or technical jargon) to `/tmp/issue-comment.txt`, post using provider CLI command, and write technical summary to `${RESULTS_DIR}/result-issue-comment-${sessionId}.md`.
 2. Wait for the subagent to complete.
@@ -328,7 +328,7 @@ Phase 0: Init [inline]
 Phase 1: Brainstorm [brainstorm skill]
        │
        ▼
-Phase 2: Plan [plan skill + ask_question]
+Phase 2: Plan [plan skill + ask the user]
        │
        ▼
 Phase 3: Implement [ultrawork in Plan-Ingestion Mode]
@@ -352,13 +352,14 @@ Workflow Complete
 ```
 
 - **[inline]**: Executed directly by the orchestrator.
-- **[TASK Subagent]**: Delegated to a background subagent via `invoke_subagent` / `task` tool.
+- **[TASK Subagent]**: Delegated to a background subagent via the subagent tool.
 - **[ultrawork in Plan-Ingestion Mode]**: Ingests Phase 2 plan JSON, executes full child multi-agent lifecycle, and reports terminal status.
 
 ---
 
 ## References
 
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Subagent Prompts: `.agents/skills/issue-autopilot/resources/subagent-prompts.md`
 - Operational Runbooks: `.agents/skills/issue-autopilot/resources/operational-runbooks.md`
 - Provider CLI map: `.agents/skills/_shared/runtime/providers.md`

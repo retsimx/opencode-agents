@@ -37,7 +37,7 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
 │ Step 6: Zero-Token-Limit Artifact Output                                 │
 │   - Write: spec-issue.md, pr-context.md, diff-pr.patch                   │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ Step 7: Current-State vs. Historical Separation                         │
+│ Step 7: Current-State vs. Historical Separation                          │
 │   - pr-context.md: current-state only (metadata, head SHA, author        │
 │     intent, documented deviations, sanitized description)                │
 │   - pr-history.md: historical review findings from prior rounds          │
@@ -128,45 +128,45 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
 Subagent 4 acts as the quality assurance engine and false-positive firewall before review publication.
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│             Subagent 4: 5-Check Verification Runbook                     │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 1: Ingestion & Inventory                                            │
-│   - Load RAW_REVIEW_FILE (.agents/results/raw-findings-pr-*.md)          │
-│   - Parse Acceptance Criteria matrix, 9-dimension issues, & comments     │
-│   - Index candidate findings by (file, start_line, line)                 │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 2: Check 1 — Ground Truth Fact-Checking                             │
-│   - view_file on workspace target source files at cited lines            │
-│   - Verify defect existence in AST and runtime context                   │
-│   - Action: DROP finding if hallucinated, already handled, or refuted    │
-│   - Provenance gate: every finding MUST cite a current-head file:line;   │
-│     no citation -> DEMOTE to Section 5 (Out-of-Diff) or DROP           │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 3: Check 2 — Diff Hunk Line Bounds & 422 Demotion                   │
-│   - Parse DIFF_FILE hunk boundaries (@@ -a,b +c,d @@)                    │
-│   - Verify target line is inside an active modified hunk                 │
-│   - Action: If in hunk -> retain inline diff suggestion                  │
-│   - Action: If outside hunk -> DEMOTE to top-level review body (no 422)  │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 4: Check 3 — Suggestion Syntax & Indentation Normalization          │
-│   - Inspect ```suggestion blocks for exact whitespace/indent match       │
-│   - Verify replacement code is syntactically valid & fully self-contained│
-│   - Action: Rewrite and correct any malformed suggestion blocks          │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 5: Check 4 — Cross-Specialist Deduplication & Calibration           │
-│   - Merge duplicate findings between QA, Deep Review, & Security sweeps  │
-│   - Calibrate severity: CRITICAL, HIGH, MEDIUM, LOW, NIT                 │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 6: Check 5 — Immutable Security Pass-Through Invariant              │
-│   - Strictly enforce: NEVER drop Subagent 3 security findings            │
-│   - Annotate with verified exploit reachability context                  │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 7: Final Review Emission                                            │
-│   - Write verified deliverable to OUTPUT_FILE (review-template.md)       │
-│   - Guarantee full 6-section uncollapsed rich markdown structure         │
-│   - Output standard 4-line chat completion summary with metrics          │
-└──────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│             Subagent 4: 5-Check Verification Runbook                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 1: Ingestion & Inventory                                                │
+│   - Load RAW_REVIEW_FILE (.agents/results/raw-findings-pr-*.md)              │
+│   - Parse Acceptance Criteria matrix, 9-dimension issues, & comments         │
+│   - Index candidate findings by (file, start_line, line)                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 2: Check 1 — Ground Truth Fact-Checking                                 │
+│   - read the file on workspace target source files at cited lines            │
+│   - Verify defect existence in AST and runtime context                       │
+│   - Action: DROP finding if hallucinated, already handled, or refuted        │
+│   - Provenance gate: every finding MUST cite a current-head file:line;       │
+│     no citation -> DEMOTE to Section 5 (Out-of-Diff) or DROP                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 3: Check 2 — Diff Hunk Line Bounds & 422 Demotion                       │
+│   - Parse DIFF_FILE hunk boundaries (@@ -a,b +c,d @@)                        │
+│   - Verify target line is inside an active modified hunk                     │
+│   - Action: If in hunk -> retain inline diff suggestion                      │
+│   - Action: If outside hunk -> DEMOTE to top-level review body (no 422)      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 4: Check 3 — Suggestion Syntax & Indentation Normalization              │
+│   - Inspect ```suggestion blocks for exact whitespace/indent match           │
+│   - Verify replacement code is syntactically valid & fully self-contained    │
+│   - Action: Rewrite and correct any malformed suggestion blocks              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 5: Check 4 — Cross-Specialist Deduplication & Calibration               │
+│   - Merge duplicate findings between QA, Deep Review, & Security sweeps      │
+│   - Calibrate severity: CRITICAL, HIGH, MEDIUM, LOW, NIT                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 6: Check 5 — Immutable Security Pass-Through Invariant                  │
+│   - Strictly enforce: NEVER drop Subagent 3 security findings                │
+│   - Annotate with verified exploit reachability context                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 7: Final Review Emission                                                │
+│   - Write verified deliverable to OUTPUT_FILE (review-template.md)           │
+│   - Guarantee full 6-section uncollapsed rich markdown structure             │
+│   - Output standard 4-line chat completion summary with metrics              │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Detailed Runbook Specifications for Subagent 4:
@@ -176,7 +176,7 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
    - Record baseline counts: `raw_ac_count`, `raw_finding_count`, `raw_inline_count`.
 
 2. **Step 2: Check 1 — Ground Truth Fact-Checking**:
-   - Read the real repository source code using `view_file` at each cited location.
+   - Read the real repository source code at each cited location.
    - Test logic claims against surrounding imports, helper functions, and class definitions.
    - *Provenance gate*: Every finding must cite a `file:line` that exists in the current head. Any finding without a current-head citation is auto-demoted to Section 5 (Out-of-Diff Observations) or dropped.
    - *Drop Condition*: If a finding claims a function lacks null-checking, but an upstream guard or framework middleware guarantees non-null execution, DROP the finding and document the refutation in the internal verification log.
@@ -288,35 +288,35 @@ EOF
 
 ## 5. Scene 5: Orchestrator Presentation & Human Gate Runbook
 
-This runbook defines the mandatory operational protocol for the Orchestrator during **Scene 5 (PRESENT & GATE)** prior to executing the Human Approval Gate via `ask_question`.
+This runbook defines the mandatory operational protocol for the Orchestrator during **Scene 5 (PRESENT & GATE)** prior to executing the Human Approval Gate by asking the user.
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│         Scene 5: Orchestrator Presentation & Human Gate Runbook          │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 1: Ingest Verified Review Deliverable                               │
-│   - Read .agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md│
-│     (or .agents/results/review-pr-{n}-{sessionId}.md) via view_file      │
-│   - Validate presence of full 6-section structure                        │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 2: Complete Uncollapsed Chat Presentation Mandate                   │
-│   - Print 100% of complete, untruncated, uncollapsed markdown contents   │
-│     directly to the active chat window before calling ask_question       │
-│   - Render all 6 rich sections, tables, citations, & suggestion blocks   │
-│   - STRICT PROHIBITION: Do NOT summarize into one-liners or file links   │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Step 3: Interactive Human Approval Gate Execution                        │
-│   - Invoke ask_question with 4 structured decision options               │
-│   - Options: 1) Publish Review + Inline Comments, 2) Publish Summary     │
-│     Only, 3) Request Adjustments, 4) Decline & Exit                      │
-│   - HARD GATE: Never mutate remote forge without explicit confirmation   │
-└──────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────┐
+│         Scene 5: Orchestrator Presentation & Human Gate Runbook                │
+├────────────────────────────────────────────────────────────────────────────────┤
+│ Step 1: Ingest Verified Review Deliverable                                     │
+│   - Read .agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md    │
+│     (or .agents/results/review-pr-{n}-{sessionId}.md) from disk                │
+│   - Validate presence of full 6-section structure                              │
+├────────────────────────────────────────────────────────────────────────────────┤
+│ Step 2: Complete Uncollapsed Chat Presentation Mandate                         │
+│   - Print 100% of complete, untruncated, uncollapsed markdown contents         │
+│     directly to the active chat window before asking the user                  │
+│   - Render all 6 rich sections, tables, citations, & suggestion blocks         │
+│   - STRICT PROHIBITION: Do NOT summarize into one-liners or file links         │
+├────────────────────────────────────────────────────────────────────────────────┤
+│ Step 3: Interactive Human Approval Gate Execution                              │
+│   - Ask the user with 4 structured decision options                            │
+│   - Options: 1) Publish Review + Inline Comments, 2) Publish Summary           │
+│     Only, 3) Request Adjustments, 4) Decline & Exit                            │
+│   - HARD GATE: Never mutate remote forge without explicit confirmation         │
+└────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Detailed Operational Specifications for Scene 5:
 
 1. **Step 1: Ingest Verified Review Deliverable**:
-   - The Orchestrator MUST read the final verified review artifact from disk using `view_file`:
+   - The Orchestrator MUST read the final verified review artifact from disk:
      - Path: `.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` (or `.agents/results/review-pr-{n}-{sessionId}.md`).
    - Ensure the artifact contains the complete, authoritative 6-section review deliverable:
      - **Header & Verdict**: PR metadata, evaluated scope, target branch, associated issue/epic, top-level review verdict.
@@ -329,7 +329,7 @@ This runbook defines the mandatory operational protocol for the Orchestrator dur
      - **Section 6: Recommended Next Steps for Author**: Actionable checklist for the PR author.
 
 2. **Step 2: Complete Uncollapsed Chat Presentation Mandate**:
-   - **Mandatory Direct Output**: The Orchestrator MUST print the **complete, untruncated, uncollapsed markdown contents of the verified review deliverable directly to the chat window** before invoking `ask_question`.
+   - **Mandatory Direct Output**: The Orchestrator MUST print the **complete, untruncated, uncollapsed markdown contents of the verified review deliverable directly to the chat window** before asking the user.
    - **Chat as the Authoritative Communication Channel**: In accordance with Anti-Context-Dilution and Communication Policy (Rule 3.1 & Rule 3.3), chat is the authoritative communication channel. Users must never be required or expected to open local artifact files, inspect external links, or decipher truncated one-liners to discover review findings, acceptance criteria matrices, or diff suggestions.
    - **Strict Prohibitions**:
      - ❌ **FORBIDDEN**: Summarizing rich markdown tables (Acceptance Criteria, Threat Model, 9-Dimension Quality Scorecard, Out-of-Diff Observations) into abbreviated bullet points or high-level one-liners (e.g. writing "All criteria passed" instead of printing the full table).
@@ -337,8 +337,8 @@ This runbook defines the mandatory operational protocol for the Orchestrator dur
      - ❌ **FORBIDDEN**: Emitting only artifact path links or high-level verdicts without printing the underlying markdown sections.
    - **Presentation Completeness Invariant**: Every table row, status badge, code location citation (`file:line`), detailed exploit path, problem description, remediation rationale, and ` ```suggestion ` block MUST be rendered in chat exactly as generated in the verified deliverable.
 
-3. **Step 3: Interactive Human Gate Execution (`ask_question`)**:
-   - Immediately after the full 6-section markdown review has been emitted to the chat window, the Orchestrator MUST execute `ask_question` to obtain explicit user confirmation.
+3. **Step 3: Interactive Human Gate Execution (ask the user)**:
+   - Immediately after the full 6-section markdown review has been emitted to the chat window, the Orchestrator MUST ask the user to obtain explicit user confirmation.
    - **Structured Question Options**:
      - `(Recommended) Publish formal review and all staged inline diff comments to forge`: Submits top-level review and inline suggestions via batch API (`gh api` or `glab api`).
      - `Publish top-level summary review only (skip inline diff comments)`: Submits top-level review note without attaching line-level suggestions.

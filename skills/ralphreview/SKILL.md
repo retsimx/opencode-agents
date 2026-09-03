@@ -300,5 +300,6 @@ exit  # clean_review_streak == 3
 17. **Nested delegation is required for review and remediation.** The review coordinator MUST delegate deep-review to a nested subagent. The remediation coordinator MUST spawn one fix subagent per NEW finding. Do NOT load deep-review skill or perform fixes directly in the coordinator.
 
 ## References
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 
 - Deep-review skill: `.agents/skills/deep-review/SKILL.md`

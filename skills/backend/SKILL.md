@@ -186,6 +186,8 @@ See `.agents/skills/backend/resources/examples.md` for input/output examples.
 Before submitting, run `docs/checklists/backend.md` (or `.agents/skills/backend/resources/checklist.md`).
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
+- Grug principles (MUST load before implementation): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Execution steps: `.agents/skills/backend/resources/execution-protocol.md`
 - Code examples: `.agents/skills/backend/resources/examples.md`
 - Checklist: `docs/checklists/backend.md` (fallback: `.agents/skills/backend/resources/checklist.md`)

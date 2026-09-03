@@ -153,5 +153,6 @@ Spawn QA Agent last to review all deliverables. Address CRITICAL issues by re-sp
 For fully automated execution without manual spawning, use the **orchestrate** skill instead.
 
 ## References
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 
 - Workflow examples: `.agents/skills/coordination/resources/examples.md`

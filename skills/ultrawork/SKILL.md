@@ -12,6 +12,7 @@ description: High-quality 5-phase development workflow with 11 review steps out 
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
   - Use `.agents/results/` for all coordination and progress files
   - Do NOT rely on MCP-specific tools or memory providers
+- **Cross-harness tool names:** refer to `.agents/rules/tool-compatibility.md` for the capability → per-harness tool map.
 - **Read the coordination skill BEFORE starting.** Load the coordination skill (`.agents/skills/coordination/SKILL.md`) and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 

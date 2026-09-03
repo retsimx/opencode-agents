@@ -173,4 +173,15 @@ The agent environment provides these built-in tools:
 | **todowrite** | Track task progress |
 | **question** | Ask the user for input |
 
+### Tool-use convention (cross-harness)
+
+Describe tool use as **capabilities**, not tool names — "read the file", "edit
+the file", "ask the user a question", "spawn a subagent". This works across
+every harness (opencode, agy, copilot, cursor) without a lookup step. Where a
+tool name is near-universal you may name it with its per-harness variants
+(e.g. "spawn a subagent via the `task` / `invoke_subagent` tool"). Never name
+a tool that exists in only one harness (e.g. `view_file`, `ask_question`,
+`StrReplace`). See `.agents/rules/tool-compatibility.md` for the full
+capability → per-harness tool map.
+
 Load the `agenthelp` skill to get a full listing of all available skills with descriptions.

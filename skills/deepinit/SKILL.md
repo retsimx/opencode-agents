@@ -12,6 +12,7 @@ description: Initialize or reinitialize a project's AI harness — AGENTS.md tab
   - Use `grep`, `glob`, `read` for codebase exploration.
   - Use `write` and `edit` for all output files.
   - Use `.agents/results/` for output files.
+- **Cross-harness tool names:** refer to `.agents/rules/tool-compatibility.md` for the capability → per-harness tool map.
 - **Exclude directories:**
   - Respect the project's `.gitignore` as the source of truth for excluding directories.
   - Automatically skip framework-generated cross-platform build/project directories (e.g., Flutter/React Native's `android`, `ios`, `macos`, `linux`, `windows`, `web` folders).
@@ -100,7 +101,7 @@ Not all files are required. Generate only what is **discoverable and relevant** 
 
 **Goal:** Understand the project's architecture, domains, patterns, and implicit rules.
 
-1. **Identify project type and structure** using `list_dir` at root and key directories.
+1. **Identify project type and structure** by listing the directory at root and key directories.
    - Monorepo? Single app? Library?
    - What packages/apps/services exist?
    - What tech stacks are used?
@@ -316,7 +317,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full domain map.
 
 ### Rules
 
-- **No file listings.** Agents can `list_dir`.
+- **No file listings.** Agents can list the directory.
 - **Every line should point somewhere or state a rule.** No filler.
 - Only list docs that were actually generated. No dead links.
 

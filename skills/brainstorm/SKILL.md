@@ -122,7 +122,8 @@ Explore user intent, constraints, and alternative approaches before planning or 
 3. **Always propose 2-3 approaches** - include a recommended option with trade-off analysis
 4. **Section-by-section design** - present design incrementally with user confirmation at each step
 5. **YAGNI** - do not over-engineer; design only what is needed for the stated goal
-6. **Save design, then return 4-line summary** - persist the approved design document to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`) and return the 4-line chat summary before handing off to `/plan`
+6. **Prefer the 80/20 solution (grug)** - favor the simplest approach that delivers most value; do not let premature abstraction shape the design before the system's shape is clear
+7. **Save design, then return 4-line summary** - persist the approved design document to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`) and return the 4-line chat summary before handing off to `/plan`
 
 ### Execution Phases
 Follow the brainstorm workflow step by step:
@@ -158,6 +159,8 @@ All design artifacts must be written to disk before finishing:
 Execution protocol instructions are included in the `task` tool prompt.
 Source files live under `.agents/skills/_shared/runtime/execution-protocol.md`.
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
+- Grug principles (MUST load before ideation): `.agents/rules/grug-principles.md`
+- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Quality principles: `.agents/skills/_shared/core/quality-principles.md`
