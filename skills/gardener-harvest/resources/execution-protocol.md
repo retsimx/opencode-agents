@@ -21,15 +21,17 @@ commands outside that map.
   "last_run": "2026-07-18T09:00:00Z",
   "provider": "github",
   "processed": [
-    {"number": 1678, "outcome": "merged"},
-    {"number": 1677, "outcome": "skipped", "reason": "high_risk"},
-    {"number": 1676, "outcome": "asked", "user_decision": "skip"},
+    {"number": 1678, "outcome": "merged", "task_id": "ses_<assessment subagent id>"},
+    {"number": 1677, "outcome": "skipped", "reason": "high_risk", "task_id": "ses_<assessment subagent id>"},
+    {"number": 1676, "outcome": "asked", "user_decision": "skip", "task_id": "ses_<assessment subagent id>"},
     {"number": 1675, "outcome": "skipped", "reason": "draft"},
     {"number": 1674, "outcome": "skipped", "reason": "ci_pending"},
     {"number": 1673, "outcome": "skipped", "reason": "merge_failed"}
   ]
 }
 ```
+
+**Subagent Dispatch Gate:** Every PR that reaches DECIDE MUST have been assessed by a spawned subagent whose harness-returned `task_id` is recorded in its `processed` entry and whose report is non-empty. Apply the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`) before DECIDE for each assessed PR. A PR assessed inline by the orchestrator (no recorded `task_id`) MUST NOT be decided — re-dispatch the assessment subagent.
 
 **Behaviour:**
 - On Entry: load state file (create the directory and empty file if missing).

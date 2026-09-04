@@ -7,6 +7,7 @@ description: Automated parallel agent execution that spawns subagents via OpenCo
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
 - **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: Every spawned agent MUST have its harness-returned `task_id` recorded in `.agents/results/subagent-ledger-{sessionId}.json`. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
@@ -107,6 +108,7 @@ For each priority tier (P0 first, then P1, etc.):
 #### Dispatch via OpenCode `task` tool
 
 Spawn agents using the OpenCode `task` tool. All same-priority tasks should be spawned in parallel (multiple `task` tool calls in one message).
+- **Record `task_id` for every spawned agent**: after each `task` tool call, record the harness-returned `task_id` (with role and `OUTPUT_FILE`) in `.agents/results/subagent-ledger-{sessionId}.json` (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`).
 
 | Domain | subagent_type |
 |:-------|:--------------|
@@ -178,7 +180,9 @@ Record reset events in `task-board.md`:
 ### Step 5: Verify Completed Agents
 
 // turbo
-For each completed agent, run automated verification:
+For each completed agent, first run the **Dispatch Gate check** (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm a non-empty `task_id` is recorded in `.agents/results/subagent-ledger-{sessionId}.json`, `status == complete`, and the deliverable file exists and is non-empty. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent.
+
+Then run automated verification:
 
 1. Run project lint/typecheck: `poetry run python manage.py lint ...` or the project's equivalent.
 2. Run project test suite: `poetry run python manage.py test ...` or the project's equivalent.

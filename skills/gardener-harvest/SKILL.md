@@ -31,6 +31,13 @@ repo. The only writes the skill performs are (a) `.agents/results/pr-merge-queue
 and (b) the squash-merge itself, which the user explicitly authorized by running
 the skill.**
 
+**Subagent Dispatch Gate (HARD INVARIANT):** Every PR decision MUST be based on a
+spawned assessment subagent whose `task_id` is recorded in the state file and
+whose report is non-empty (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`).
+A PR assessed inline by the orchestrator (no recorded `task_id`) MUST NOT be decided —
+re-dispatch the assessment subagent. Inline analysis may supplement but never replace
+an assessment subagent's report.
+
 A merge retry is NOT a mutation. Re-issuing the same
 `gh pr merge <n> --squash --delete-branch` (or glab equivalent) after a transient
 provider failure is fully within the user's authorization and is the skill's
@@ -105,28 +112,29 @@ cases. PR maintenance is the `gardener-tend` skill's job, not this skill's.
 2. **PREFILTER**: For each PR in oldest-first order, before spawning any subagent:
    - Skip if the PR number is already in `processed` (state file resume).
    - Fetch `gh pr diff <number>` (or `glab mr diff <number>`). If the diff output exceeds ~50,000 chars, record `skipped: large_diff` and continue. Never attempt to summarize.
-3. **BATCH_ASSESS**: Take the next up-to-5 unprocessed PRs. Spawn one subagent per PR using `.agents/skills/gardener-harvest/resources/subagent-prompt.md`, substituting `<number>`, `<repo_path>`, `<provider>`, and `<high_risk_globs>`. Subagents report raw findings only — no merge recommendation, no decision logic.
-4. **DECIDE**: For each report received (in oldest-first order), apply the decision logic:
+3. **BATCH_ASSESS**: Take the next up-to-5 unprocessed PRs. Spawn one subagent per PR using `.agents/skills/gardener-harvest/resources/subagent-prompt.md`, substituting `<number>`, `<repo_path>`, `<provider>`, and `<high_risk_globs>`. Subagents report raw findings only — no merge recommendation, no decision logic. Record each subagent's harness-returned `task_id` against its PR in the state file.
+4. **DISPATCH_GATE**: Before any decision, pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`) for every assessed PR: non-empty `task_id` recorded, `status == complete`, and a non-empty report. A PR assessed inline by the orchestrator (no recorded `task_id`) MUST NOT be decided — re-dispatch its assessment subagent.
+5. **DECIDE**: For each report received (in oldest-first order), apply the decision logic:
    - **MERGE**: risk = LOW AND behavior = NO AND CI = all passed AND filesChanged ≤ 10 AND total lines changed ≤ 300 AND no repository-specific flags AND confidence ≥ 90%
    - **ASK**: risk = MEDIUM OR behavior = UNCLEAR OR confidence < 90% OR any repository-specific flag present OR scope coherence = NO
    - **SKIP**: risk = HIGH OR CI has any failure OR any check pending OR files changed > 20 OR obvious bug visible in diff OR security concern OR merge strategy mismatch
    - CI pending alone is a SKIP (reason `ci_pending`) — never wait, never poll, never re-check. Move on immediately.
-5. **MERGE**: For each MERGE decision, issued SERIALLY in oldest-first order (never parallel — see `.agents/skills/gardener-harvest/resources/execution-protocol.md`):
+6. **MERGE**: For each MERGE decision, issued SERIALLY in oldest-first order (never parallel — see `.agents/skills/gardener-harvest/resources/execution-protocol.md`):
    a. Run `gh pr merge <number> --squash --delete-branch` (GitHub) or `glab mr merge <number> --squash --remove-source-branch` (GitLab).
    b. If the merge command fails or the subsequent state check is not `MERGED`, apply the Merge Retry Policy in `.agents/skills/gardener-harvest/resources/execution-protocol.md`:
       - Transient failures (405, 409 with policy lag, 429, 5xx, "try again" CLI messages, eventual-consistency false negatives): retry up to 3 times with backoff (5s, 15s), re-checking state and head SHA before each retry.
       - Permanent failures (conflict, branch protection rejects squash, PR changed since assessment, PR disappeared): record `skipped: <reason>` and continue. No retry.
    c. `sleep 2` between successful merges to let the provider's branch-protection state machine settle.
    d. Never rebase, push, force-push, edit files, run CI locally, change merge strategy, or delete branches by hand — even during retry. Retrying the same `--squash --delete-branch` command is the only permitted retry action.
-6. **VERIFY**: After a successful merge (or transient retry that succeeds), verify via `.agents/skills/gardener-harvest/resources/execution-protocol.md`:
+7. **VERIFY**: After a successful merge (or transient retry that succeeds), verify via `.agents/skills/gardener-harvest/resources/execution-protocol.md`:
    - PR state is `MERGED`.
    - Branch ref is gone (404). If still present, record `outcome: merged_branch_not_deleted` and continue. **Do not** delete the branch manually.
-7. **BATCH_ASK**: After all MERGE and SKIP decisions in the pass are resolved, collect all ASK-classified PRs. Present them in a single `question` tool call with `multiple: true`, chunked into ≤10 per call if more than 10 accumulate. Each option label is `#<n> <title>` and the description is the subagent report's `Top concerns` + `Confidence` + `Risk` summary. User picks which to proceed with.
-8. **MERGE_ASKED**: For each PR the user selected, run step 5–6 (merge + verify), in oldest-first order.
-9. **FINALIZE**: Append every ASK-without-proceed to `processed` as `skipped: user_skipped_ask`. Output a summary table with columns `PR | Risk | Behavior change | CI | Files/Lines | Confidence | Outcome | Reason`. Save state file.
+8. **BATCH_ASK**: After all MERGE and SKIP decisions in the pass are resolved, collect all ASK-classified PRs. Present them in a single `question` tool call with `multiple: true`, chunked into ≤10 per call if more than 10 accumulate. Each option label is `#<n> <title>` and the description is the subagent report's `Top concerns` + `Confidence` + `Risk` summary. User picks which to proceed with.
+9. **MERGE_ASKED**: For each PR the user selected, run step 6–7 (merge + verify), in oldest-first order.
+10. **FINALIZE**: Append every ASK-without-proceed to `processed` as `skipped: user_skipped_ask`. Output a summary table with columns `PR | Risk | Behavior change | CI | Files/Lines | Confidence | Outcome | Reason`. Save state file.
 
 ### Transitions
-- If a PR is MERGE -> run step 5-6, record outcome in state, next PR.
+- If a PR is MERGE -> run step 6-7, record outcome in state, next PR.
 - If a PR is ASK -> defer to BATCH_ASK; after user selects, merge selected and record the rest as skipped.
 - If a PR is SKIP -> record outcome + reason in state, next PR.
 - If subagent task times out or fails -> record `skipped: subagent_failed`, continue.

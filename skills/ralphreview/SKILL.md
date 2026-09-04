@@ -76,9 +76,9 @@ Iteratively review and remediate the current implementation until review stabili
 
 ### Scenes
 1. **PREPARE**: Initialize state and ask for scope if needed.
-2. **REVIEW**: Invoke a Task subagent (the review coordinator). The coordinator **delegates the deep-review analysis to a nested Task subagent** (passing `STATE_FILE` path so the subagent reads WORKTREE and dedup context directly), receives findings as plain text, then the coordinator **parses that text and appends NEW findings to `STATE_FILE`** itself. Returns only a signal (`NEW_FOUND` or `NO_NEW_FINDINGS`).
+2. **REVIEW**: Invoke a Task subagent (the review coordinator). The coordinator **delegates the deep-review analysis to a nested Task subagent** (passing `STATE_FILE` path so the subagent reads WORKTREE and dedup context directly), receives findings as plain text, then the coordinator **parses that text and appends NEW findings to `STATE_FILE`** itself. Before parsing/appending any findings, record each spawned subagent's harness-returned `task_id` in `STATE_FILE` alongside its role and findings. Returns only a signal (`NEW_FOUND` or `NO_NEW_FINDINGS`).
 3. **EVALUATE**: If `NO_NEW_FINDINGS`, increment streak and loop. Otherwise invoke remediation.
-4. **REMEDIATE**: Invoke a Task subagent (the remediation coordinator). The coordinator reads `STATE_FILE` for WORKTREE and `NEW` entries, then **spawns separate nested Task subagents in parallel for each individual finding** that examine each issue, classify fixability, and apply fixes if FIXABLE. The coordinator collects per-finding results and **updates matching NEW entries to FIXED/SKIPPED in-place** in `STATE_FILE`. Returns ONLY what was fixed.
+4. **REMEDIATE**: Invoke a Task subagent (the remediation coordinator). The coordinator reads `STATE_FILE` for WORKTREE and `NEW` entries, then **spawns separate nested Task subagents in parallel for each individual finding** that examine each issue, classify fixability, and apply fixes if FIXABLE. Before parsing/appending any per-finding results, record each spawned fix subagent's harness-returned `task_id` in `STATE_FILE` alongside its finding. The coordinator collects per-finding results and **updates matching NEW entries to FIXED/SKIPPED in-place** in `STATE_FILE`. Returns ONLY what was fixed.
 5. **STREAK**: If anything was fixed, reset streak to 0. If all were skipped (or no findings), increment streak.
 6. **FINALIZE**: Exit when streak == 3. Optionally read `STATE_FILE` and report a summary to the user.
 
@@ -177,14 +177,19 @@ while clean_review_streak < 3:
 
          2. WAIT for the nested subagent to return its findings text.
 
-         3. PARSE the returned text. If "NO_ISSUES_FOUND", return exactly:
+         3. RECORD: Before parsing/appending any findings, record the nested
+            subagent's harness-returned `task_id` in <STATE_FILE> alongside
+            its role and findings (see
+            .agents/skills/_shared/runtime/subagent-dispatch-gate.md).
+
+         4. PARSE the returned text. If "NO_ISSUES_FOUND", return exactly:
                NO_NEW_FINDINGS
 
             Otherwise, for each finding line:
               - APPEND to <STATE_FILE> in this format:
                   NEW|<SEVERITY>|<file:line>|<description>
 
-         4. If you appended any findings, return exactly: NEW_FOUND
+         5. If you appended any findings, return exactly: NEW_FOUND
 
          IMPORTANT: You (the review coordinator) MUST write to STATE_FILE.
          The nested deep-review subagent ONLY returns text findings — it does
@@ -246,6 +251,10 @@ while clean_review_streak < 3:
                     SKIPPED|<SEVERITY>|<file:line>|<description> — reason: <why>\"
 
          3. COLLECT: Wait for all fix subagents to return. As each returns:
+               - RECORD: Before parsing/appending its result, record that fix
+                 subagent's harness-returned `task_id` in <STATE_FILE>
+                 alongside its finding (see
+                 .agents/skills/_shared/runtime/subagent-dispatch-gate.md).
                - UPDATE <STATE_FILE>: find the matching NEW entry (by file:line and description) and replace its status from NEW to FIXED or SKIPPED. Do NOT append a new line.
                - If the result starts with FIXED, add to your fixed-list.
 
@@ -307,6 +316,7 @@ exit  # clean_review_streak == 3
 15. **TOOL RESTRICTION — Diff: You may only run `git diff --stat` (file names only) to check whether files changed. Never the full diff.**
 16. **CRITICAL: The `task` tool is a built-in agent function call, the same as `read`, `write`, or `grep`. It is NOT a bash command. Never run `$ task ...` in a shell — use the agent's tool-calling interface instead.**
 17. **Nested delegation is required for review and remediation.** The review coordinator MUST delegate deep-review to a nested subagent. The remediation coordinator MUST spawn one fix subagent per NEW finding. Do NOT load deep-review skill or perform fixes directly in the coordinator.
+18. **Subagent Dispatch Gate (HARD INVARIANT).** Every spawned review, remediation, or per-finding fix subagent MUST have its harness-returned `task_id` recorded in `STATE_FILE` alongside its findings. The orchestrator MUST NOT perform the review or fix inline and record findings itself. A finding attributed to a subagent with no recorded `task_id` MUST be re-dispatched. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 
 ## References

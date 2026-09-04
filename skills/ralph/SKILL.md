@@ -7,6 +7,7 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
 
 - **NEVER skip phases.** Execute from Phase 0 in order. Explicitly report completion of each phase to the user before proceeding to the next.
 - **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: any subagent spawned directly by ralph (not via ultrawork) MUST have its harness-returned `task_id` recorded in the session state file (`.agents/results/session-ralph.md` or a dedicated `subagent-ledger-{sessionId}.json`) alongside its role and result_file. The orchestrator MUST NOT perform a delegated subagent's work inline. A subagent with no recorded `task_id` (or a missing/empty result_file) MUST be re-dispatched — do not proceed by doing the work inline. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 - **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
@@ -87,7 +88,8 @@ Delegate to the ultrawork skill:
 1. Load the ultrawork skill and follow it step by step.
 2. Pass the prepared input as the task description.
 3. Ultrawork handles all vendor-specific agent spawning internally.
-4. Wait for ultrawork to complete all 5 phases (PLAN, IMPL, VERIFY, REFINE, SHIP).
+4. Ultrawork enforces the Subagent Dispatch Gate internally — its subagents record their harness-returned `task_id` in `.agents/results/subagent-ledger-{sessionId}.json` (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`). Ralph does not need to re-record those `task_id`s, but MUST NOT consume ultrawork's subagent deliverables unless ultrawork's dispatch gate has passed.
+5. Wait for ultrawork to complete all 5 phases (PLAN, IMPL, VERIFY, REFINE, SHIP).
 
 ### Step 1.3: Record EXEC Completion
 

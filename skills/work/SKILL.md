@@ -7,6 +7,7 @@ description: Coordinate multiple agents for a complex multi-domain project using
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
 - **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: Every spawned agent MUST have its harness-returned `task_id` recorded in `.agents/results/subagent-ledger-{sessionId}.json`. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
@@ -85,6 +86,7 @@ Spawn agents using the OpenCode `task` tool:
 - Use `subagent_type="general"` for implementation agents
 - Use `subagent_type="explore"` for research/analysis agents
 - Spawn all same-priority tasks in parallel (multiple `task` tool calls in one message)
+- **Record `task_id` for every spawned agent**: after each `task` tool call, record the harness-returned `task_id` (with role and `OUTPUT_FILE`) in `.agents/results/subagent-ledger-{sessionId}.json` (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`).
 - Inject context variables into each subagent prompt:
   - `SESSION_ID`: Active session identifier (`{sessionId}`)
   - `TASK_SLUG`: Concise kebab-case task identifier (`{taskSlug}`)
@@ -113,7 +115,8 @@ Spawn agents using the OpenCode `task` tool:
 1. Monitor subagents for 4-line chat completion returns.
 2. Use `read` to check `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` files for active progress if tracking turns.
 3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` files exist on disk upon completion.
-4. Record monitoring results and artifact links in `.agents/results/session-work.md`.
+4. **Subagent Dispatch Gate**: for each spawned agent, confirm a non-empty `task_id` is recorded in `.agents/results/subagent-ledger-{sessionId}.json`, `status == complete`, and the deliverable file exists and is non-empty (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`). A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent.
+5. Record monitoring results and artifact links in `.agents/results/session-work.md`.
 
 ---
 

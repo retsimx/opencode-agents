@@ -142,6 +142,8 @@ Only **PASS** and **VERIFY FAIL** outcomes append a row to the state file; every
 
 **All git/forge/bash commands inside subagents MUST be wrapped with `timeout 300` to prevent infinite hangs.**
 
+**Dispatch gate (HARD INVARIANT): after every `Call task` below returns, the orchestrator MUST record the harness-returned `task_id` in the state file alongside the step name and the returned signal (e.g. `gardener-init: task_id=ses_... signal=READY|<iteration>`) BEFORE acting on that signal. A step whose subagent has no recorded `task_id` MUST be re-dispatched, not done inline. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.**
+
 ```
 STATE_FILE = .agents/results/gardener-state.md
 MAIN_REPO = absolute path to main repository checkout
@@ -250,6 +252,7 @@ EXIT
 18. **State file tracks open/closed rows** — only PASS and VERIFY FAIL rows are appended; SHIP appends the PASS row with Status=open, the orchestrator appends the VERIFY FAIL row with Status=open and PR=`-`; INIT removes merged rows, updates closed rows to Status=closed, removes Status=done rows, and skips Status=open rows whose PR URL is `-`
 19. **Description column for SCAN** — SCAN compares slug AND description to distinguish similar fixes
 20. **Provider-agnostic** — detect `PROVIDER` once; pass to every subagent; never hardcode `gh` or `glab`
+21. **Subagent Dispatch Gate (HARD INVARIANT)** — every delegated task subagent MUST have its harness-returned `task_id` recorded in the session state file alongside its step result (step name and returned signal). The orchestrator MUST NOT perform a step's work inline and report the subagent's signal itself. A step whose subagent has no recorded `task_id` MUST be re-dispatched. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 
 ## References
 - Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`

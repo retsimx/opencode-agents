@@ -16,6 +16,8 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 - **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases.
 - **MUST use the question tool to ask the user anything.** Never use plain text output for user gates or clarification questions.
 - **MUST use subagent tools for delegated subagents.** All Task subagent delegations (Phase 4 commit messages/PR descriptions, Phase 5 issue comment, and Phase 3 implementation/QA/debug agents) must be dispatched cleanly via subagent tools.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: Every Task subagent spawn MUST record its harness-returned `task_id` in `${RESULTS_DIR}/subagent-ledger-${sessionId}.json`. Before consuming any subagent's deliverable (Phase 4 Step 2, Phase 5), pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): non-empty `task_id`, `status == complete`, and a non-empty result file. On failure, dispatch the missing subagent — do NOT substitute inline work.
+- **No Inline Substitution (HARD INVARIANT)**: A subagent's deliverable is defined as a file written by a spawned subagent whose `task_id` is recorded in the ledger. Orchestrator-inline output does not count as a subagent's deliverable, regardless of quality.
 - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 - **Subagents are cheap; use them aggressively.** Spawn focused implementation, review, and fix agents rather than doing everything inline.
 - **Enforce Zero-Context Relay and File-First State I/O**: Pass context by file path reference; subagents write full deliverables to designated markdown files in `${RESULTS_DIR}` and return standardized 4-line chat summaries.
@@ -230,7 +232,8 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 2. Spawn an SCM Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#1-scm-specialist-subagent-prompt):
    - `Role`: `"SCM Specialist Agent"`
    - `Prompt`: Instruct agent to inspect `WORKTREE` diffs, adhere to `.agents/skills/scm/SKILL.md` Conventional Commits (`Closes #<number>`), write `/tmp/commit-msg.txt` and `/tmp/pr-body.txt`, and write execution technical summary to `${RESULTS_DIR}/result-scm-ship-${sessionId}.md`.
-3. Wait for the subagent to complete and confirm `/tmp/commit-msg.txt` and `/tmp/pr-body.txt` exist.
+3. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${sessionId}.json` (role `scm-ship`, `result_file` `${RESULTS_DIR}/result-scm-ship-${sessionId}.md`).
+4. Pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm non-empty `task_id`, `status == complete`, and `${RESULTS_DIR}/result-scm-ship-${sessionId}.md` exists and is non-empty. Also confirm `/tmp/commit-msg.txt` and `/tmp/pr-body.txt` exist. On gate failure, re-dispatch the SCM subagent — do NOT write the commit message inline.
 
 #### Step 3: Git Commit, Push, and Draft PR Creation (Orchestrator Inline)
 
@@ -268,6 +271,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 ### GATE EXIT
 - [ ] Local CI Sanity Gate passed with 0 errors
+- [ ] SCM subagent dispatched with `task_id` recorded in the subagent ledger and result file non-empty (Subagent Dispatch Gate)
 - [ ] Commit created adhering to Conventional Commits with `Closes #<number>`
 - [ ] Branch pushed to remote origin
 - [ ] Draft PR/MR created on forge and URL reported to user
@@ -294,10 +298,12 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 1. Spawn a Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#2-issue-communicator-subagent-prompt):
    - `Role`: `"Issue Communicator Agent"`
    - `Prompt`: Instruct agent to read `.agents/skills/_shared/runtime/providers.md`, inspect merged diff from `$PARENT_REPO`, write non-technical plain-English summary (no code references or technical jargon) to `/tmp/issue-comment.txt`, post using provider CLI command, and write technical summary to `${RESULTS_DIR}/result-issue-comment-${sessionId}.md`.
-2. Wait for the subagent to complete.
-3. Present the posted comment text in chat to the user.
+2. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${sessionId}.json` (role `issue-comment`, `result_file` `${RESULTS_DIR}/result-issue-comment-${sessionId}.md`).
+3. Pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm non-empty `task_id`, `status == complete`, and `${RESULTS_DIR}/result-issue-comment-${sessionId}.md` exists and is non-empty. On gate failure, re-dispatch — do NOT write the comment inline.
+4. Present the posted comment text in chat to the user.
 
 ### GATE EXIT
+- [ ] Issue Communicator subagent dispatched with `task_id` recorded in the subagent ledger and result file non-empty (Subagent Dispatch Gate)
 - [ ] Plain-English comment posted to the forge issue
 - [ ] User can see the comment content in chat
 - [ ] Workflow complete

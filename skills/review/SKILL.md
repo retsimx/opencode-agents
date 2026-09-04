@@ -7,6 +7,7 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
 
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **Use Task subagents for isolated work** — delegate review focus areas (security, performance, etc.) to separate review subagents. Subagents are cheap; they prevent context dilution.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: Every spawned review/fix agent MUST have its harness-returned `task_id` recorded in `.agents/results/subagent-ledger-{sessionId}.json`. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Use the `question` tool when uncertain** — never make assumptions about code intent. Ask if you need clarification.
 - **You MUST use OpenCode's built-in tools for the workflow.**
   - Use `grep`, `glob`, `read` for code analysis and review.
@@ -138,6 +139,16 @@ For large review scopes, delegate Steps 2-7 to a review agent via the OpenCode `
 - Pass `SESSION_ID`, `TASK_SLUG`, and designated `OUTPUT_FILE` (`.agents/results/result-review-{taskSlug}-{sessionId}.md`)
 - Include the file list and review standards from the review skill in the prompt
 - Mandate writing the full report to `OUTPUT_FILE` and returning the 4-line chat summary
+- **Record the harness-returned `task_id`** for the spawned review agent in `.agents/results/subagent-ledger-{sessionId}.json` alongside its role and designated `result_file`.
+
+### Dispatch Gate Check (before consuming subagent output)
+
+Before consuming (synthesizing, aggregating, or publishing) any spawned review agent's deliverable, confirm for that agent:
+- [ ] A non-empty `task_id` is recorded in `.agents/results/subagent-ledger-{sessionId}.json`.
+- [ ] `status == complete` (not `pending`/`running`/`failed`).
+- [ ] The agent's `result_file` exists on disk and is non-empty.
+
+A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 
 ---
 
@@ -145,14 +156,17 @@ For large review scopes, delegate Steps 2-7 to a review agent via the OpenCode `
 
 When user wants fixes too, execute review then fix then re-review loop:
 
-1. Spawn review agent (via OpenCode `task` tool) to write issue report to `.agents/results/result-review-{taskSlug}-{sessionId}.md` and return 4-line summary.
+1. Spawn review agent (via OpenCode `task` tool) to write issue report to `.agents/results/result-review-{taskSlug}-{sessionId}.md` and return 4-line summary. Record the harness-returned `task_id` in `.agents/results/subagent-ledger-{sessionId}.json`.
 2. If CRITICAL/HIGH issues exist:
    - Spawn domain agent(s) to fix issues via OpenCode `task` tool:
      - `subagent_type="general"` with fix instructions, upstream review artifact via `UPSTREAM_ARTIFACTS=".agents/results/result-review-{taskSlug}-{sessionId}.md"`, and designated output file
      - For multi-domain fixes, spawn separate tasks per domain
+   - Record the harness-returned `task_id` for each spawned fix agent in `.agents/results/subagent-ledger-{sessionId}.json`.
 
-3. Re-spawn review agent (via OpenCode `task` tool) to re-review fixed code and write updated `.agents/results/result-review-{taskSlug}-{sessionId}-verify.md`.
+3. Re-spawn review agent (via OpenCode `task` tool) to re-review fixed code and write updated `.agents/results/result-review-{taskSlug}-{sessionId}-verify.md`. Record the harness-returned `task_id` in `.agents/results/subagent-ledger-{sessionId}.json`.
 4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.
+
+Before consuming any spawned review/fix agent's deliverable, run the Dispatch Gate Check: confirm a non-empty `task_id` is recorded, `status == complete`, and the `result_file` exists and is non-empty. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 
 ---
 

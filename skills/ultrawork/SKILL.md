@@ -7,6 +7,7 @@ description: High-quality 5-phase development workflow with 11 review steps out 
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
 - **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: Every spawned implementation/QA/debug agent MUST have its harness-returned `task_id` recorded in `.agents/results/subagent-ledger-{sessionId}.json`. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
@@ -113,6 +114,7 @@ Spawn implementation agents in parallel using the OpenCode `task` tool:
   - `.agents/skills/_shared/core/quality-principles.md`
   - plus its domain skill (backend/frontend/mobile) which carries its own rules.
 - Spawn all same-priority agents in a single message for parallel execution.
+- **Record `task_id` for every spawned agent**: after each `task` tool call, record the harness-returned `task_id` (with role and `OUTPUT_FILE`) in `.agents/results/subagent-ledger-{sessionId}.json`. `task_id` is unforgeable evidence of real dispatch (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`).
 
 ---
 
@@ -123,7 +125,8 @@ Spawn implementation agents in parallel using the OpenCode `task` tool:
 1. Monitor subagent 4-line chat completion returns.
 2. Read `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` files if tracking active turns.
 3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` deliverable files exist on disk.
-4. Update `.agents/results/session-ultrawork.md` with monitoring results and artifact paths.
+4. **Subagent Dispatch Gate**: for each spawned agent, confirm a non-empty `task_id` is recorded in `.agents/results/subagent-ledger-{sessionId}.json`, `status == complete`, and the deliverable file exists and is non-empty (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`). A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent.
+5. Update `.agents/results/session-ultrawork.md` with monitoring results and artifact paths.
 
 **Continue polling until all agents report completion or failure.**
 
