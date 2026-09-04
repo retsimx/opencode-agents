@@ -165,6 +165,11 @@ while clean_review_streak < 3:
 
                 Load the deep-review skill and review scope: <SCOPE>.
 
+                Grug Compliance is part of this deep review. Any actionable
+                Grug violations surface as ordinary findings with conventional
+                severities (SEVERITY|file:line|description|execution_path_reasoning).
+                A standalone Grug PASS needs no representation in the line protocol.
+
                 Read <STATE_FILE>:
                 - Line 1 is WORKTREE=<path> — the working tree to review
                 - All existing entries (NEW, FIXED, SKIPPED) are

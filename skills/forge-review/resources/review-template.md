@@ -157,6 +157,22 @@ Comprehensive evaluation across the 9 core software engineering dimensions:
 |----------|------------------------|-----------------------------------|----------------------------|
 | `MINOR` / `NIT` | `path/to/views.py:L90` | {Duplicated logic found also in service.py:L30} | Extract to shared helper |
 
+### Grug Compliance (Cross-Cutting Lens)
+
+> **Cross-cutting lens, NOT a tenth dimension.** This subsection applies the Grug principles as an orthogonal complexity lens over the 9 dimensions above. It does not add a 10th dimension and does not change the "9-Dimension" scope of Section 3.
+
+**Aggregate Grug Verdict**: `{PASS | WARN | FAIL}`
+
+Report against the **Minimum Grug Reporting Shortlist** in `.agents/rules/grug-principles.md` (rule numbers are GLOBAL 1–28). Only rules with review-applicable findings are listed; rules with no findings are omitted.
+
+| Rule # | Status | Finding | Location (`file:line`) |
+|--------|:------:|---------|------------------------|
+| `{2}` | `PASS` / `WARN` / `FAIL` | {Complexity / minimalism finding} | `path/to/file.py:L45` |
+| `{3}` | `PASS` / `WARN` / `FAIL` | {Premature factoring finding} | `path/to/file.py:L88` |
+| `{4}` | `PASS` / `WARN` / `FAIL` | {Simple-over-clever finding} | `path/to/file.py:L12` |
+
+> **INFORMATIONAL**: The Grug verdict is informational only and is NOT an independent blocking gate. Actionable Grug violations flow through the existing severity levels (CRITICAL / MAJOR / MINOR) already reported in the 9-dimension detailed findings and Section 4 staged suggestions. A `FAIL` Grug verdict alone does not force `REQUEST_CHANGES`; it only signals complexity concerns to weigh alongside the dimension-level severities.
+
 ---
 
 ## 4. Staged Inline Diff Suggestions & Detailed Remediation (Subagent 4 Verified)

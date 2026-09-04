@@ -98,6 +98,21 @@ actually necessary. When in doubt, choose the simpler option.
 28. **Stay calm** — don't reach for the club; steer others with working
     demos.
 
+## Minimum Grug Reporting Shortlist
+
+This is a MINIMUM REPORTING SHORTLIST (reporting-only). It is NOT a
+relaxation of the mandatory full rule set above — all rules remain binding.
+
+When reviewing a change, report against this shortlist of review-applicable
+rules: **2, 3, 4, 5, 8, 11, 12, 17, 18, 19, 20, 21, 22, 24, 25**.
+
+Rule numbers are GLOBAL (1–28) across all sections.
+
+Selection criteria: rules selected are those directly assessable when
+reviewing a change (complexity, minimalism, reuse, types, testing, coherence,
+verification). Rules excluded are process/mindset rules not directly
+assessable from a diff (e.g. 1, 6, 7, 9, 10, 13, 14, 15, 23, 26–28).
+
 ## One-Line Summary
 
 Unnecessary complexity very, very bad. Necessary complexity is a cost we pay

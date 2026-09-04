@@ -100,7 +100,7 @@ convention (run-scoped artifacts).
 1. **PREPARE**: Load the design. If it is not an approved design (no design doc / vague description), run the `brainstorm` phase to produce one (save to `docs/plans/designs/`). Confirm the design with the user before decomposing.
 2. **ACQUIRE**: Read the design; detect existing issue prefixes in the target repos (scan open + closed issues) to propose a non-colliding per-epic prefix; ask if ambiguous.
 3. **REASON**: Decompose using `plan`-skill heuristics — waves, dependencies, critical path, cross-repo gates. Priority ladder is per epic-forge (`resources/style-guide.md`): P0 = critical-path foundation; P1 = high; P2 = medium; P3 = polish. Produce the epic + task DAG.
-4. **Gate 1 (DAG review)**: present the DAG (prefix-based) for approval. On rejection, revise.
+4. **Gate 1 (DAG review)**: present the DAG (prefix-based) for approval. Include a grug decomposition checklist (rules 2, 12, 20, 21): no speculative issues, each issue independently valuable or dependency-necessary, no abstraction-only task, no unrelated work bundled. On rejection, revise.
 5. **ACT (draft)**: Write epic + issue bodies from the templates (`resources/epic-template.md`, `resources/issue-template.md`) following `resources/style-guide.md`. Bodies use prefix references + `{SIBLING_EPIC}` placeholders. Save all bodies + a manifest (prefix → title → phase → priority → deps → status) + an empty state file to `.agents/results/epic-forge/<run>/`.
 6. **Gate 2 (summary review)**: present per-epic summary — issue cards (title, 2–3 line summary, files, acceptance count, depends-on) + numbered dependency hierarchy + critical path. **Verify write access to all target repos** (functional check per repo; fail fast). On approval, proceed.
 7. **ACT (create + link + annotate)** — three passes:
@@ -119,7 +119,7 @@ convention (run-scoped artifacts).
    - **Spec divergence → the user must describe how and why** (never auto-detect); plan the spec-follows-code update from that description.
    Use targeted questions (clarification-protocol) to resolve ambiguity. Produce the delta map: affected open issues, obsolete closed issues, new issues needed, cross-repo companion impacts.
 4. **ACT (draft)**: Draft updates — update the epic's spec/narrative sections (the contract), create new issue bodies, update open issue bodies, plan re-links. Refresh the epic task table as reference only (add new rows, update DAG/critical path) — do NOT maintain its status column.
-5. **Gate (delta review)**: present the delta map + per-issue summary cards + **per-issue delta changes** (what is changing in each issue). On approval, proceed.
+5. **Gate (delta review)**: present the delta map + per-issue summary cards + **per-issue delta changes** (what is changing in each issue). Include a grug delta checklist (rules 2, 12, 20, 21): is this the minimum viable change? no speculative scope? no unnecessary complexity? no unrelated work bundled? This covers small tweaks and spec divergence that sidestep brainstorm. On approval, proceed.
 6. **ACT (apply)**: update the epic, create new issues, update open issue bodies, close obsolete issues (with user confirmation per closure), re-link dependencies, run the annotation pass for new references.
 7. **VERIFY**: confirm the epic + issues reflect the delta. Report.
 

@@ -144,7 +144,8 @@ Follow the brainstorm workflow step by step:
 ### Output Contract (File-First State I/O & 4-Line Chat Return)
 All design artifacts must be written to disk before finishing:
 1. **File-First Artifact**: Write complete design doc with tradeoff matrix to `docs/plans/designs/{NNN}-{topic}.md` (or `.agents/results/design-{topic}-{sessionId}.md`).
-2. **Chat Return Contract**: Return strictly the 4-line summary:
+2. **Complexity Check (proportional)**: Include a short complexity check in the design doc. Record material complexity decisions, justified necessary complexity, and any actual rule concerns, referencing grug rule numbers only (from the Minimum Grug Reporting Shortlist in `.agents/rules/grug-principles.md`). When there are no material complexity concerns, a single concise clean statement suffices — a full rule-by-rule matrix is NOT required.
+3. **Chat Return Contract**: Return strictly the 4-line summary:
    ```markdown
    ### Task Complete: Brainstorm — {Topic}
    - **Status**: SUCCESS | BLOCKED | FAILED

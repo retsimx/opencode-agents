@@ -180,12 +180,14 @@ You MUST evaluate:
 - repeated test setup/assertion patterns
 
 #### Grug Compliance (Complexity)
+- assess against the Minimum Grug Reporting Shortlist (rules 2, 3, 4, 5, 8, 11, 12, 17, 18, 19, 20, 21, 22, 24, 25)
 - unnecessary complexity introduced vs. necessary complexity paid deliberately
 - gold-plating or speculative features not required by the change
 - premature abstraction / over-engineering (abstractions without repeated concrete cases)
 - unused extension points, configuration, or compatibility layers for hypothetical needs
 - whether an existing project mechanism could have been used instead of new machinery
 - whether the change could be smaller or simpler while satisfying the requirement
+- the Grug verdict is INFORMATIONAL: it does not independently gate approval; actionable violations flow through the existing severity levels
 
 ---
 
@@ -241,7 +243,7 @@ You MUST NOT:
 
 This skill enforces **File-First State I/O**:
 1. **Write Complete Review Report to File**:
-   Write the full 9-dimension review report to `.agents/results/result-deep-review-{sessionId}.md` (or designated `OUTPUT_FILE`).
+   Write the full review report covering nine dimensions plus Grug Compliance to `.agents/results/result-deep-review-{sessionId}.md` (or designated `OUTPUT_FILE`).
    The file MUST contain all sections below, in order. If a dimension has no findings, state `No issues found` explicitly — do not omit the section.
 
 2. **Return 4-Line Chat Summary**:
@@ -250,7 +252,7 @@ This skill enforces **File-First State I/O**:
    ### Task Complete: Deep Review — {Scope}
    - **Status**: SUCCESS | BLOCKED | FAILED
    - **Summary**:
-     - {Overall deep review verdict: PASS / WARNING / FAIL}
+     - {Overall deep review verdict: PASS / WARN / FAIL}
      - {Dimension breakdown: X Critical, Y High, Z Medium issues found}
      - {Key regression / architectural risk identified or "No regressions identified"}
    - **Artifact**: `file:///path/to/.agents/results/result-deep-review-{sessionId}.md`
@@ -325,6 +327,28 @@ If no issues: `No issues found`
 |----------|-----------|-------------|---------------------|
 
 If no issues: `No issues found`
+
+## Grug Compliance
+
+Assess the full Minimum Grug Reporting Shortlist (`.agents/rules/grug-principles.md`)
+internally, but report only rules that produced a material finding or required a
+meaningful complexity justification. Reference rules by number; do not restate
+canonical rule text.
+
+| Rule # | Status | Finding |
+|--------|:------:|---------|
+| (material rules only) | WARN / FAIL | concrete, evidence-backed finding or justified complexity |
+
+If no material Grug concerns: `No material Grug concerns identified against the Minimum Grug Reporting Shortlist.`
+
+Aggregate Grug verdict: **PASS / WARN / FAIL**
+
+The Grug verdict is INFORMATIONAL. It does not independently gate approval;
+actionable violations flow through the existing severity levels (CRITICAL /
+HIGH / MEDIUM / LOW) above.
+
+Notes on justified necessary complexity (if any): record any complexity that
+was necessarily introduced and explain why it is required.
 
 ## Notes (optional)
 Only if necessary for additional context not captured above
