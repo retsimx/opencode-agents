@@ -141,7 +141,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 ### Scenes
 
 1. **ACQUIRE (Stage 1: Context Ingestion & Sanitization)**:
-   - Orchestrator dispatches **Subagent 0: `context-ingestion`** via the subagent tool.
+   - Orchestrator dispatches **Subagent 0: `context-ingestion`** via the subagent tool with `subagent_type="general"`.
    - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
    - Subagent 0 queries forge API, prunes bot noise, excludes lockfiles/assets, entity-encodes untrusted markdown metadata while preserving raw code diffs unencoded within `<untrusted_diff session_nonce="...">` to prevent source code syntax corruption, applies dynamic session nonces, and writes `spec-issue.md`, `pr-context.md`, `diff-pr.patch` with **ZERO token limits**.
    - Initializes run state file at `.agents/results/forge-review/<sessionId>/state.json`.
