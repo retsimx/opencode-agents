@@ -11,10 +11,10 @@ This document defines the authoritative technical execution protocol and operati
 1. **Subagent 0 (`context-ingestion`)**: Interacts with the target forge CLI (`gh` or `glab`), extracts PR/MR metadata, diffs, and issue specifications, prunes bot noise, excludes lockfiles/minified assets, sanitizes untrusted markdown metadata with entity-encoding and dynamic session nonces, guarantees raw uncorrupted code diff syntax in `diff-pr.patch` wrapped inside `<untrusted_diff session_nonce="...">`, normalizes author roles, and persists unconstrained artifacts to disk with **ZERO token limits**. It separates **current-state** (`pr-context.md`: metadata, head SHA, author intent, documented deviations, sanitized description) from **historical review findings** (`pr-history.md`: prior-round findings under a clearly-marked "HISTORICAL REVIEW ROUNDS (may describe already-fixed code)" section), tagging provenance at ingestion without determining staleness.
 2. **Phase 2 (Parallel Detector Sweep)**: Orchestrator concurrently dispatches three domain specialists:
    - **Subagent 1 (`qa-agent`)**: Reads `spec-issue.md`, `pr-context.md`, `diff-pr.patch`, and `.agents/skills/review/SKILL.md` to evaluate 100% of Acceptance Criteria and contract commitments for Section 1 (Acceptance Criteria & Contract Alignment Matrix with `file:line` proof citations).
-   - **Subagent 2 (`deep-reviewer`)**: Reads `pr-context.md`, `diff-pr.patch`, `.agents/skills/deep-review/SKILL.md`, and `docs/checklists/{domain}.md` to perform an exhaustive 9-dimension code audit for Section 3 (9-Dimension Quality Scorecard) and stage candidate diff suggestions with ` ```suggestion ` blocks.
+   - **Subagent 2 (`deep-reviewer`)**: Reads `spec-issue.md` (SPEC_FILE), `pr-context.md`, `diff-pr.patch`, `.agents/skills/deep-review/SKILL.md`, and `docs/checklists/{domain}.md` to perform an exhaustive 9-dimension code audit for Section 3 (9-Dimension Quality Scorecard) and stage candidate diff suggestions with ` ```suggestion ` blocks. It grounds each CRITICAL/HIGH candidate in a Contract Basis (Criterion #N or `EXTRA-CONTRACT MERGE-SAFETY DEFECT`) with reachability and material impact, but remains a broad detector and does NOT own final disposition.
    - **Subagent 3 (`security-agent`)**: Reads `diff-pr.patch` **ONLY** under an isolated **STRICT ZERO-TRUST MANDATE** (completely barred from author explanations, narrative justifications, or issue descriptions) to generate Section 2 Dedicated Threat Model Matrix across 6 threat vectors with exploit scenarios, reachability paths, and remediation code.
-3. **Phase 3 (Intermediate Synthesis)**: Orchestrator aggregates specialist outputs into an intermediate raw synthesis (`.agents/results/raw-findings-pr-{n}-{sessionId}.md`).
-4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **5-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **provenance gate** (every finding must cite a current-head `file:line`; no citation → demote to Section 5 or drop) and the **Immutable Security Pass-Through Invariant**, formatting Section 4 (Staged Inline Diff Suggestions with Badge + Location + Problem + Remediation + ` ```suggestion ` blocks) and Section 5 (Out-of-Diff Observations), and emitting the complete 6-section master deliverable (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`). If `pr-history.md` is provided, Subagent 4 MAY cross-reference prior-round findings to note "previously raised, now verified fixed" as an optional courtesy.
+3. **Phase 3 (Intermediate Synthesis)**: Orchestrator aggregates specialist outputs into an intermediate raw synthesis (`.agents/results/raw-findings-pr-{n}-{sessionId}.md`). `RAW_SYNTHESIZE` preserves each candidate's detector severity, provenance, contract basis, reachability evidence, and proposed remediation WITHOUT deciding final disposition; Subagent 4 remains the sole owner of final BLOCKING/NON-BLOCKING classification.
+4. **Phase 3.5 (Verification & Criticism Pass)**: Orchestrator dispatches **Subagent 4 (`review-verifier`)** to execute the **6-Check Verification Protocol** against live repository source files and diff hunks, enforcing the **provenance gate** (every finding must cite a current-head `file:line`; no citation → demote to Section 5 or drop), the **Immutable Security Pass-Through Invariant**, and the **Contract-Led Verdict Invariant** (the acceptance-criteria matrix establishes the baseline verdict; detector severity alone cannot force REQUEST_CHANGES; only an explicit contract deviation or a verifier-confirmed, reachable merge-safety defect may block) together with the **Smallest Remediation Invariant** (a blocking recommendation must use the smallest existing mechanism that resolves the demonstrated defect). Subagent 4 reads `spec-issue.md` (SPEC_FILE), formats Section 4 (Staged Inline Diff Suggestions with Badge + Location + Problem + Remediation + ` ```suggestion ` blocks) and Section 5 (Out-of-Diff and Non-Blocking Observations), and emits the complete 6-section master deliverable (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`). If `pr-history.md` is provided, Subagent 4 MAY cross-reference prior-round findings to note "previously raised, now verified fixed" as an optional courtesy.
 5. **Phase 4 (Presentation, Gate, & Publication)**:
    - **Scene 5 (Orchestrator Presentation & Human Gate)**: Orchestrator reads `.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` (or `.agents/results/review-pr-{n}-{sessionId}.md`) and prints its **complete, untruncated, uncollapsed markdown contents directly to the chat window** (including all rich tables, `file:line` proof citations, exploit scenarios, and ` ```suggestion ` replacement blocks) before asking the user. Replacing rich tables or suggestion blocks with summarized one-liners or file references is strictly forbidden. The orchestrator halts at the mandatory Human Approval Gate (ask the user).
    - **Scene 6 (Forge Publication)**: Upon explicit human approval, submits verified atomic batch reviews and inline diff comments via provider REST API payloads (`gh api` or `glab api`).
@@ -60,13 +60,16 @@ This document defines the authoritative technical execution protocol and operati
 ┌───────────────────────────────────────────────────────────────────────────┐
 │                     Phase 3: Intermediate Synthesis                       │
 │  - Orchestrator collects Subagents 1, 2, 3 result files from disk         │
-│  - Aggregates raw findings into raw-findings-pr-{n}-{sessionId}.md        │
+│  - RAW_SYNTHESIZE preserves each candidate's detector severity,            │
+│    provenance, contract basis, reachability evidence, and proposed        │
+│    remediation WITHOUT deciding final disposition                        │
+│  - Aggregates raw findings into raw-findings-pr-{n}-{sessionId}.md       │
 └───────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
 ┌────────────────────────────────────────────────────────────────────────────┐
 │             Phase 3.5: Review Verifier & Critic Specialist Pass            │
-│  spawn a subagent([review-verifier])                                       │
+│  spawn a subagent([review-verifier])  (reads spec-issue.md / SPEC_FILE)    │
 │  - Check 1: Ground Truth Fact-Check (Verify against live codebase)         │
 │    + Provenance Gate: every finding MUST cite a current-head file:line;    │
 │      no citation -> demote to Section 5 or drop                            │
@@ -74,6 +77,13 @@ This document defines the authoritative technical execution protocol and operati
 │  - Check 3: Suggestion Syntax & Indentation Normalization                  │
 │  - Check 4: Cross-Specialist Deduplication & Severity Recalibration        │
 │  - Check 5: Immutable Security Pass-Through Invariant (Subagent 3 Locked)  │
+│  - Check 6: Contract Grounding & Merge Disposition (BLOCKING vs           │
+│    NON-BLOCKING against the acceptance-criteria matrix)                    │
+│  - Invariants: Contract-Led Verdict (matrix is baseline; detector         │
+│    severity alone cannot force REQUEST_CHANGES) and Smallest Remediation  │
+│    (blocking fix uses the smallest existing mechanism)                    │
+│  - Subagent 4 is the SOLE owner of final BLOCKING/NON-BLOCKING           │
+│    classification and the final verdict                                   │
 │  - Format Section 4 Staged Suggestions & Section 5 Out-of-Diff Obs         │
 │  - Write: OUTPUT_FILE (.agents/results/review-pr-{n}-{sessionId}.md or     │
 │    .agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md)     │
@@ -113,6 +123,13 @@ gh issue view <ISSUE_NUMBER> --json number,title,body,labels,assignees,author > 
 Submit top-level review summary and all inline diff comments atomically in a single REST call:
 
 ```bash
+# Submit top-level review summary and all inline diff comments atomically in a single REST call.
+# The review "event" is derived from the VERIFIER'S FINAL VERDICT (Subagent 4), NOT from raw
+# detector severity. A CRITICAL/HIGH detector finding does not by itself select REQUEST_CHANGES;
+# only an explicit contract deviation or a verifier-confirmed, reachable merge-safety defect does.
+#   FINAL_VERDICT=REQUEST_CHANGES -> "event": "REQUEST_CHANGES"
+#   FINAL_VERDICT=APPROVE        -> "event": "APPROVE"
+#   FINAL_VERDICT=COMMENT        -> "event": "COMMENT"
 gh api \
   --method POST \
   -H "Accept: application/vnd.github+json" \
@@ -121,7 +138,7 @@ gh api \
 {
   "commit_id": "{HEAD_SHA}",
   "body": "{TOP_LEVEL_REVIEW_MARKDOWN}",
-  "event": "REQUEST_CHANGES",
+  "event": "{FINAL_VERDICT}",
   "comments": [
     {
       "path": "tutoring/views.py",
@@ -224,10 +241,13 @@ glab api \
 # Post top-level summary note
 glab mr note <MR_IID> --message "$(cat .agents/results/review-summary-${SESSION_ID}.md)"
 
-# If verdict is APPROVE:
+# The approval action below derives from the VERIFIER'S FINAL VERDICT (Subagent 4), not from raw
+# detector severity. A CRITICAL/HIGH detector finding alone does not force REQUEST_CHANGES.
+
+# If FINAL_VERDICT is APPROVE:
 glab mr approve <MR_IID>
 
-# If verdict is REQUEST_CHANGES (unapprove if previously approved):
+# If FINAL_VERDICT is REQUEST_CHANGES (unapprove if previously approved):
 glab mr unapprove <MR_IID>
 ```
 
@@ -251,7 +271,10 @@ All subagents are dispatched via the subagent tool using the prompt templates de
   - Operates under isolated Strict Zero-Trust (diffs only, barred from narrative justifications).
   - Produces Section 2 Dedicated Threat Model Matrix across all 6 threat vectors with full Exploit Scenarios, reachability paths, impact analysis, and remediation suggestion blocks.
 - **Subagent 4 (`review-verifier`)**:
-  - Executes the 5-Check Verification Protocol (Fact-checking, Diff Hunk Bounds & 422 Demotion, Suggestion Syntax & Indentation Normalization, Deduplication & Severity Recalibration, Immutable Security Pass-Through).
+  - Reads `spec-issue.md` (SPEC_FILE) plus the raw synthesis and live repository source.
+  - Executes the 6-Check Verification Protocol (Fact-checking, Diff Hunk Bounds & 422 Demotion, Suggestion Syntax & Indentation Normalization, Deduplication & Severity Recalibration, Immutable Security Pass-Through, Contract Grounding & Merge Disposition).
+  - Enforces the **Contract-Led Verdict Invariant** (the acceptance-criteria matrix establishes the baseline verdict; detector severity alone cannot force REQUEST_CHANGES; only an explicit contract deviation or a verifier-confirmed, reachable merge-safety defect may block) and the **Smallest Remediation Invariant** (a blocking recommendation must use the smallest existing mechanism that resolves the demonstrated defect; broader architecture is reported only as a non-blocking alternative unless required by the contract).
+  - Owns the sole final BLOCKING/NON-BLOCKING classification and the final verdict.
   - Synthesizes and emits the final verified deliverable (`.agents/results/forge-review/<sessionId>/review-pr-{n}-verified.md` or `.agents/results/review-pr-{n}-{sessionId}.md`) formatted with all 6 rich markdown sections fully populated.
 
 ### B. Scene 5: Orchestrator Presentation & Human Gate Protocol
@@ -268,7 +291,7 @@ Prior to triggering the interactive human gate or publishing to any forge:
 ### C. Operational Runbooks Reference
 See `.agents/skills/forge-review/resources/operational-runbooks.md` for detailed runbook specifications:
 - **Section 1**: Subagent 0 Operational Runbook: Context Ingestion & Sanitization
-- **Section 2**: Subagent 4 Operational Runbook: Review Verifier & Critic Specialist (5-Check Protocol)
+- **Section 2**: Subagent 4 Operational Runbook: Review Verifier & Critic Specialist (6-Check Protocol)
 - **Section 3**: Forge Discussion Payload Reference: GitLab Multiline Discussion Schema
 - **Section 4**: GitHub Atomic Batch Review Payload Reference & Submission Protocol
 - **Section 5**: Scene 5: Orchestrator Presentation & Human Gate Runbook
@@ -319,7 +342,7 @@ When submitting an inline suggestion to GitHub/GitLab:
 2. **Recovery Procedure**:
    - **Step 1**: Attempt to re-fetch the latest commit SHA and diff.
    - **Step 2**: Re-anchor line numbers against the refreshed diff hunk.
-   - **Step 3 (Graceful Fallback)**: If re-anchoring fails, DO NOT fail the review. Downgrade the unplaced inline comment to a labeled finding inside **Section 5 (Out-of-Diff Observations)** of the top-level review body (`review-template.md`), citing the target `file:line` directly in markdown text.
+   - **Step 3 (Graceful Fallback)**: If re-anchoring fails, DO NOT fail the review. Downgrade the unplaced inline comment to a labeled finding inside **Section 5 (Out-of-Diff and Non-Blocking Observations)** of the top-level review body (`review-template.md`), citing the target `file:line` directly in markdown text.
 
 ---
 

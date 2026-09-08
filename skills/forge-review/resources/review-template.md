@@ -14,7 +14,7 @@ The deliverable follows a strict 6-section hierarchy designed for maximum audit 
 4. **Section 2: Dedicated Security & Threat Model Audit (Subagent 3 Zero-Trust Pass)**: Zero-trust audit across 6 threat vectors with concrete exploit scenarios.
 5. **Section 3: 9-Dimension Code Quality & Architecture Audit Scorecard (Subagent 2 Deep Review)**: Comprehensive 9-dimension quality scorecard and breakdown.
 6. **Section 4: Staged Inline Diff Suggestions & Detailed Remediation (Subagent 4 Verified)**: Verified inline findings formatted with 4-part breakdown and ```` ```suggestion ```` blocks.
-7. **Section 5: Out-of-Diff Observations (Demoted from Inline)**: Valid findings on untouched code outside diff hunks to guarantee zero HTTP 422 API errors.
+7. **Section 5: Out-of-Diff and Non-Blocking Observations**: Valid findings on untouched code outside diff hunks (and non-blocking in-hunk observations) to guarantee zero HTTP 422 API errors; never published as inline comments.
 8. **Section 6: Recommended Next Steps for Author**: Actionable checklist for the PR author.
 
 ---
@@ -53,6 +53,8 @@ This matrix verifies that 100% of requirements from the associated Issue and Epi
 > - `INCOMPLETE`: Partially implemented; secondary edge cases, error handlers, or parameters missing.
 > - `DEVIATED`: Implemented differently than specified in the issue/epic contract without documented rationale.
 > - `MISSING`: Requirement was specified in the issue/epic but has no implementation in the diff.
+> - `OPERATIONAL` (or `PENDING_EXTERNAL_EVIDENCE`): Requirement cannot be verified from the MR alone (e.g. requires a live deployment, external service, or runtime gate). This is **not** a code defect and does not by itself force `REQUEST_CHANGES`; it may produce `COMMENT` when the evidence is a required pre-merge gate, otherwise it is a deployment follow-up.
+> - `AMBIGUOUS`: Normative criteria that conflict or cannot be resolved from current evidence. Do **not** invent a precedence rule; preserve concrete findings and use `COMMENT` unless an independently verified merge-safety defect requires `REQUEST_CHANGES`.
 
 ---
 
@@ -77,6 +79,8 @@ Evaluated under strict Zero-Trust isolation (diff only, no author narrative assu
 
 #### Threat Vector: {Vector Name (e.g., Authorization & IDOR)}
 - **Location**: `{path/to/file.ext}:{line_or_range}`
+- **Disposition**: `BLOCKING` / `NON-BLOCKING`
+- **Contract Basis**: `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY`
 - **Exploit Path & Impact**: {Detailed step-by-step description of how an attacker could exploit this flaw, prerequisites, payload, and direct business/technical impact.}
 - **Remediation**:
 ```suggestion
@@ -105,57 +109,57 @@ Comprehensive evaluation across the 9 core software engineering dimensions:
 
 #### Dimension 1: Correctness
 <!-- If clean: No correctness issues identified. -->
-| Severity | Location (`file:line`) | Description & Execution Path | Suggested Resolution |
-|----------|------------------------|------------------------------|----------------------|
-| `CRITICAL` / `MAJOR` / `MINOR` | `path/to/file.py:L45` | {Logic flaw explanation and runtime trace} | {Actionable fix} |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Description & Execution Path | Suggested Resolution |
+|----------|:-----------:|:--------------:|------------------------|------------------------------|----------------------|
+| `CRITICAL` / `MAJOR` / `MINOR` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/file.py:L45` | {Logic flaw explanation and runtime trace} | {Actionable fix} |
 
 #### Dimension 2: Security & Auth
 <!-- If clean: No security/auth issues identified. -->
-| Severity | Location (`file:line`) | Vulnerability / Auth Gap | Remediation |
-|----------|------------------------|--------------------------|-------------|
-| `CRITICAL` / `MAJOR` / `MINOR` | `path/to/file.py:L88` | {Auth gap explanation} | {Required permission guard} |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Vulnerability / Auth Gap | Remediation |
+|----------|:-----------:|:--------------:|------------------------|--------------------------|-------------|
+| `CRITICAL` / `MAJOR` / `MINOR` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/file.py:L88` | {Auth gap explanation} | {Required permission guard} |
 
 #### Dimension 3: Regression Risk
 <!-- If clean: No regression risks identified. -->
-| Severity | Location (`file:line`) | Potential Broken Workflow | Verification Needed |
-|----------|------------------------|---------------------------|---------------------|
-| `MAJOR` / `MINOR` | `path/to/file.py:L12` | {Affected consumer or dependent module} | {Regression test case} |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Potential Broken Workflow | Verification Needed |
+|----------|:-----------:|:--------------:|------------------------|---------------------------|---------------------|
+| `MAJOR` / `MINOR` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/file.py:L12` | {Affected consumer or dependent module} | {Regression test case} |
 
 #### Dimension 4: State & Data Integrity
 <!-- If clean: No state/data integrity risks identified. -->
-| Severity | Location (`file:line`) | Risk (Transaction / Migration / Concurrency) | Mitigation |
-|----------|------------------------|----------------------------------------------|------------|
-| `MAJOR` / `MINOR` | `path/to/models.py:L50` | {Schema or race condition description} | {Transaction wrapper / index} |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Risk (Transaction / Migration / Concurrency) | Mitigation |
+|----------|:-----------:|:--------------:|------------------------|----------------------------------------------|------------|
+| `MAJOR` / `MINOR` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/models.py:L50` | {Schema or race condition description} | {Transaction wrapper / index} |
 
 #### Dimension 5: UI / Rendering / UX
 <!-- If clean: No UI/UX flaws identified. -->
-| Severity | Location (`file:line`) | UI / Template / UX Flaw | Recommended Adjustment |
-|----------|------------------------|-------------------------|------------------------|
-| `MINOR` / `NIT` | `templates/booking.html:L20` | {Missing loading state or unescaped block} | {HTML / CSS / JS fix} |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | UI / Template / UX Flaw | Recommended Adjustment |
+|----------|:-----------:|:--------------:|------------------------|-------------------------|------------------------|
+| `MINOR` / `NIT` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `templates/booking.html:L20` | {Missing loading state or unescaped block} | {HTML / CSS / JS fix} |
 
 #### Dimension 6: Test Coverage & Quality
 <!-- If clean: Test coverage meets standards. -->
-| Severity | Location (`file:line`) | Test Gap / Assertion Flaw | Test to Add |
-|----------|------------------------|---------------------------|-------------|
-| `MAJOR` / `MINOR` | `tests/test_service.py:L10` | {Untested edge condition} | {Specific test scenario} |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Test Gap / Assertion Flaw | Test to Add |
+|----------|:-----------:|:--------------:|------------------------|---------------------------|-------------|
+| `MAJOR` / `MINOR` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `tests/test_service.py:L10` | {Untested edge condition} | {Specific test scenario} |
 
 #### Dimension 7: Performance & Scalability
 <!-- If clean: No performance bottlenecks identified. -->
-| Severity | Location (`file:line`) | Performance Bottleneck (N+1 / Memory / Algorithmic) | Optimization |
-|----------|------------------------|-----------------------------------------------------|--------------|
-| `MAJOR` / `MINOR` | `path/to/views.py:L60` | {Iterative DB query in loop} | `select_related()` / batching |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Performance Bottleneck (N+1 / Memory / Algorithmic) | Optimization |
+|----------|:-----------:|:--------------:|------------------------|-----------------------------------------------------|--------------|
+| `MAJOR` / `MINOR` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/views.py:L60` | {Iterative DB query in loop} | `select_related()` / batching |
 
 #### Dimension 8: Dead Code & Hygiene
 <!-- If clean: Codebase is clean and hygienic. -->
-| Severity | Location (`file:line`) | Unused Component / Orphaned Code | Action |
-|----------|------------------------|----------------------------------|--------|
-| `MINOR` / `NIT` | `path/to/utils.py:L15` | {Unused helper function or import} | Remove / deprecate |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Unused Component / Orphaned Code | Action |
+|----------|:-----------:|:--------------:|------------------------|----------------------------------|--------|
+| `MINOR` / `NIT` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/utils.py:L15` | {Unused helper function or import} | Remove / deprecate |
 
 #### Dimension 9: DRY & Architectural Consistency
 <!-- If clean: Architecture and DRY standards maintained. -->
-| Severity | Location (`file:line`) | Duplication / Architectural Drift | Refactoring Recommendation |
-|----------|------------------------|-----------------------------------|----------------------------|
-| `MINOR` / `NIT` | `path/to/views.py:L90` | {Duplicated logic found also in service.py:L30} | Extract to shared helper |
+| Severity | Disposition | Contract Basis | Location (`file:line`) | Duplication / Architectural Drift | Refactoring Recommendation |
+|----------|:-----------:|:--------------:|------------------------|-----------------------------------|----------------------------|
+| `MINOR` / `NIT` | `BLOCKING` / `NON-BLOCKING` | `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY` | `path/to/views.py:L90` | {Duplicated logic found also in service.py:L30} | Extract to shared helper |
 
 ### Grug Compliance (Cross-Cutting Lens)
 
@@ -171,7 +175,7 @@ Report against the **Minimum Grug Reporting Shortlist** in `.agents/rules/grug-p
 | `{3}` | `PASS` / `WARN` / `FAIL` | {Premature factoring finding} | `path/to/file.py:L88` |
 | `{4}` | `PASS` / `WARN` / `FAIL` | {Simple-over-clever finding} | `path/to/file.py:L12` |
 
-> **INFORMATIONAL**: The Grug verdict is informational only and is NOT an independent blocking gate. Actionable Grug violations flow through the existing severity levels (CRITICAL / MAJOR / MINOR) already reported in the 9-dimension detailed findings and Section 4 staged suggestions. A `FAIL` Grug verdict alone does not force `REQUEST_CHANGES`; it only signals complexity concerns to weigh alongside the dimension-level severities.
+> **INFORMATIONAL**: The aggregate Grug verdict is informational only and does **not** independently determine approval. However, Grug rules that prohibit invented requirements and unnecessary machinery **constrain** finding severity, blocking disposition, and remediation scope. A finding cannot block solely on speculative complexity, and its requested fix must be the smallest change that resolves the demonstrated contract deviation or reachable defect. Actionable Grug violations flow through the existing severity levels (CRITICAL / MAJOR / MINOR) and the `BLOCKING` / `NON-BLOCKING` disposition already reported in the 9-dimension detailed findings and Section 4 staged suggestions. A `FAIL` Grug verdict alone does not force `REQUEST_CHANGES`; it only signals complexity concerns to weigh alongside the dimension-level severities and dispositions.
 
 ---
 
@@ -181,6 +185,8 @@ The following actionable findings fall strictly within modified diff hunks and a
 
 ### 1. [{SEVERITY}] [{CLASSIFICATION}]: {Short Title}
 - **Location**: `{file:line}` (in modified diff hunk)
+- **Disposition**: `BLOCKING` / `NON-BLOCKING`
+- **Contract Basis**: `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY`
 - **Problem**: {Detailed failure mode and runtime consequence}
 - **Remediation**: {Concrete fix description}
 
@@ -190,6 +196,8 @@ The following actionable findings fall strictly within modified diff hunks and a
 
 ### 2. [{SEVERITY}] [{CLASSIFICATION}]: {Short Title}
 - **Location**: `{file:start_line-end_line}` (in modified diff hunk)
+- **Disposition**: `BLOCKING` / `NON-BLOCKING`
+- **Contract Basis**: `Criterion #N` / `EXTRA-CONTRACT MERGE-SAFETY` / `ADVISORY`
 - **Problem**: {Detailed failure mode and runtime consequence}
 - **Remediation**: {Concrete fix description}
 
@@ -199,14 +207,20 @@ The following actionable findings fall strictly within modified diff hunks and a
 
 ---
 
-## 5. Out-of-Diff Observations (Demoted from Inline)
+## 5. Out-of-Diff and Non-Blocking Observations
 
-The following valid findings target unmodified lines outside active diff hunks. They have been demoted from inline comments to top-level review observations to guarantee zero Forge API HTTP 422 errors while providing complete engineering feedback:
+> **Placement routing (independent of disposition)**: Section placement does **not** determine disposition — disposition determines the verdict, not placement or technical severity.
+> - `BLOCKING` + in-hunk → Section 4 (eligible for inline publication).
+> - `NON-BLOCKING` + in-hunk → Section 4 only when a concise local suggestion is useful; otherwise Section 5.
+> - Any out-of-hunk finding → Section 5.
+> - Section 5 findings are **never** published as inline comments.
 
-| # | Severity | Classification | Location (`file:line`) | Observation / Defect | Recommended Resolution |
-|---|:--------:|:--------------:|------------------------|----------------------|------------------------|
-| 1 | `MAJOR` | `[SECURITY]` | `path/to/legacy_view.py:L42` | Pre-existing missing permission check on caller | Wrap caller with permission decorator |
-| 2 | `MINOR` | `[PERFORMANCE]` | `path/to/helpers.py:L115` | Pre-existing unindexed queryset lookup | Add database index on lookup column |
+The following valid findings target unmodified lines outside active diff hunks (or are non-blocking observations). They have been demoted from inline comments to top-level review observations to guarantee zero Forge API HTTP 422 errors while providing complete engineering feedback:
+
+| # | Severity | Disposition | Contract Basis | Classification | Location (`file:line`) | Observation / Defect | Recommended Resolution |
+|---|:--------:|:-----------:|:--------------:|:--------------:|------------------------|----------------------|------------------------|
+| 1 | `MAJOR` | `NON-BLOCKING` | `ADVISORY` | `[SECURITY]` | `path/to/legacy_view.py:L42` | Pre-existing missing permission check on caller | Wrap caller with permission decorator |
+| 2 | `MINOR` | `NON-BLOCKING` | `ADVISORY` | `[PERFORMANCE]` | `path/to/helpers.py:L115` | Pre-existing unindexed queryset lookup | Add database index on lookup column |
 
 ---
 
@@ -223,7 +237,7 @@ The following valid findings target unmodified lines outside active diff hunks. 
 ## 6. Recommended Next Steps for Author
 
 - [ ] **Apply Inline Suggestions**: Review and accept/commit the verified inline suggestion blocks on the diff.
-- [ ] **Address Blocking Findings**: Resolve all `CRITICAL` and `MAJOR` issues in Sections 2, 3, and 4.
+- [ ] **Address Blocking Findings**: Address every finding marked `BLOCKING` in Sections 2, 3, and 4. Treat `NON-BLOCKING` findings as optional follow-up unless the contract is clarified to require them.
 - [ ] **Fulfill Missing Criteria**: Complete any `INCOMPLETE`, `DEVIATED`, or `MISSING` Acceptance Criteria identified in Section 1.
 - [ ] **Out-of-Diff Follow-ups**: Create tracking issues for out-of-diff observations listed in Section 5 if outside PR scope.
 - [ ] **Run Test Suite**: Execute full local test suite (`pytest` / `npm test`) to confirm zero regressions.
@@ -234,8 +248,16 @@ The following valid findings target unmodified lines outside active diff hunks. 
 
 ## Verdict Determination Guidelines
 
+The verdict is **contract-led**, determined in the following order:
+
+1. **Contract baseline**: `REQUEST_CHANGES` if any explicit normative acceptance criterion is `INCOMPLETE`, `DEVIATED`, or `MISSING`.
+2. **Merge-safety override**: `REQUEST_CHANGES` only for a **verified** `BLOCKING` finding proving a concrete reachable correctness regression, data-loss / integrity failure, or `CRITICAL` / `HIGH` security vulnerability — even when omitted from the contract.
+3. **Non-blocking findings remain visible** and do not force `REQUEST_CHANGES`, regardless of hypothetical impact severity.
+
+`OPERATIONAL` / `PENDING_EXTERNAL_EVIDENCE` and `AMBIGUOUS` criterion statuses are not code defects and do not by themselves force `REQUEST_CHANGES` (see Section 1 legend). Section placement and technical severity do not determine the verdict — disposition does.
+
 | Verdict | Criteria | Provider Action |
 |---------|----------|-----------------|
-| `APPROVE` | - 100% Acceptance Criteria `VERIFIED`<br>- Zero `CRITICAL` or `MAJOR` findings across Quality and Security audits<br>- All minor/nit suggestions are optional non-blockers | Submit review with `APPROVE` event (`gh pr review --approve` / `glab mr approve`). |
-| `REQUEST_CHANGES` | - Any Acceptance Criteria `INCOMPLETE`, `MISSING`, or `DEVIATED`<br>- One or more `CRITICAL` or `MAJOR` issues in Correctness, Security, Regression, or Data Integrity<br>- Unresolved high-risk security vulnerabilities | Submit review with `REQUEST_CHANGES` event (`gh pr review --request-changes` / `glab mr unapprove`). |
-| `COMMENT` | - Review provides informational analysis, clarification questions, or architectural feedback<br>- No blocking defects identified, but formal sign-off withheld pending author discussion | Submit review with `COMMENT` event (`gh pr review --comment` / `glab mr note`). |
+| `APPROVE` | - No criterion is `INCOMPLETE`, `DEVIATED`, or `MISSING`<br>- Zero `BLOCKING` findings across Quality and Security audits<br>- All required pre-merge gates verified<br>- Non-gating `OPERATIONAL` follow-ups may remain<br>- All non-blocking findings are optional follow-up | Submit review with `APPROVE` event (`gh pr review --approve` / `glab mr approve`). |
+| `REQUEST_CHANGES` | - Any Acceptance Criteria `INCOMPLETE`, `MISSING`, or `DEVIATED` (contract baseline)<br>- A verified `BLOCKING` merge-safety defect: concrete reachable correctness regression, data-loss / integrity failure, or `CRITICAL` / `HIGH` security vulnerability (merge-safety override)<br>- Unresolved high-risk security vulnerabilities that meet the verified reachable bar | Submit review with `REQUEST_CHANGES` event (`gh pr review --request-changes` / `glab mr unapprove`). |
+| `COMMENT` | - Review provides informational analysis, clarification questions, or architectural feedback<br>- No `BLOCKING` findings identified, but formal sign-off withheld pending author discussion<br>- `OPERATIONAL` / `AMBIGUOUS` criteria present where evidence is a required pre-merge gate | Submit review with `COMMENT` event (`gh pr review --comment` / `glab mr note`). |

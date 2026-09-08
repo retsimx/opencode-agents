@@ -67,6 +67,9 @@ When commenting on a range of lines (using GitHub multi-line comment ranges `sta
 ### Template 1: Code Suggestion (Single / Multi-Line)
 
 ````markdown
+**Disposition**: BLOCKING | NON-BLOCKING
+**Contract basis**: Criterion #N | Extra-contract merge-safety defect | Advisory
+
 **{TAG}**: {Concise issue summary}
 
 {Detailed explanation of why the current implementation is flawed, including runtime flow or failure scenario.}
@@ -81,6 +84,9 @@ When commenting on a range of lines (using GitHub multi-line comment ranges `sta
 ### Template 2: Conceptual Note / Question (No Replacement Block)
 
 ````markdown
+**Disposition**: BLOCKING | NON-BLOCKING
+**Contract basis**: Criterion #N | Extra-contract merge-safety defect | Advisory
+
 **{TAG}**: {Topic summary}
 
 {Clear explanation of the concern, architectural tradeoff, or missing edge case.}
@@ -89,6 +95,13 @@ When commenting on a range of lines (using GitHub multi-line comment ranges `sta
 - {Actionable item 1}
 - {Actionable item 2}
 ````
+
+### Template 3: Language Rule (Merge-Gating vs Advisory Wording)
+
+The `**Disposition**` line determines the language of the comment body:
+
+- **BLOCKING** findings use imperative merge-gating language (e.g. "must fix before merge", "this must be corrected"). They MUST cite their contract basis: either the violated criterion (`Criterion #N`) or a complete extra-contract merge-safety basis (current-head `file:line` evidence, reachable execution path, material impact, and smallest local remediation).
+- **NON-BLOCKING** findings use advisory language (e.g. "consider", "recommend", "worth reviewing"). They MUST NOT use imperative merge-gating language such as "must fix before merge". They MUST NOT prescribe architecture or policy broader than the evidenced problem; the recommendation must stay scoped to the concrete issue described.
 
 ---
 
@@ -100,11 +113,14 @@ When commenting on a range of lines (using GitHub multi-line comment ranges `sta
 **Target Range**: Lines 42-45
 
 ````markdown
+**Disposition**: BLOCKING
+**Contract basis**: Criterion #3
+
 **[BUG]**: Unhandled `None` return from `get_active_term()` causes `AttributeError` when scheduling outside term dates.
 
-When `get_active_term(target_date)` returns `None` (e.g. during school holidays), accessing `term.max_daily_sessions` raises an unhandled `AttributeError` instead of returning an empty slot collection.
+When `get_active_term(target_date)` returns `None` (e.g. during school holidays), accessing `term.max_daily_sessions` raises an unhandled `AttributeError` instead of returning an empty slot collection. This deviates from Criterion #3, which requires the schedule view to render for any valid date.
 
-**Impact**: Schedule view crashes with HTTP 500 for parents viewing holiday weeks.
+**Impact**: Schedule view crashes with HTTP 500 for parents viewing holiday weeks. This must be fixed before merge.
 
 ```suggestion
     term = get_active_term(target_date)
@@ -122,11 +138,14 @@ When `get_active_term(target_date)` returns `None` (e.g. during school holidays)
 **Target Range**: Line 88
 
 ````markdown
+**Disposition**: BLOCKING
+**Contract basis**: Criterion #5
+
 **[BUG]**: Using `timezone.now().date()` causes off-by-one day calculation errors for users in positive UTC offsets.
 
-`timezone.now().date()` extracts the calendar date from the UTC timestamp rather than the configured project timezone (`settings.TIME_ZONE`). Between midnight and the local UTC offset (e.g., 00:00-10:00 AEST), this resolves to yesterday's date.
+`timezone.now().date()` extracts the calendar date from the UTC timestamp rather than the configured project timezone (`settings.TIME_ZONE`). Between midnight and the local UTC offset (e.g., 00:00-10:00 AEST), this resolves to yesterday's date, deviating from Criterion #5 which requires today's sessions to be treated as current.
 
-**Impact**: Sessions scheduled for today are incorrectly flagged as past sessions during morning hours.
+**Impact**: Sessions scheduled for today are incorrectly flagged as past sessions during morning hours. This must be fixed before merge.
 
 ```suggestion
     today = timezone.localdate()
@@ -141,11 +160,14 @@ When `get_active_term(target_date)` returns `None` (e.g. during school holidays)
 **Target Range**: Lines 134-138
 
 ````markdown
+**Disposition**: BLOCKING
+**Contract basis**: Extra-contract merge-safety defect
+
 **[SECURITY]**: Insecure Direct Object Reference (IDOR) allows any authenticated parent to view other families' invoices.
 
-The invoice lookup retrieves the invoice solely by primary key (`pk=invoice_id`) from the global `Invoice.objects` manager without scoping by `request.user.parent_profile`. An authenticated user can enumerate invoice IDs to access sensitive financial details and student records belonging to other users.
+The invoice lookup retrieves the invoice solely by primary key (`pk=invoice_id`) from the global `Invoice.objects` manager without scoping by `request.user.parent_profile`. An authenticated user can enumerate invoice IDs to access sensitive financial details and student records belonging to other users. This is an extra-contract merge-safety defect: reachable via ordinary authenticated requests (`tutoring/views.py:134-138`), with material data-exposure impact and a smallest local remediation below. Merge is unsafe without it.
 
-**Impact**: High severity authorization bypass / data exposure.
+**Impact**: High severity authorization bypass / data exposure. This must be fixed before merge.
 
 ```suggestion
     invoice = get_object_or_404(
@@ -164,13 +186,37 @@ The invoice lookup retrieves the invoice solely by primary key (`pk=invoice_id`)
 **Target Range**: Lines 60-65
 
 ````markdown
+**Disposition**: NON-BLOCKING
+**Contract basis**: Advisory
+
 **[PERFORMANCE]**: Synchronous email dispatch inside the HTTP request loop blocks the worker process.
 
-`send_booking_confirmation_email(booking)` connects synchronously to the SMTP server inside the view transaction. If the mail gateway encounters latency or network timeout, the client request remains locked, exhausting gunicorn worker capacity under load.
+`send_booking_confirmation_email(booking)` connects synchronously to the SMTP server inside the view transaction. If the mail gateway encounters latency or network timeout, the client request remains locked, exhausting gunicorn worker capacity under load. This does not violate any acceptance criterion, so it is advisory and non-blocking.
 
 **Recommendation / Consideration**:
-- Offload the email delivery task to the Celery / background worker queue (`send_booking_confirmation_email_task.delay(booking.id)`).
-- Ensure the booking transaction commits before dispatching the background notification task to prevent race conditions where the worker reads uncommitted state.
+- Consider offloading the email delivery task to the Celery / background worker queue (`send_booking_confirmation_email_task.delay(booking.id)`).
+- Consider ensuring the booking transaction commits before dispatching the background notification task to prevent race conditions where the worker reads uncommitted state.
+````
+
+---
+
+### Example 5: Non-Blocking Observation (Scoped Advisory Wording)
+
+**File**: `tutoring/services/slot_calculator.py`  
+**Target Range**: Lines 90-95
+
+````markdown
+**Disposition**: NON-BLOCKING
+**Contract basis**: Advisory
+
+**[NOTE]**: The slot window size is hard-coded as a module-level constant.
+
+The value is repeated in two call sites rather than shared. This is a minor readability concern and does not affect correctness or any acceptance criterion.
+
+**Recommendation / Consideration**:
+- Consider extracting the constant to a single shared definition if it is reused again.
+
+This is advisory only; it does not need to be fixed before merge.
 ````
 
 ---
@@ -182,3 +228,6 @@ Before formatting and submitting inline review comments, ensure:
 - [ ] The suggestion is syntactically valid and imports all referenced identifiers.
 - [ ] No local workstation directories or private agent execution context are present.
 - [ ] Line numbers match the new side (`RIGHT` / `new_line`) of the diff hunk.
+- [ ] Every comment carries `**Disposition**` and `**Contract basis**` metadata lines.
+- [ ] BLOCKING comments use imperative merge-gating language and cite their criterion or complete extra-contract merge-safety basis.
+- [ ] NON-BLOCKING comments use advisory language with no "must fix before merge" wording and no broader architecture or policy prescription.

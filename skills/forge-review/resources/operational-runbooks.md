@@ -129,10 +129,11 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│             Subagent 4: 5-Check Verification Runbook                         │
+│             Subagent 4: 6-Check Verification Runbook                         │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ Step 1: Ingestion & Inventory                                                │
 │   - Load RAW_REVIEW_FILE (.agents/results/raw-findings-pr-*.md)              │
+│   - Load SPEC_FILE (spec-issue.md) as the adjudication contract             │
 │   - Parse Acceptance Criteria matrix, 9-dimension issues, & comments         │
 │   - Index candidate findings by (file, start_line, line)                     │
 ├──────────────────────────────────────────────────────────────────────────────┤
@@ -141,7 +142,7 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 │   - Verify defect existence in AST and runtime context                       │
 │   - Action: DROP finding if hallucinated, already handled, or refuted        │
 │   - Provenance gate: every finding MUST cite a current-head file:line;       │
-│     no citation -> DEMOTE to Section 5 (Out-of-Diff) or DROP                 │
+│     no citation -> DEMOTE to Section 5 (Out-of-Diff & Non-Blocking) or DROP │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ Step 3: Check 2 — Diff Hunk Line Bounds & 422 Demotion                       │
 │   - Parse DIFF_FILE hunk boundaries (@@ -a,b +c,d @@)                        │
@@ -162,7 +163,14 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 │   - Strictly enforce: NEVER drop Subagent 3 security findings                │
 │   - Annotate with verified exploit reachability context                      │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ Step 7: Final Review Emission                                                │
+│ Step 7: Check 6 — Contract Grounding & Merge Disposition                    │
+│   - Classify each finding BLOCKING / NON-BLOCKING against SPEC_FILE         │
+│   - BLOCKING iff explicit criterion INCOMPLETE/DEVIATED/MISSING OR         │
+│     verified extra-contract merge-safety defect (current-head proof,        │
+│     reachable path, material impact, smallest remediation)                 │
+│   - Derive final verdict from contract baseline + merge-safety override    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Step 8: Final Review Emission                                                │
 │   - Write verified deliverable to OUTPUT_FILE (review-template.md)           │
 │   - Guarantee full 6-section uncollapsed rich markdown structure             │
 │   - Output standard 4-line chat completion summary with metrics              │
@@ -173,17 +181,18 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 
 1. **Step 1: Ingestion & Inventory**:
    - Ingest `RAW_REVIEW_FILE` and extract all candidate findings, inline suggestions, and Acceptance Criteria rows.
+   - Ingest `SPEC_FILE` (`spec-issue.md`) as the adjudication contract. When it contains no normative acceptance criteria (standalone PR / branch modes), use `NO_NORMATIVE_CONTRACT` as the contract basis — never invent criteria from PR prose.
    - Record baseline counts: `raw_ac_count`, `raw_finding_count`, `raw_inline_count`.
 
 2. **Step 2: Check 1 — Ground Truth Fact-Checking**:
    - Read the real repository source code at each cited location.
    - Test logic claims against surrounding imports, helper functions, and class definitions.
-   - *Provenance gate*: Every finding must cite a `file:line` that exists in the current head. Any finding without a current-head citation is auto-demoted to Section 5 (Out-of-Diff Observations) or dropped.
+   - *Provenance gate*: Every finding must cite a `file:line` that exists in the current head. Any finding without a current-head citation is auto-demoted to Section 5 (Out-of-Diff and Non-Blocking Observations) or dropped.
    - *Drop Condition*: If a finding claims a function lacks null-checking, but an upstream guard or framework middleware guarantees non-null execution, DROP the finding and document the refutation in the internal verification log.
 
 3. **Step 3: Check 2 — Diff Hunk Line Bounds & 422 Error Prevention**:
    - Parse `diff-pr.patch` to compute exact hunk boundaries: `[start_line, start_line + line_count]`.
-   - *Demotion Rule*: If a finding identifies a valid bug on an unmodified line outside the PR diff, DO NOT attach it as an inline comment (which causes HTTP 422 Unprocessable Entity from GitHub/GitLab). Instead, DEMOTE the finding to Section 5 (Out-of-Diff Observations) of the top-level review body (`review-template.md`).
+   - *Demotion Rule*: If a finding identifies a valid bug on an unmodified line outside the PR diff, DO NOT attach it as an inline comment (which causes HTTP 422 Unprocessable Entity from GitHub/GitLab). Instead, DEMOTE the finding to Section 5 (Out-of-Diff and Non-Blocking Observations) of the top-level review body (`review-template.md`).
 
 4. **Step 4: Check 3 — Suggestion Syntax & Indentation Normalization**:
    - Validate every ` ```suggestion ` block:
@@ -194,18 +203,41 @@ Subagent 4 acts as the quality assurance engine and false-positive firewall befo
 5. **Step 5: Check 4 — Cross-Specialist Deduplication & Severity Calibration**:
    - Identify overlapping reports (e.g. QA notes missing error handling and Deep Review flags unhandled exception on the same line).
    - Merge duplicates into a single authoritative finding, combining both criteria alignment and code quality rationale.
-   - Recalculate overall verdict:
-     - 🔴 `REQUEST_CHANGES`: Any verified `CRITICAL` / `HIGH` defect or `INCOMPLETE` / `DEVIATED` Acceptance Criterion.
-     - 🟡 `COMMENT`: Only `MEDIUM` / `LOW` findings.
-     - 🟢 `APPROVE`: All Acceptance Criteria `VERIFIED`, zero blocking defects.
+   - Calibrate technical severity: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `NIT`.
+   - Technical severity alone does NOT determine the verdict. Blocking disposition and the final verdict are decided in Check 6 (Contract Grounding & Merge Disposition).
 
 6. **Step 6: Check 5 — Immutable Security Pass-Through Invariant**:
-   - **MANDATORY INVARIANT**: Subagent 4 is strictly prohibited from dropping, suppressing, or downgrading vulnerabilities identified by Subagent 3 (`security-agent`).
+   - **MANDATORY INVARIANT**: Subagent 4 is strictly prohibited from dropping, suppressing, silently discarding, or overwriting the original detector severity of vulnerabilities identified by Subagent 3 (`security-agent`). Check 5 overrides Check 1 for Subagent 3 findings: an unverified security finding remains represented in Section 2 rather than being silently dropped.
    - If Subagent 4 verifies an exploit path is difficult to trigger, it may add an explanatory reachability note, but the security finding MUST remain in the final review.
+   - Preserve the original detector severity and provenance; add verified severity, reachability, confidence, and disposition as separate fields. Only a verified, reachable `CRITICAL` / `HIGH` vulnerability blocks.
 
-7. **Step 7: Final Review Emission**:
+7. **Step 7: Check 6 — Contract Grounding & Merge Disposition**:
+   - Classify every finding as `BLOCKING` or `NON-BLOCKING` against `SPEC_FILE`.
+   - A finding is `BLOCKING` iff either:
+     1. It proves an explicit normative acceptance criterion is `INCOMPLETE`, `DEVIATED`, or `MISSING`; **or**
+     2. It proves an **extra-contract merge-safety defect** meeting ALL of: current-head `file:line` evidence; a concrete reachable execution path; reachability through supported inputs / ordinary concurrency / a realistic trust boundary; material user / data-integrity / availability / security impact; a smallest local remediation; and an explanation of why merge is unsafe without the fix.
+   - Everything else is `NON-BLOCKING`. Non-blocking findings remain visible with their technical severity and follow-up; "non-blocking" does not mean "no value".
+   - Derive the final verdict from the contract baseline first, then the merge-safety override:
+     - 🔴 `REQUEST_CHANGES`: at least one `BLOCKING` finding (an explicit criterion `INCOMPLETE` / `DEVIATED` / `MISSING`, or a verified `BLOCKING` merge-safety defect).
+     - 🟡 `COMMENT`: no `BLOCKING` finding, but required pre-merge gate evidence is unavailable, or an `OPERATIONAL` / `AMBIGUOUS` criterion needs a comment or deployment follow-up.
+     - 🟢 `APPROVE`: no criterion is `INCOMPLETE`, `DEVIATED`, or `MISSING`, no `BLOCKING` finding exists, and required pre-merge gates are verified. Non-gating `OPERATIONAL` follow-ups may remain.
+   - Verify the proposed remediation for every blocker is no broader than necessary (smallest local remediation).
+
+8. **Step 8: Final Review Emission**:
    - Write the pristine verified review artifact to `OUTPUT_FILE` (`.agents/results/review-pr-{PR_NUMBER}-{SESSION_ID}.md` or `.agents/results/forge-review/<sessionId>/review-pr-{PR_NUMBER}-verified.md`).
-   - Guarantee that all 6 sections (Acceptance Criteria Matrix, Dedicated Security Audit, 9-Dimension Quality Scorecard, Staged Inline Diff Suggestions, Out-of-Diff Observations, and Author Next Steps) are fully populated with complete markdown tables, exact `file:line` proof citations, exploit traces, and complete ` ```suggestion ` replacement blocks without placeholder abbreviations or summarized omissions.
+   - Guarantee that all 6 sections (Acceptance Criteria Matrix, Dedicated Security Audit, 9-Dimension Quality Scorecard, Staged Inline Diff Suggestions, Out-of-Diff and Non-Blocking Observations, and Author Next Steps) are fully populated with complete markdown tables, exact `file:line` proof citations, exploit traces, and complete ` ```suggestion ` replacement blocks without placeholder abbreviations or summarized omissions.
+
+9. **Placement Routing Rule (independent of disposition)**:
+   - `BLOCKING` + in-hunk: Section 4 and eligible for inline publication.
+   - `NON-BLOCKING` + in-hunk: Section 4 only when a concise local suggestion is useful; otherwise Section 5.
+   - Any out-of-hunk finding: Section 5.
+   - Section 5 findings are never published as inline comments.
+   - Disposition, not section placement or technical severity, determines the verdict.
+
+10. **NO_NORMATIVE_CONTRACT Mode (standalone PR / branch reviews)**:
+   - When `SPEC_FILE` contains no normative acceptance criteria, use `NO_NORMATIVE_CONTRACT` as the contract basis for every finding.
+   - In this mode there is no contract baseline; the verdict is determined only by verifier-confirmed merge-safety defects, required repository gates, and unresolved evidence.
+   - Do NOT invent acceptance criteria from PR prose.
 
 ---
 
@@ -251,6 +283,8 @@ glab api \
 ## 4. GitHub Atomic Batch Review Payload Reference & Submission Protocol
 
 When publishing reviews to GitHub Pull Requests via `gh api`, submit the top-level review markdown and all inline diff comments atomically in a single REST payload (`POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews`):
+
+> **Event from final verdict**: The `event` field (`APPROVE` / `REQUEST_CHANGES` / `COMMENT`) is derived from the verifier's final verdict in Check 6 — never from raw detector severity. A `CRITICAL` / `HIGH` detector finding does not by itself select `REQUEST_CHANGES`; only a `BLOCKING` disposition (explicit criterion `INCOMPLETE` / `DEVIATED` / `MISSING` or a verified merge-safety defect) does. The example below shows `REQUEST_CHANGES` because that is the verifier's final verdict for this review.
 
 ### GitHub REST API Review Payload Schema:
 
@@ -325,14 +359,14 @@ This runbook defines the mandatory operational protocol for the Orchestrator dur
      - **Section 2: Dedicated Security & Threat Model Audit (Subagent 3 Zero-Trust Pass)**: Threat Model Matrix across all 6 threat vectors with Exploit Scenarios, Impact Analysis, and precise Remediations.
      - **Section 3: 9-Dimension Code Quality & Architecture Audit Scorecard (Subagent 2 Deep Review)**: 9-Dimension status matrix and detailed findings tables per dimension.
      - **Section 4: Staged Inline Diff Suggestions & Detailed Remediation (Subagent 4 Verified)**: Verified findings formatted with Badge + Location (`file:line`) + Problem + Remediation + ` ```suggestion ` replacement code blocks.
-     - **Section 5: Out-of-Diff Observations (Demoted from Inline)**: Table of valid defects on untouched lines outside PR diff hunks.
+     - **Section 5: Out-of-Diff and Non-Blocking Observations**: Table of valid observations on untouched lines outside PR diff hunks, plus in-diff but non-blocking defensive or architectural observations. Never published as inline comments.
      - **Section 6: Recommended Next Steps for Author**: Actionable checklist for the PR author.
 
 2. **Step 2: Complete Uncollapsed Chat Presentation Mandate**:
    - **Mandatory Direct Output**: The Orchestrator MUST print the **complete, untruncated, uncollapsed markdown contents of the verified review deliverable directly to the chat window** before asking the user.
    - **Chat as the Authoritative Communication Channel**: In accordance with Anti-Context-Dilution and Communication Policy (Rule 3.1 & Rule 3.3), chat is the authoritative communication channel. Users must never be required or expected to open local artifact files, inspect external links, or decipher truncated one-liners to discover review findings, acceptance criteria matrices, or diff suggestions.
    - **Strict Prohibitions**:
-     - ❌ **FORBIDDEN**: Summarizing rich markdown tables (Acceptance Criteria, Threat Model, 9-Dimension Quality Scorecard, Out-of-Diff Observations) into abbreviated bullet points or high-level one-liners (e.g. writing "All criteria passed" instead of printing the full table).
+     - ❌ **FORBIDDEN**: Summarizing rich markdown tables (Acceptance Criteria, Threat Model, 9-Dimension Quality Scorecard, Out-of-Diff and Non-Blocking Observations) into abbreviated bullet points or high-level one-liners (e.g. writing "All criteria passed" instead of printing the full table).
      - ❌ **FORBIDDEN**: Replacing Section 4 inline diff suggestions or ` ```suggestion ` blocks with descriptive summaries or file citations (e.g. writing "2 suggestions staged in file.py; see report for details").
      - ❌ **FORBIDDEN**: Emitting only artifact path links or high-level verdicts without printing the underlying markdown sections.
    - **Presentation Completeness Invariant**: Every table row, status badge, code location citation (`file:line`), detailed exploit path, problem description, remediation rationale, and ` ```suggestion ` block MUST be rendered in chat exactly as generated in the verified deliverable.
