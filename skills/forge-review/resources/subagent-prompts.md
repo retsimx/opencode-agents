@@ -8,6 +8,8 @@ All heavy inputs (`DIFF_FILE`, `SPEC_FILE`, `PR_CONTEXT_FILE`, `RAW_REVIEW_FILE`
 
 ## 1. Subagent 0: `context-ingestion` (Context Ingestion & Sanitization Specialist)
 
+> **Dispatch type (HARD OVERRIDE)**: Subagent 0 MUST be dispatched with the `general` subagent type (`subagent_type="general"`), overriding any default that routes all subagents to a high-power model (e.g. `m365gpt`). Subagent 0 is mostly mechanical (forge CLI, shell, file writes) and does not need a high-power model; a smaller, faster `general` subagent is sufficient and more reliable. This override applies ONLY to Subagent 0; Subagents 1–4 follow the default dispatch type.
+
 ```json
 {
   "TypeName": "self",
