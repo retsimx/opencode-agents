@@ -139,14 +139,37 @@ glab api projects/:encoded-path
 
 ## Local CI config discovery
 
-When a skill must mirror remote CI locally, prefer the file that matches the provider:
+When a skill must run checks locally, use this order and never invent a runner
+or install tooling:
 
-| Provider | Primary config | Also check |
-|----------|----------------|------------|
-| GitHub | `.github/workflows/*.yml` | project docs / `AGENTS.md` |
-| GitLab | `.gitlab-ci.yml` | project docs / `AGENTS.md` |
+1. A command named in repository guidance, if locally executable without extra
+   secrets or installs.
+2. A script named by that repository's CI config, if locally executable without
+   extra secrets or installs.
+3. Otherwise no local suite — rely on forge checks.
 
-If both exist, use the provider that matched `origin`. Always also follow project-local verify scripts named in `AGENTS.md` / skill resources.
+CI config files (for step 2 only): GitHub `.github/workflows/*.yml`; GitLab
+`.gitlab-ci.yml`. If both exist, use the provider that matched `origin`.
+
+## Gardener-only forge operations
+
+These rows are for gardener skills. They do **not** replace the Create draft PR
+or Merge rows above (other skills still use those).
+
+Resolve the default branch once (`gh repo view --json defaultBranchRef` /
+GitLab project `default_branch`). Never hardcode `main` in gardener flows.
+
+| Operation | GitHub (`gh`) | GitLab (`glab`) |
+|-----------|---------------|-----------------|
+| Resolve default branch | `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` | `glab api projects/:encoded-path` → `.default_branch` |
+| Same-repo head? | `gh pr view N --json headRepository,isCrossRepository` (`isCrossRepository == false`) | `glab api projects/:pid/merge_requests/:iid` → source project id equals target project id |
+| Head SHA | `gh pr view N --json headRefOid --jq .headRefOid` | MR `.sha` |
+| Create gardener draft | `gh pr create --draft --base <default> --title "..." --body-file PATH` | `glab mr create --draft --target-branch <default> --title "..." --description "$(cat PATH)"` |
+| Close PR | `gh pr close N` | `glab mr close N` |
+| Gardener squash-merge (expected head) | `gh pr merge N --squash --delete-branch --match-head-commit <sha>` | `glab api -X PUT projects/:pid/merge_requests/:iid/merge -f squash=true -f should_remove_source_branch=true -f sha=<head>` |
+| Failed check logs | `gh run view <id> --log-failed` when the check is a GitHub Actions run; otherwise `gh pr checks N` / check details URL | `glab api projects/:pid/pipelines/:pipeline_id/jobs` then job trace |
+
+If the expected-head merge command cannot be issued, gardener-harvest must not merge.
 
 ## Merge strategy defaults (when a skill merges)
 

@@ -1,34 +1,79 @@
 # Gardener Tend — Worktree Isolation (FATAL)
 
-**Any modification to the main repository checkout is a FATAL ERROR.**
+**Any modification of tracked project source in `MAIN_REPO` is a FATAL ERROR.**
+
+Registry/intent writes under `CONTROL_ROOT` are allowed even when
+`CONTROL_ROOT` lives inside `MAIN_REPO`.
 
 ## Definitions
 
-- `MAIN_REPO` — the primary git checkout (where `.git` lives and `git worktree add` is run from)
-- `WORKTREE` — the iteration-specific path, e.g. `/tmp/wt-<pr-number>`
+| Name | Meaning |
+|------|---------|
+| `MAIN_REPO` | Primary git checkout (forge + `git worktree add` cwd) |
+| `CONTROL_ROOT` | Agent pack root containing `skills/gardener-sow` |
+| `WORKTREE` | `$CONTROL_ROOT/worktrees/gardener-<run-id>` |
+| `run-id` | Unique id for this tend action (prefer PR's `gardener/run-…` suffix) |
 
 ## Rules
 
-1. Every subagent MUST receive `WORKTREE` (absolute path) when a worktree exists.
-2. Every subagent MUST `cd "$WORKTREE"` before any file read, edit, write, or command.
-3. Subagents MUST NOT edit, stage, commit, or run tests in `MAIN_REPO`.
-4. `git worktree add` from `MAIN_REPO` does NOT require a clean main checkout — a dirty main is allowed.
-5. WORKTREE_SETUP and WORKTREE_CLEANUP run from `MAIN_REPO` only for `git worktree` commands — they MUST NOT modify tracked files in `MAIN_REPO`.
+1. Every source-changing subagent receives absolute `MAIN_REPO`, `CONTROL_ROOT`,
+   and `WORKTREE`, and must `cd "$WORKTREE"` before read/edit/test of project
+   source.
+2. Subagents must not edit, stage, commit, or run project checks in `MAIN_REPO`.
+3. `git worktree add` from `MAIN_REPO` does **not** require a clean main
+   checkout.
+4. SETUP/CLEANUP may run `git fetch`, `git worktree add|remove|prune` from
+   `MAIN_REPO` without modifying tracked project files.
+5. Capture the remote head SHA before content work. Push only with
+   `--force-with-lease` against that SHA.
+6. All rebase/commit operations are non-interactive (`GIT_EDITOR=true`,
+   `GIT_SEQUENCE_EDITOR=true`).
+
+## Setup
+
+From `MAIN_REPO`:
+
+```bash
+git fetch origin "<default-branch>" "<pr-branch>"
+mkdir -p "$CONTROL_ROOT/worktrees"
+git worktree add "$WORKTREE" "origin/<pr-branch>"
+# or: git worktree add -b <pr-branch> "$WORKTREE" origin/<pr-branch>
+```
+
+Record `worktree_path` on the tend intent before mutating the worktree.
+
+## Cleanup
+
+After a completed action (or on abandon with no remote effect):
+
+```bash
+git worktree remove --force "$WORKTREE"   # when safe
+git worktree prune
+```
+
+On skill **entry**, remove every `$CONTROL_ROOT/worktrees/gardener-*` path that
+is **not** `intent.worktree_path`.
 
 ## Fatal error
 
-If any subagent detects it modified files outside `WORKTREE`, or ran destructive git operations on `MAIN_REPO` (checkout, commit, reset, clean on tracked files), return immediately:
+If a subagent modifies files outside `WORKTREE` (except allowed `CONTROL_ROOT`
+state/intent), or runs destructive git on `MAIN_REPO` tracked files:
 
-`FATAL|main_modified|<detail>`
+```text
+FATAL|main_modified|<detail>
+```
 
-## Allowed in MAIN_REPO (SETUP/CLEANUP only)
+Stop the invocation; report the path; do not push.
 
-- `git fetch origin main`
-- `git worktree add`, `git worktree remove`, `git worktree prune`
-- Reading PR status via forge CLI (`gh` / `glab` per `.agents/skills/_shared/runtime/providers.md`)
+## Allowed in MAIN_REPO
+
+- `git fetch`
+- `git worktree add|remove|list|prune`
+- Forge CLI reads/mutations that do not edit local project source
+- Atomic writes to `$CONTROL_ROOT/state/gardener/*` when `CONTROL_ROOT ⊆ MAIN_REPO`
 
 ## Prohibited in MAIN_REPO
 
-- `git checkout -- .`, `git clean`, `git commit`, `git push`
-- `edit` / `write` on any source file under `MAIN_REPO`
-- Running tests, ruff, or coverage in `MAIN_REPO`
+- Checkout/commit/reset/clean that changes tracked project files
+- Editing project source files
+- Running discovered local check suites against `MAIN_REPO` instead of `WORKTREE`

@@ -1,161 +1,255 @@
-# Execution Protocol
+# Gardener Harvest — Execution Protocol
 
-Runtime behaviour for the gardener-harvest skill. The skill is pure
-read-only against PRs (no push, no rebase, no CI fixing). This document covers
-state, batching, parallelism, rate limits, drafts, large diffs, and branch
-verification.
+Normative runtime detail for `gardener-harvest`. Load with
+`gardener-contract.md`, `gardener-state.md`, and shared `providers.md`.
 
-**Forge CLI commands:** use
-`.agents/skills/_shared/runtime/providers.md`
-(also stubbed at `.agents/skills/gardener-harvest/resources/providers.md`). Do not invent provider-specific
-commands outside that map.
+Forge commands: only
+`.agents/skills/_shared/runtime/providers.md` (stub:
+`.agents/skills/gardener-harvest/resources/providers.md`).
 
-## State file
+## Paths
 
-**Path:** `.agents/results/pr-merge-queue.json`
+| Name | Value |
+|------|--------|
+| `CONTROL_ROOT` | Walk parents of this skill until `skills/gardener-sow` exists |
+| `MAIN_REPO` | Target git repository (cwd for forge + git) |
+| `RUN_DIR` | `$CONTROL_ROOT/results/tmp/pr-harvest/<run-id>/` |
+| State | `$CONTROL_ROOT/state/gardener/{open,closed,intent}.json` |
 
-**Schema:**
+`run-id` must be unique per incomplete capture (UTC timestamp + optional suffix).
+
+## Entry cleanup
+
+1. If intent `skill` is another gardener skill → stop; report it.
+2. Worktree cleanup (same pin as sow/tend): remove
+   `$CONTROL_ROOT/worktrees/gardener-*` paths that are **not**
+   `intent.worktree_path`. No intent / empty path → remove all such paths.
+3. Delete every directory under `$CONTROL_ROOT/results/tmp/pr-harvest/` whose
+   path is **not** equal to `intent.run_dir`. No intent / empty `run_dir` →
+   delete all of them.
+4. Validate `closed.json` (stop if present but invalid). Rebuild `open.json`
+   if absent/invalid/wrong repo.
+5. If `skill == "harvest"` and `intent.json` exists → reconcile (below), then
+   **exit**. Do not SELECT.
+
+## Intent operations
+
+Allowed harvest operations only:
+
+- `harvest_merge`
+- `harvest_needs_fix`
+- `harvest_close`
+
+Write intent **immediately before** the forge effect. Fields at minimum:
 
 ```json
 {
-  "last_run": "2026-07-18T09:00:00Z",
-  "provider": "github",
-  "processed": [
-    {"number": 1678, "outcome": "merged", "task_id": "ses_<assessment subagent id>"},
-    {"number": 1677, "outcome": "skipped", "reason": "high_risk", "task_id": "ses_<assessment subagent id>"},
-    {"number": 1676, "outcome": "asked", "user_decision": "skip", "task_id": "ses_<assessment subagent id>"},
-    {"number": 1675, "outcome": "skipped", "reason": "draft"},
-    {"number": 1674, "outcome": "skipped", "reason": "ci_pending"},
-    {"number": 1673, "outcome": "skipped", "reason": "merge_failed"}
-  ]
+  "skill": "harvest",
+  "repository": "provider-host/owner/project",
+  "operation": "harvest_merge",
+  "subject": "42",
+  "expected_result": "PR 42 MERGED; source branch delete requested",
+  "worktree_path": "",
+  "run_dir": "/abs/path/to/pr-harvest/<run-id>",
+  "run_id": "<run-id>",
+  "pr_number": 42,
+  "head_sha": "<assessed head>",
+  "base_sha": "<assessed base>"
 }
 ```
 
-**Subagent Dispatch Gate:** Every PR that reaches DECIDE MUST have been assessed by a spawned subagent whose harness-returned `task_id` is recorded in its `processed` entry and whose report is non-empty. Apply the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`) before DECIDE for each assessed PR. A PR assessed inline by the orchestrator (no recorded `task_id`) MUST NOT be decided — re-dispatch the assessment subagent.
+Delete intent only after the **whole** expected result is verified.
 
-**Behaviour:**
-- On Entry: load state file (create the directory and empty file if missing).
-- Skip any PR whose number already appears in `processed`.
-- After each PR decision, append to `processed` and save the file.
-- At FINALIZE, leave the file on disk. The user can archive it manually between runs (or move it aside to re-process every PR).
-- The state file is the only persistent local mutation the skill performs. PRs are never mutated.
+### Reconcile on entry
 
-## Scale: fetching all open PRs
+Query forge/git before retrying.
 
-- **GitHub**: `gh pr list --state open --json number,title,headRefName,createdAt,isDraft --limit 1000`. The `--limit` flag MUST be explicit — the default is 30 and silently under-fetches.
-  - Above 1000 open PRs: `--limit 5000`, or paginate via `gh api 'search/issues?q=is:pr+is:open+repo:<owner>/<repo>&sort=created&order=asc&per_page=100&page=N'` until a page returns 0 items.
-- **GitLab**: `glab api "projects/:pid/merge_requests?state=opened&per_page=100&page=N"`, page until a request returns 0 results.
-- After fetch, always re-sort client-side by `createdAt` ascending so the oldest PR is processed first.
-- Then filter drafts (`isDraft == false` on GitHub; `draft == false || work_in_progress == false` on GitLab) and any PR number already in the state file's `processed` list.
-- Log the total count of remaining PRs to process before starting the first batch. This is the user's main signal of scope.
+**harvest_merge**
 
-## Parallel assessment batching
+- Already merged → verify requested source-branch deletion (404 OK; if still
+  present report `merged_branch_not_deleted` — never delete manually), remove
+  open-cache entry, clear intent.
+- Still open and recorded base/head SHAs still match → retry pinned expected-head
+  merge once.
+- Still open and either SHA changed → verify no merge occurred, clear stale
+  intent, treat as `SKIP` for this invocation, **exit** (do not SELECT).
 
-- Default batch size: 5 subagent assessments spawned in parallel.
-- **Scale rules — DO NOT spawn hundreds of subagents at once:**
-  - 1–20 PRs total: batch size 5
-  - 21–100 PRs total: batch size 5
-  - 101–500 PRs total: batch size 3
-  - > 500 PRs total: batch size 2
-- Apply the merge gate sequentially in oldest-first order once a batch reports back.
-- After merging a PR, the next batch starts. Never merge out of creation-date order even when reports arrive out of order.
-- If a subagent task fails or times out, treat that PR as `skipped: subagent_failed` — do not block the rest of the batch, do not retry, do not investigate.
+**harvest_needs_fix**
 
-## Batched ASK pattern
+- Recorded SHAs still match → query comments for `<!-- gardener -->` and
+  equivalent fix text; add comment only if absent; then clear intent when
+  comment present.
+- SHA changed → clear stale no-effect intent; `SKIP`; **exit**.
 
-- Accumulate all ASK-classified PRs across the current pass.
-- After all assessment batches for the pass finish, present the accumulated ASKs in ONE `question` tool call (with `multiple: true`) letting the user multi-select which to proceed with.
-- Chunk the question into batches of **≤ 10 PRs per call**. If more than 10 ASKs accumulate, issue successive `question` calls of 10 each until all have been presented. Do not present a single giant question.
-- Each option label is `#<n> <title>` (1–5 words). The option description includes the subagent report's risk + behavior change + confidence + top concern summary.
-- Merge each selected PR in turn (oldest first); record each into the state file.
-- Unselected ASKs are recorded as `skipped` with `reason: "user_skipped_ask"`.
-- If the user dismisses or cancels the question, record every un-answered ASK as `skipped: user_skipped_ask` and continue.
+**harvest_close**
 
-> Note: with high PR counts (300+), accumulating all ASKs across the whole pass before asking the user may leave the user waiting hours between question calls. Acceptable trade-off for safety. Do not attempt to mid-pass ask — that re-orders merges and risks state corruption.
+- Recorded SHAs still match **or** PR already closed → ensure rationale comment
+  with marker exists, ensure closed, write `closed.json` category
+  (human non-marked reject/close → `rejected` + `suppress_equivalent: true`;
+  else `unknown` + `suppress_equivalent: false`), remove open entry, clear
+  intent.
+- Still open and SHA changed → clear stale intent; `SKIP`; **exit**.
 
-## Rate-limit awareness
+## SELECT — one PR
 
-- Before listing PRs: check `gh api rate_limit` on GitHub. GitLab has no non-admin rate-limit endpoint (`glab api rate_limit` returns 404) — handle 429 responses when they occur instead.
-- If remaining core allowance < 200, set batch size to 1 and proceed slowly.
-- On a 429 or rate-limit response from any API call: stop spawning new subagents immediately. Finish any pending batch, write state, exit with reason "rate_limited".
+1. Fully paginate open PRs (providers list rules).
+2. Normalize fields client-side.
+3. Keep only PRs where **all** hold:
+   - title starts with `chore(gardener):`
+   - head branch starts with `gardener/run-` (never `gardener/iter-`)
+   - `baseRefName` == resolved default branch
+   - same-repository head (not a fork)
+   - `isDraft == false`
+4. Sort by `createdAt` ascending.
+5. Process **only index 0**. Exit after that PR's path completes.
 
-## Large-diff handling
+Do not maintain a durable "processed" list for temporary CI/conflict skips.
 
-- If a PR diff exceeds 50,000 chars (~10k tokens), record it as ASK with `reason: "large_diff"` before spawning a subagent.
-- Never attempt to summarize or truncate diffs in-context; auto-ASK is the only safe response.
-- This check must run in Entry or LIST, not in the subagent.
+## EARLY_SKIP (no assessor)
 
-## Draft PR filter
+From list/view + CI metadata **before** capture:
 
-- For BOTH providers: filter drafts client-side before any processing.
-  - GitHub: `isDraft == false` (the `gh pr list --state open` output INCLUDES drafts by default — do not trust arguments to the contrary).
-  - GitLab: `draft == false` and `work_in_progress == false`.
-- Skill MUST skip all draft PRs with `skipped: draft` before assessing them. Never spawn an assessment subagent for a draft PR.
+| Condition | Action |
+|-----------|--------|
+| Conflict / unmergeable / dirty merge state | Update open observation; `SKIP`; exit |
+| Any check pending or running | Update open observation; `SKIP`; exit |
+| Any check failed | Update open observation; `SKIP`; exit |
 
-## CI status handling
+Pending vs failed vs green comes from `gh pr checks` / pipeline jobs, **not**
+from the shared providers mergeability row that maps `UNSTABLE` to
+“CI running — skip.”
 
-- Pending CI is NOT a wait condition. If any check is `PENDING` or `RUNNING`, the PR is skipped with `reason: "ci_pending"`. Do not poll, do not sleep, do not retry. Move to the next PR.
-- Failed checks: PR is skipped with `reason: "ci_failed"`. Do not investigate, do not run the failing tests, do not push fixes.
-- All checks must be `PASS`/`SUCCESS` for auto-merge eligibility. Optional checks count as much as required checks: Y > 0 → SKIP. There is no "required vs optional" carve-out in this skill; if your repo uses optional checks, exclude them from CI at the provider level before relying on this skill.
-- Zero checks observed (X = Y = Z = 0) → ASK with `reason: ci_unknown`. Never treat "no CI ran" as a clean run.
+"Update open observation" means refresh that item's `head_sha` / metadata in
+`open.json` when known. Do not invent `topic`/`rationale`/`areas` from the title.
 
-## Branch deletion verification
+Zero checks observed is **not** an early skip by itself — continue to capture
+and let assessor + parent judge; MERGE still requires green CI at recheck
+(absence of checks is not "green").
 
-After a successful `gh pr merge N --squash --delete-branch` (or `glab mr merge N --squash --remove-source-branch`):
+## CAPTURE — `RUN_DIR` layout
 
-1. Fetch PR state via `gh pr view N --json state` (or glab equivalent). Expect `state == "MERGED"`.
-   - If state is NOT merged, consult the Merge Retry Policy below before concluding anything.
-2. Verify the branch ref is gone:
-   - GitHub: `gh api repos/{owner}/{repo}/branches/{branch}` — expect 404.
-   - GitLab: `glab api projects/:pid/repository/branches/{branch}` — expect 404.
-3. Outcomes:
-   - 404 → record `outcome: "merged"`.
-   - 200 → record `outcome: "merged_branch_not_deleted"` and CONTINUE. Do not attempt to delete the branch manually — that is a mutation, and PR mutations are forbidden by the prime guardrail.
-   - 403 or 5xx → trust `--delete-branch` succeeded; record `outcome: "merged"`.
+Create `RUN_DIR` and write at least:
 
-## Merge execution: serial, with inter-merge gap
+| File | Content |
+|------|---------|
+| `meta.json` | number, url, title, branch, base/head SHAs, default branch, provider |
+| `description.md` | PR body |
+| `patch.diff` | full PR diff |
+| `ci.txt` | CI / pipeline summary |
+| `discussions.md` | review + conversation comments |
+| `subagent-ledger.json` | assessor task ledger (after spawn) |
+| `assessment.md` | assessor output (after assess) |
 
-Merges MUST be issued serially (one `gh pr merge` / `glab mr merge` call at a time), never in parallel. GitHub and GitLab both rate-limit the merge endpoint and race internally with branch-protection rule re-evaluation. Issuing 5 merges near-simultaneously regularly produces transient 405 / 409 / 5xx failures on 2–3 of them even when the underlying PRs are clean.
+Pass absolute `MAIN_REPO`, `CONTROL_ROOT`, `RUN_DIR`, `PROVIDER`, PR number,
+and pinned base/head SHAs to the assessor.
 
-Between merges, sleep 2 seconds (`sleep 2`) to give the provider's branch-protection state machine time to settle. This is a fixed, modest gap — not an indefinite poll.
+## Assessor dispatch gate
 
-## Merge Retry Policy
+Ledger (`$RUN_DIR/subagent-ledger.json`):
 
-**A merge retry is NOT a PR mutation in the prime-invariant sense.** The user already authorized merging via this skill. Retrying the SAME squash-merge command (no code edits, no rebase, no force-push) is fully within that authorization.
+```json
+{
+  "subagents": {
+    "assessor": {
+      "role": "assessor",
+      "task_id": "<harness-returned-id>",
+      "result_file": "<abs>/assessment.md",
+      "status": "complete"
+    }
+  }
+}
+```
 
-When the merge command fails or `state != MERGED` after the first attempt, classify the failure:
+Before PARENT_DECIDE, require all of:
 
-**Transient — RETRY with backoff (up to 3 attempts):**
-- HTTP 405 Method Not Allowed on the merge route
-- HTTP 409 Conflict with message indicating "base branch policy is still being evaluated" or similar
-- HTTP 429 rate-limited
-- HTTP 5xx from the provider
-- CLI exit code non-zero but stderr contains "merge queue", "temporarily", "try again", "Service Unavailable"
-- `gh pr view N --json state` returns `OPEN` right after a non-error exit but pull request was actually merged (eventual-consistency lag)
+- non-empty `task_id`
+- `status == complete`
+- `assessment.md` exists and is non-empty
+- required section markers present (see assessor-prompt):
+  `# Verdict`, `# Valuable micro-improvement`, `# Intended behavior`,
+  `# Behavior change`, `# Coherence`, `# Unhinged or nonsense`,
+  `# Correctness`, `# Tests`, `# Grug`, `# PR description claims`,
+  `# Justification`
 
-**Permanent — SKIP, record, move on (NEVER retry):**
-- HTTP 422 Unprocessable Entity — base branch conflict, NOT_MERGEABLE
-- Branch protection rejects `--squash` → record `skipped: merge_strategy_mismatch`
-- Branch protection rejects merge of any kind → record `skipped: branch_protection_blocked`
-- PR has been closed/deleted out from under us → record `skipped: pr_disappeared`
-- PR has new commits pushed since assessment (sha changed) → record `skipped: pr_changed_after_assessment`. The subagent's report is stale; do not re-assess in the same run.
-- Any explicit conflict/diff mismatch message → record `skipped: merge_conflict`
+Inline parent notes may supplement; they never replace `assessment.md`.
 
-**Backoff schedule (transient failures only):**
-- Attempt 1: immediate (already done)
-- Attempt 2: `sleep 5`, retry
-- Attempt 3: `sleep 15`, retry
-- After attempt 3 fails: record `skipped: merge_transient_failed` and continue to next PR
+On gate failure: re-dispatch the assessor once. If still failing → `SKIP`,
+retain `RUN_DIR`, stop without forge mutation.
 
-**Mandatory between retries:**
-- Re-check `gh pr view N --json state` before each retry. If state is already `MERGED`, the previous failure was a false negative — record `outcome: "merged"` and move on. Do NOT issue another merge.
-- Re-check `gh pr view N --json headRefOid` before each retry. If the commit SHA differs from the one captured at ASSESS time, abort retries — record `skipped: pr_changed_after_assessment`. The PR was mutated externally; do not trust the stale subagent report.
+## SHA recapture
 
-**Never do, even on retry:**
-- Pull, fetch, rebase, push, force-push, commit, amend, edit any file, run any local test, run CI locally, delete a branch manually, investigate CI failure logs, change the merge strategy, change `--squash` flag, change `--delete-branch` flag. Any of these are violations of the prime invariant, regardless of retry motivation.
+Immediately before MERGE / NEEDS_FIX / CLOSE:
 
-## Resume behaviour
+1. Re-fetch base SHA, head SHA, mergeability, CI.
+2. If base or head differs from captured assessment SHAs:
+   - Discard prior assessment
+   - Recapture into the same or a fresh `RUN_DIR`
+   - Spawn a new assessor; pass dispatch gate; parent re-decides
+   - This may happen **at most once** per invocation
+3. If after that one recapture either SHA still mismatches → `SKIP`; exit
 
-- If the state file's `last_run` is recent (< 1 hour) AND more than 0 PRs are listed as `processed`, log a short resume banner and skip already-processed PRs.
-- If `last_run` is older than 1 hour, ask the user via `question` whether to start fresh (clear `processed`) or resume.
-- Never silently clear state — user confirmation required.
+## MERGE procedure
+
+Preconditions at mutate time: child+parent MERGE, CI green, mergeability clean,
+no unresolved actionable review, head SHA == assessed head.
+
+1. Write `harvest_merge` intent (`run_dir`, SHAs, expected merged state).
+2. Issue pinned expected-head squash-merge (providers Gardener-only table).
+3. Verify PR state merged.
+4. Verify branch deletion (404); if not deleted, record failure — do not delete
+   manually.
+5. Remove open-cache entry (atomic write).
+6. Clear intent; delete `RUN_DIR`.
+
+If squash/expected-head is rejected → do not fall back; `SKIP` with
+`merge_strategy_mismatch` (or equivalent). Clear or retain intent per whether
+any effect occurred (query first).
+
+## NEEDS_FIX procedure
+
+1. Search existing comments for `<!-- gardener -->` and near-equivalent ask.
+2. If equivalent exists → do not comment again; clear any stale intent; exit.
+3. Write `harvest_needs_fix` intent.
+4. Post comment whose body includes the exact line `<!-- gardener -->` plus a
+   concrete actionable request.
+5. Verify comment present; clear intent; delete `RUN_DIR`.
+
+## CLOSE procedure
+
+1. Determine rationale source:
+   - Explicit **non-marked** human reject/close → authoritative; category
+     `rejected`
+   - Else child+parent CLOSE agreement → category `unknown`
+2. Write `harvest_close` intent.
+3. Post closure rationale with `<!-- gardener -->` (agent CLOSE comments are
+   marked and must **not** set suppress).
+4. Close the PR.
+5. Verify closed; append `closed.json` item with correct category /
+   `suppress_equivalent`; remove open entry.
+6. Clear intent; delete `RUN_DIR`.
+
+## Comment marker
+
+Every gardener-authored harvest comment must include this exact line:
+
+```
+<!-- gardener -->
+```
+
+`rejected` / suppress is allowed only when a **non-marked** comment explicitly
+asks to reject or close.
+
+## Open / closed writes
+
+Follow gardener-state atomic write rules. Never overwrite invalid `closed.json`.
+Categories used by harvest: `rejected` | `unknown` only.
+
+## Forbidden
+
+- Risk / confidence / ASK / size gates / `repo-rules.yaml`
+- Waiting or polling for CI
+- Rebase, push, edit, CI repair, manual branch delete
+- Processing more than one PR per invocation
+- Recognizing `gardener/iter-`
+- Merging without expected-head pin when the pin cannot be issued
+- Durable suppression of temporary CI / conflict skips

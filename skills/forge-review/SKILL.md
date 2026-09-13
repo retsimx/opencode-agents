@@ -39,7 +39,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 - Reviewing purely local, uncommitted files -> use `deep-review` or `review`.
 - Writing or implementing the code fixes -> use `ultrawork` or `work`.
 - Creating the issues and epics -> use `epic-forge`.
-- Automated batch merge without detailed review -> use `gardener-harvest`.
+- Automated one-PR gardener merge/close/skip without detailed human review -> use `gardener-harvest`.
 
 ### Expected inputs
 - `target`: Issue number (`#154`), PR number (`#42` / `!42`), PR URL, branch name, or none (current branch).

@@ -1,273 +1,199 @@
 ---
 name: gardener-sow
 description: >
-  Single-shot software-gardening sow: find one micro-improvement in an isolated
-  git worktree, verify CI locally, open one small draft PR, then exit. No user
-  interaction. Orchestration-only — all work runs in task subagents. Continuous
-  runs use an external shell loop (see running docs). Family: gardener-sow →
-  gardener-tend → gardener-harvest.
+  Single-shot gardener sow: reconcile state, propose one evidence-backed
+  micro-improvement in an isolated worktree, implement, verify, assess, open
+  one draft PR, then exit. No user interaction. Thin orchestration — substantive
+  work via task subagents. Outer shell loops for continuity. Family:
+  gardener-sow → gardener-tend → gardener-harvest.
 ---
 
-# Gardener Sow — Single Micro-Improvement
+# Gardener Sow — One Draft Micro-Improvement
 
-## Scheduling
+Load before acting:
 
-### Goal
-Improve the repository by **exactly one** micro-change per invocation. Runs in an isolated git worktree, produces one small human-reviewable draft PR (or skips/fails cleanly), cleans up the worktree, then **ends the turn**. Continuous gardening is the caller's outer shell loop — never an in-skill infinite loop (avoids context dilution).
+- `.agents/skills/_shared/runtime/gardener-contract.md`
+- `.agents/skills/_shared/runtime/gardener-state.md`
+- `.agents/skills/_shared/runtime/providers.md` (Gardener-only forge ops + Local CI discovery)
+- `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`
+- `.agents/rules/grug-principles.md`
 
-### Intent signature
-- User invokes `/gardener-sow` or asks to sow one gardener iteration
-- User wants one small draft PR with full CI verification before push
-- Continuous improvement via external `while` / cron wrapping this skill
+How to run: `.agents/skills/_shared/runtime/gardener-running.md`.
 
-### When to use
-- One autonomous micro-improvement (or an outer loop of many)
-- Background gardening with draft PRs for human review
-- Cheap/local models where fresh context each shot matters
+## Goal
 
-### When NOT to use
-- Bounded task with defined completion criteria -> use `ralph`
-- Review-only loop until clean -> use `ralphreview`
-- Single issue with user approval gates -> use `issue-autopilot`
-- One-shot review -> use `deep-review`
-- Maintain existing `chore(gardener)` PRs -> use `gardener-tend`
-- Assess/merge open PRs -> use `gardener-harvest`
+One coherent, evidence-backed draft gardener PR per invocation — or a clean
+skip/abandon — then end the turn. Never loop inside this skill.
 
-### Expected inputs
-- Repository with `gh` (GitHub) or `glab` (GitLab) CLI authenticated for `origin`
-- `AGENTS.md` and `TESTING.md` present
-- Optional: existing `.agents/results/gardener-state.md` from prior runs
-- Main checkout may be dirty — gardener does not require or enforce a clean `main`
+## Paths (resolve once)
 
-### Expected outputs
-- At most one small draft PR (`gardener/iter-{NNNN}-{slug}`) on success
-- Log row in `.agents/results/gardener-state.md` **only** for PASS (PR created) and VERIFY FAIL; rows removed once PR is merged
-- No orphaned worktrees after the invocation
-- Main checkout state unchanged
-- Process exits after one attempt (success, skip, or failure)
+| Name | Value |
+|------|--------|
+| `MAIN_REPO` | Target git repository (cwd / forge + `git worktree add`) |
+| `CONTROL_ROOT` | Walk parents of this skill file until a dir contains `skills/gardener-sow` |
+| `STATE_DIR` | `$CONTROL_ROOT/state/gardener` |
+| `run-id` | Unique id (e.g. UTC timestamp + short suffix) |
+| `WORKTREE` | `$CONTROL_ROOT/worktrees/gardener-<run-id>` |
+| `BRANCH` | `gardener/run-<run-id>` |
+| `RUN_TMP` | `$CONTROL_ROOT/results/tmp/gardener-sow-<run-id>/` |
+| `LEDGER` | `$RUN_TMP/subagent-ledger.json` |
 
-### Dependencies
-- OpenCode `task` tool — all scan, work, verify, ship, worktree, and revert work
-- `scm` skill — loaded by SHIP subagent for commit conventions
-- Shared provider map: `.agents/skills/_shared/runtime/providers.md` (`gh` / `glab`)
-- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
-- Resources: `.agents/skills/gardener-sow/resources/worktree-isolation.md`, `.agents/skills/gardener-sow/resources/worker-prompt.md`, `.agents/skills/gardener-sow/resources/worktree-prompt.md`, `.agents/skills/gardener-sow/resources/pr-size-limits.md`, `.agents/skills/gardener-sow/resources/exclusions.md`, `.agents/skills/gardener-sow/resources/ci-gates.md`, `.agents/skills/gardener-sow/resources/init-prompt.md`, `.agents/skills/gardener-sow/resources/verify-prompt.md`, `.agents/skills/gardener-sow/resources/ship-prompt.md`, `.agents/skills/gardener-sow/resources/revert-prompt.md`
-- Forge CLI (`gh` or `glab`) for draft PR creation
-- Design doc: `docs/plans/designs/gardener-loop.md`
+Do not edit tracked project source in the main checkout. Source edits and checks
+run in `WORKTREE`. Registry/intent writes under `CONTROL_ROOT` are allowed.
 
-### Control-flow features
-- **Single shot** — one INIT→…→CLEANUP pass, then exit (no in-skill loop)
-- Each invocation uses an isolated git worktree; main checkout never modified
-- Mandatory worktree cleanup before exit (success or failure)
-- Every subagent receives `MAIN_REPO` and `WORKTREE` paths
-- `FATAL|main_modified` aborts the shot immediately
-- No `question` tool — fully autonomous
+## Orchestrator role
 
-## Structural Flow
+Thin runner only: resolve paths, reconcile intent/state, create/cleanup worktrees,
+spawn subagents, enforce the dispatch gate, write `intent.json`, update
+`open.json`, delete temps. Do **not** scan, implement, verify, assess, or write
+PR bodies inline.
 
-### Entry
-1. Verify this is an autonomous gardening session (no user prompts).
-2. Record `MAIN_REPO` as absolute path to main repository checkout.
-3. Initialize or read `.agents/results/gardener-state.md`.
-4. Run the single pipeline once starting at INIT.
+Every substantive subagent (scanner, implement, verify, assessor, revise, ship)
+must pass `.agents/skills/_shared/runtime/subagent-dispatch-gate.md` before the
+next stage consumes its output: non-empty harness `task_id` in `LEDGER`,
+`status == complete`, non-empty `result_file`, required section markers present.
 
-### Scenes
-1. **INIT**: Task subagent (`init-prompt.md`) detects provider, verifies forge CLI auth, fetches `origin main`, reads state; does not check main cleanliness; returns `READY|<iteration>`.
-2. **WORKTREE_SETUP**: Task subagent (`worktree-prompt.md`, MODE=SETUP) creates isolated worktree from `origin/main` (works even if main is dirty); returns `WORKTREE_READY|<path>|<branch>`.
-3. **SCAN**: Task subagent (`worker-prompt.md`, MODE=SCAN) inside `WORKTREE`; returns `FOUND|...`, `SKIP|...`, or `FATAL|main_modified|...`.
-4. **WORK**: Task subagent (`worker-prompt.md`, MODE=WORK) inside `WORKTREE`; returns `SUCCESS|...`, `FAIL|...`, `ABORT|...`, or `FATAL|main_modified|...`.
-5. **VERIFY**: Task subagent (`verify-prompt.md`) inside `WORKTREE`; returns `PASS`, `FAIL:<reason>`, or `FATAL|main_modified|...`.
-6. **SHIP**: Task subagent (`ship-prompt.md`) inside `WORKTREE`; returns `SHIPPED|<branch>|<pr_url>`, `SHIP_FAIL:<reason>`, or `FATAL|main_modified|...`.
-7. **LOG**: SHIP subagent appends the PASS row with Status=open; the orchestrator appends the VERIFY FAIL row (Status=open, PR=`-`); INIT removes rows whose PRs are merged, updates rows whose PRs are closed (Status=open → Status=closed), and removes rows with Status=done. No other outcome appends a row.
-8. **WORKTREE_CLEANUP**: Task subagent (`worktree-prompt.md`, MODE=CLEANUP) removes worktree — **mandatory before exit**; does not alter main working tree.
-9. **EXIT**: End the turn. Do not start another iteration.
+Pass absolute `MAIN_REPO`, `CONTROL_ROOT`, `WORKTREE` (once created), `PROVIDER`,
+`DEFAULT_BRANCH`, and `RUN_TMP` to every subagent. Shell commands in subagents:
+wrap with `timeout 300`.
 
-### Transitions
-- WORKTREE_SETUP fails -> exit (no log, no cleanup needed).
-- Any `FATAL|main_modified` -> WORKTREE_CLEANUP, exit (no log).
-- SCAN returns `SKIP` -> WORKTREE_CLEANUP, exit (no log).
-- WORK returns `FAIL` or `ABORT` -> revert via task, WORKTREE_CLEANUP, exit (no log).
-- VERIFY returns `FAIL` -> revert via task, WORKTREE_CLEANUP, LOG `FAIL`, exit.
-- VERIFY returns `EXCLUDED` -> revert via task, WORKTREE_CLEANUP, exit (no log).
-- SHIP returns `SHIP_FAIL` -> revert via task, WORKTREE_CLEANUP, exit (no log).
-- SHIP returns `SHIPPED` -> SHIP already logged `PASS`, WORKTREE_CLEANUP, exit.
-- Any error -> revert if needed, WORKTREE_CLEANUP (always), exit (no log).
+## Flow (exactly once)
 
-### Failure and recovery
-| Failure | Recovery |
-|---------|----------|
-| `FATAL\|main_modified` | cleanup worktree, exit (no log) |
-| VERIFY fails | revert via task, cleanup worktree, log `FAIL:<reason>`, exit |
-| SHIP fails | revert via task, cleanup worktree, exit (no log) |
-| SCAN finds nothing | cleanup worktree, exit (no log) |
-| Subagent timeout/error | revert if dirty in worktree, cleanup worktree, exit (no log) |
-| CLEANUP fails | exit anyway (no log) |
+### 0. Entry
 
-Only **PASS** and **VERIFY FAIL** outcomes append a row to the state file; every other outcome (NOT_READY, ERROR, WORKTREE_FAIL, WORK FAIL/ABORT, SKIP, EXCLUDED, SHIP_FAIL, FATAL, CLEANUP_FAIL) exits silently without logging.
+1. Detect `PROVIDER` and verify auth via functional repo view (`providers.md`).
+2. Resolve `DEFAULT_BRANCH` (never hardcode `main`).
+3. If `$STATE_DIR/intent.json` exists and `skill` is another gardener skill,
+   **stop** and report it.
+4. **Cleanup orphan worktrees**: `git worktree list`; remove paths under
+   `$CONTROL_ROOT/worktrees/` matching `gardener-*` that are **not**
+   `intent.worktree_path` (if no intent / empty path, remove all such paths).
+5. **Reconcile `open.json`**: fully paginate open gardener PR metadata; rebuild
+   if absent/invalid/wrong repo (shared protocol
+   `.agents/skills/_shared/runtime/gardener-state.md`). Validate `closed.json`
+   (stop if present but invalid).
+6. If `intent.json` exists and `skill` is `sow`, reconcile `ship_draft_pr`
+   from actual git/forge (see Interrupt recovery), then **exit** (reconcile
+   consumes the invocation — `gardener-state.md`). If absent, continue.
+7. Allocate `run-id`. Create `RUN_TMP` and empty `LEDGER`.
+8. Create worktree:  
+   `git -C "$MAIN_REPO" fetch origin "$DEFAULT_BRANCH"`  
+   `git -C "$MAIN_REPO" worktree add -b "$BRANCH" "$WORKTREE" "origin/$DEFAULT_BRANCH"`
 
-### Exit
-- Always exit after one pipeline attempt (PASS / SKIP / FAIL / FATAL / ERROR).
-- Outer shell loops re-invoke for the next shot with a fresh context.
+### 1. Scanner → proposal
 
-## Logical Operations
+Spawn task with `resources/scanner-prompt.md`.
 
-### Actions
-| Action | SSL primitive | Evidence |
-|--------|---------------|----------|
-| Read/init state | `READ` | `.agents/results/gardener-state.md` |
-| Delegate init | `CALL_TOOL` | task subagent returns `READY` |
-| Delegate worktree setup | `CALL_TOOL` | task subagent returns `WORKTREE_READY` |
-| Delegate scan | `CALL_TOOL` | task subagent returns `FOUND` or `SKIP` |
-| Delegate work | `CALL_TOOL` | task subagent returns `SUCCESS` or `FAIL` |
-| Delegate verify | `CALL_TOOL` | task subagent returns `PASS` or `FAIL` |
-| Delegate ship | `CALL_TOOL` | task subagent returns `SHIPPED` or `SHIP_FAIL` |
-| Revert on failure | `CALL_TOOL` | task subagent per `revert-prompt.md` |
-| Delegate worktree cleanup | `CALL_TOOL` | task subagent returns `CLEANED` |
-| Append PASS row | `UPDATE_STATE` | state file append with Status=open (SHIP subagent) |
-| Append verify-fail row | `UPDATE_STATE` | state file append with Status=open, PR=`-` (orchestrator, only on VERIFY FAIL) |
-| Remove merged row | `UPDATE_STATE` | state file row removal (INIT subagent — also removes Status=done rows) |
-| Update closed row | `UPDATE_STATE` | state file Status=open → Status=closed (INIT subagent) |
-| Exit | `UPDATE_STATE` | end turn after cleanup |
+- Result: `$RUN_TMP/proposal.md` with required markers (see prompt).
+- Gate, then read. If `NO_PROPOSAL` / empty worthwhile work → cleanup, exit.
 
-### Tools and instruments
-- OpenCode `task` tool (`subagent_type="general"`) — **only** tool for substantive work
-- Orchestrator may use `bash` **only** for: appending to state file, reading iteration counter
-- Orchestrator **MUST NOT**: `read` source files, `edit`/`write` source files, run ruff/tests/coverage, run `git commit`/`git push`/forge PR create, create/remove worktrees
+### 2. Parent suppression check
 
-### Canonical workflow path
+Per shared `gardener-state.md`: walk open items and closed `rejected` items
+only. Suppress only if a scanner-cited **open or `rejected`** row is the same
+concern and the parent agrees, or the parent finds a missed colliding
+open/`rejected` row. A cited `unknown` row does **not** suppress. On suppress
+→ cleanup, exit (no source ship).
 
-**CRITICAL: The orchestrator is a thin single-shot runner. It MUST NOT loop. It MUST NOT perform scan, work, verify, ship, or worktree operations inline. Every phase except LOG uses the built-in `task` tool. Never run `$ task` in bash.**
+### 3. Implementation preflight + implement
 
-**Every task subagent prompt MUST include `MAIN_REPO` (absolute path) and `WORKTREE` (absolute path, once created). Nested subagents inherit both. See `.agents/skills/gardener-sow/resources/worktree-isolation.md`.**
+Spawn task with `resources/implement-prompt.md` (preflight then edit).
 
-**All git/forge/bash commands inside subagents MUST be wrapped with `timeout 300` to prevent infinite hangs.**
+- Preflight must validate proposal against current `WORKTREE` code. Invalid →
+  cleanup, exit.
+- Implement exactly one improvement. Result: `$RUN_TMP/implement.md`. Gate,
+  then require `STATUS: DONE`. `STATUS: REJECT` → cleanup, exit. Do not
+  continue on missing or non-DONE status.
 
-**Dispatch gate (HARD INVARIANT): after every `Call task` below returns, the orchestrator MUST record the harness-returned `task_id` in the state file alongside the step name and the returned signal (e.g. `gardener-init: task_id=ses_... signal=READY|<iteration>`) BEFORE acting on that signal. A step whose subagent has no recorded `task_id` MUST be re-dispatched, not done inline. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.**
+### 4. Local checks
 
-```
-STATE_FILE = .agents/results/gardener-state.md
-MAIN_REPO = absolute path to main repository checkout
+Spawn task with `resources/verify-prompt.md`.
 
-worktree = null
-branch = null
+- Discover checks per contract / `providers.md` Local CI discovery. Never invent
+  runners or install tooling.
+- Result: `$RUN_TMP/verify.md`. Gate, then read `STATUS`:
+  - `FAIL` → revision path (or abandon if already revised once).
+  - `PASS` or `NO_LOCAL_SUITE` → continue (no local suite is not a failure;
+    rely on forge checks + tend).
+  - Any other status → abandon, no ship.
 
-# INIT — resources/init-prompt.md
-Call task (gardener-init) with MAIN_REPO
-Return: READY|<iteration_number> or NOT_READY|<reason>
-if NOT_READY: EXIT (no log)
+### 5. Assessor
 
-# WORKTREE_SETUP — resources/worktree-prompt.md MODE=SETUP, SLUG=pending
-Call task (gardener-worktree-setup) with MAIN_REPO, ITERATION, SLUG=pending
-Return: WORKTREE_READY|<worktree_path>|<branch> or WORKTREE_FAIL|<reason>
-if WORKTREE_FAIL: EXIT (no log)
+Spawn task with `resources/assessor-prompt.md`.
 
-worktree = path; branch = branch name
+- Result: `$RUN_TMP/assessment.md` with `PASS` or `FAIL`. Gate.
+- Parent independently skims the diff; must agree before ship.
 
-# SCAN — resources/worker-prompt.md MODE=SCAN
-Call task (gardener-scan) with MAIN_REPO, WORKTREE
-Return: FOUND|<slug>|... or SKIP|... or FATAL|main_modified|...
+### 6. One revision (at most)
 
-if FATAL or SKIP:
-    Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    EXIT (no log)
+On verify fail or assessor `FAIL`: spawn `resources/revise-prompt.md` once, then
+re-run verify + assessor. Second failure → abandon (revert worktree dirty state
+if needed), cleanup, exit.
 
-# WORK
-Call task (gardener-work) with MAIN_REPO, WORKTREE, ITEM=<slug>|<description>|<rationale>
-Return: SUCCESS|... or FAIL|... or ABORT|... or FATAL|main_modified|...
+### 7. Ship
 
-if FATAL/FAIL/ABORT:
-    Call task (gardener-revert) with MAIN_REPO, WORKTREE
-    Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    EXIT (no log)
+1. Spawn `resources/ship-prompt.md` **MODE=COMMIT**: one local commit
+   `chore(gardener): …`, write `$RUN_TMP/pr-body.md` from
+   `resources/pr-body-template.md` + verified patch. Return commit SHA. Gate,
+   then require `STATUS: COMMITTED` and a non-empty `HEAD_SHA`. On `FAIL` or
+   missing SHA → do **not** write intent; do not publish; cleanup, exit.
+2. Atomically write `$STATE_DIR/intent.json` with
+   `skill=sow`, `operation=ship_draft_pr`, `worktree_path`, `run_id`, branch,
+   `head_sha`, `base_sha`, title, PR body path, expected forge result.
+3. Spawn ship **MODE=PUBLISH**: push branch; create gardener draft targeting
+   `DEFAULT_BRANCH` (Gardener-only create row in `providers.md`, never the
+   shared `--base main` create row). Gate, then require `STATUS: SHIPPED` and
+   a PR number.
+4. Verify PR exists; update `open.json` (number, url, title, branch, head_sha,
+   topic, rationale, areas, created_at).
+5. Delete `intent.json` only after expected result is verified.
+6. Cleanup: remove `WORKTREE` + branch local ref as appropriate; delete `RUN_TMP`.
 
-# VERIFY
-Call task (gardener-verify) with MAIN_REPO, WORKTREE
-Return: PASS or FAIL:<reason> or EXCLUDED:<path> or FATAL|main_modified|...
+### 8. Exit
 
-if VERIFY == FAIL:<reason>:
-    Call task (gardener-revert) with MAIN_REPO, WORKTREE
-    Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    append verify-fail row to STATE_FILE (orchestrator bash):
-        | <ITERATION> | FAIL | <slug> | <description> | <BRANCH> | - | open | <ISO_TIMESTAMP> |
-    EXIT
+End the turn. Do not start another sow.
 
-if VERIFY == EXCLUDED or FATAL:
-    Call task (gardener-revert) with MAIN_REPO, WORKTREE
-    Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    EXIT (no log)
+## Interrupt recovery (`ship_draft_pr`)
 
-# SHIP
-Call task (gardener-ship) with MAIN_REPO, WORKTREE, BRANCH, ITERATION, SLUG, DESCRIPTION
-Return: SHIPPED|... or SHIP_FAIL|... or FATAL|main_modified|...
+Query remote branch / PR carrying the recorded `run-id`:
 
-if SHIP_FAIL or FATAL:
-    Call task (gardener-revert) with MAIN_REPO, WORKTREE
-    Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-    EXIT (no log)
+| Remote state | Action |
+|--------------|--------|
+| Branch pushed, no PR | Create the one intended draft; then open.json; clear intent; **exit** |
+| PR exists | Record in open.json; clear intent; **exit** |
+| Neither | Report failed ship; clean abandoned worktree/branch; clear intent only after confirming no external effect; **exit** |
+| Differs from intent | Stop and report — do not guess; **exit** |
 
-# LOG — SHIP already appended the PASS row (Status=open)
+Do not fall through to allocate a new `run-id` or open a second draft.
 
-# WORKTREE_CLEANUP — mandatory before exit
-Call task (gardener-worktree-cleanup) with MAIN_REPO, WORKTREE, BRANCH
-EXIT
-```
+## PR body
 
-### Resource scope
-| Scope | Resource target |
-|-------|-----------------|
-| `LOCAL_FS` | `.agents/results/gardener-state.md`, ephemeral `../<project>-gardener-{NNNN}` worktrees |
-| `PROCESS` | task subagent processes |
-| `CODEBASE` | modified only by subagents inside worktrees, never main checkout or orchestrator |
+Sections: **Improvement**, **Safety**, **Verification**, **Grug**, optional
+**Prior proposal**. See `resources/pr-body-template.md`. Examples:
+`resources/acme-examples.md`.
 
-### Preconditions
-- Matching forge CLI (`gh` or `glab`) installed and authenticated for `origin`
-- `poetry` environment available in worktree
-- WORKTREE_SETUP creates branch from `origin/main` via `git worktree add` (main may be dirty)
+## Guardrails
 
-### Effects and side effects
-- Subagents may modify code inside worktree, run tests, commit, push, create draft PRs
-- Orchestrator only appends to state file
-- At most one new branch and one draft PR per successful invocation
-- Worktree removed before exit; main checkout state preserved
-- Never commits to `main`
+1. Single shot; no in-skill loop; no `question` tool.
+2. No inline substitution for required subagents (dispatch gate).
+3. No Poetry / Ruff / `test_coverage.sh` / `main` / `AGENTS.md` / `TESTING.md`
+   hardcoding — discover guidance and checks.
+4. No `gardener/iter-`. Do not use a legacy Markdown state *table*. The shared
+   protocol `.agents/skills/_shared/runtime/gardener-state.md` is required.
+5. Draft PRs only; title `chore(gardener):`; branch `gardener/run-…`.
+6. Exclusions: `resources/exclusions.md` (secrets / generated / vendored only).
+7. Do not touch excluded paths; do not invent local CI.
 
-### Guardrails
-1. **Orchestrator never edits source** — no `read`/`edit`/`write` on application code
-2. **Orchestrator never runs CI** — ruff, tests, coverage run only in subagents
-3. **No `question` tool** — fully autonomous, no user interaction
-4. **Single shot only** — never loop inside the skill; outer shell owns continuity
-5. **One fix per invocation** — one commit, one draft PR, one specific concern
-6. **Never commit to or modify `main`** — `FATAL|main_modified` on violation
-7. **Isolated worktree per invocation** — all SCAN/WORK/VERIFY/SHIP inside `WORKTREE` only
-8. **Every subagent gets `MAIN_REPO` + `WORKTREE`** — nested subagents inherit both
-9. **Dirty main is allowed** — worktree created from `origin/main` without cleaning main
-10. **Mandatory cleanup** — worktree removed before exit regardless of outcome
-11. **Human-reviewable size** — see `.agents/skills/gardener-sow/resources/pr-size-limits.md` (≤150 diff lines, one concern; no hard file limit)
-12. **Respect exclusions** — see `.agents/skills/gardener-sow/resources/exclusions.md`
-13. **Tests must pass** before SHIP — coverage is informational, no hard percentage
-14. **Draft PRs only** — always create via the Create draft PR command for `$PROVIDER` in `.agents/skills/_shared/runtime/providers.md`
-15. **All PRs via forge CLI** — `gh` or `glab` per `.agents/skills/_shared/runtime/providers.md`; never use web UI or other tools
-16. **Nested tasking allowed** — subagents may spawn further subagents (must pass paths)
-17. **AGENTS.md and TESTING.md** — subagents must comply
-18. **State file tracks open/closed rows** — only PASS and VERIFY FAIL rows are appended; SHIP appends the PASS row with Status=open, the orchestrator appends the VERIFY FAIL row with Status=open and PR=`-`; INIT removes merged rows, updates closed rows to Status=closed, removes Status=done rows, and skips Status=open rows whose PR URL is `-`
-19. **Description column for SCAN** — SCAN compares slug AND description to distinguish similar fixes
-20. **Provider-agnostic** — detect `PROVIDER` once; pass to every subagent; never hardcode `gh` or `glab`
-21. **Subagent Dispatch Gate (HARD INVARIANT)** — every delegated task subagent MUST have its harness-returned `task_id` recorded in the session state file alongside its step result (step name and returned signal). The orchestrator MUST NOT perform a step's work inline and report the subagent's signal itself. A step whose subagent has no recorded `task_id` MUST be re-dispatched. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
+## Resources
 
-## References
-- Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
-- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
-- Sibling skills: `gardener-tend` (maintain PRs), `gardener-harvest` (merge queue)
-- Provider CLI map: `.agents/skills/_shared/runtime/providers.md`
-- Design: `docs/plans/designs/gardener-loop.md`
-- Worktree isolation (FATAL rules): `.agents/skills/gardener-sow/resources/worktree-isolation.md`
-- Worker instructions: `.agents/skills/gardener-sow/resources/worker-prompt.md`
-- Worktree lifecycle: `.agents/skills/gardener-sow/resources/worktree-prompt.md`
-- PR size limits: `.agents/skills/gardener-sow/resources/pr-size-limits.md`
-- Init subagent: `.agents/skills/gardener-sow/resources/init-prompt.md`
-- Verify subagent: `.agents/skills/gardener-sow/resources/verify-prompt.md`
-- Ship subagent: `.agents/skills/gardener-sow/resources/ship-prompt.md`
-- Revert subagent: `.agents/skills/gardener-sow/resources/revert-prompt.md`
-- Exclusions: `.agents/skills/gardener-sow/resources/exclusions.md`
-- CI gates: `.agents/skills/gardener-sow/resources/ci-gates.md`
-- SCM conventions: `.agents/skills/scm/SKILL.md`
+| File | Role |
+|------|------|
+| `resources/scanner-prompt.md` | Evidence-backed proposal |
+| `resources/implement-prompt.md` | Preflight + implement |
+| `resources/verify-prompt.md` | Local check discovery |
+| `resources/assessor-prompt.md` | Independent patch assessment |
+| `resources/revise-prompt.md` | One focused revision |
+| `resources/ship-prompt.md` | Commit / publish |
+| `resources/pr-body-template.md` | Public PR body |
+| `resources/acme-examples.md` | Good/bad proposal examples |
+| `resources/exclusions.md` | Generic path exclusions |
