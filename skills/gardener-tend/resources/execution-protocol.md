@@ -289,6 +289,14 @@ Every gardener-authored comment must contain this exact line:
 `rejected` / suppress applies only when a **non-marked** comment explicitly
 asks to reject or close.
 
-## No-op exit
+## No-op exit (idle only)
 
-If no PR needs action: report `all_clear` and exit. **Do not sleep.**
+If no PR needs action:
+
+1. Report `all_clear`.
+2. **`sleep 300`** (five minutes) so continuous outer loops do not burn turns
+   while the queue is empty.
+3. Exit.
+
+If this invocation **did** perform a tend action, exit immediately with **no**
+sleep — the next outer-loop shot should pick up the next PR without delay.

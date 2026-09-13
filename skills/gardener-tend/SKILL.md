@@ -14,8 +14,9 @@ description: >
 ### Goal
 
 Perform **at most one** maintenance action on the oldest open gardener PR that
-needs work, then exit. The outer loop owns cadence. Never sleep inside this
-skill.
+needs work, then exit. If there is a backlog, exit **without** sleeping so the
+outer loop can start the next shot immediately. Sleep **only** on `all_clear`
+(nothing to tend) so idle polling does not burn continuous agent turns.
 
 Load before acting:
 
@@ -122,8 +123,9 @@ On the first actionable item, perform that single action and exit.
    Vague comments → reply asking clarification (still one action), exit.
 5. **PROMOTE** — draft, mergeable, CI complete+green, no actionable unresolved
    comments, fresh assessment of exact head passes → `tend_promote`.
-6. **ALL_CLEAR** — no PR needed action → exit with a short no-op report.
-   **Do not sleep.**
+6. **ALL_CLEAR** — no PR needed action → report `all_clear`, **`sleep 300`**,
+   then exit. Do **not** sleep after a real tend action (close / rebase / CI /
+   comment / promote) — exit immediately so a queue drains fast.
 
 ### Transitions
 
@@ -229,7 +231,8 @@ On the first actionable item, perform that single action and exit.
 8. **Capture head SHA** before content work; push `--force-with-lease`; abort on unexpected remote head.
 9. **Non-interactive git only** — `GIT_EDITOR=true` / `GIT_SEQUENCE_EDITOR=true` (or equivalent).
 10. **Local checks** via discovery procedure only — no Poetry/Ruff/coverage hardcoding.
-11. **No in-skill sleep** — outer loop owns cadence.
+11. **Idle sleep only** — `sleep 300` solely on `all_clear`. Never sleep after
+    a completed tend action.
 12. **Verification can fail** — stop without push; never claim verification cannot fail.
 13. **Dispatch gate** — delegated implement/verify/revise/assess outputs must pass
     `.agents/skills/_shared/runtime/subagent-dispatch-gate.md` before consumption.

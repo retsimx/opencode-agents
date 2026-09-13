@@ -33,6 +33,9 @@ done
 ## gardener-tend
 
 One maintenance action on the oldest gardener PR that needs work, then exit.
+When there is a backlog, each shot exits immediately so the next starts with
+no delay. When there is nothing to tend, the skill itself `sleep 300`s before
+exit (idle backoff only — do not add a blanket sleep in this wrapper).
 
 ```bash
 while :; do
