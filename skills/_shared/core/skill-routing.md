@@ -38,6 +38,9 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | configuration management, SCM, CM, git, commit, gitflow, GitHub Flow, GitLab Flow, trunk-based branching, merge conflict, rebase, worktree, baseline, tag, release branch, signed commits, merge queue, conventional commits | **scm** | SCM + Conventional Commits in one skill |
 | issue, resolve issue, fix issue, issue autopilot, autopilot, automated issue resolution, forge issue, GitHub issue, GitLab issue, end-to-end issue fix | **issue-autopilot** | Complete automated issue resolution engine: Ingests GitHub/GitLab issue -> Brainstorms architecture -> Decomposes plan -> Auto-implements via ultrawork (Plan-Ingestion Mode) -> Runs Fast-Fail Local CI Sanity Gate -> Generates Conventional Commits & Draft PR -> Posts plain-English issue comment — all inside an isolated worktree. |
 | ultrawork, rigorous development, 5-phase workflow, multi-review, high-assurance implementation | **ultrawork** | High-quality 5-phase development workflow (PLAN, IMPL, VERIFY, REFINE, SHIP) with 11 review gates. Can run standalone or in Plan-Ingestion Mode when invoked by issue-autopilot. |
+| gardener sow, micro-improvement draft PR, chore(gardener) | **gardener-sow** | One evidence-backed draft micro-improvement PR per invocation |
+| gardener tend, rebase gardener PR, fix gardener CI, promote gardener draft | **gardener-tend** | One maintenance action on the oldest gardener PR that needs work |
+| gardener harvest, merge gardener PR | **gardener-harvest** | One oldest non-draft gardener PR: MERGE / NEEDS_FIX / CLOSE / SKIP, then exit |
 
 ---
 
@@ -109,7 +112,9 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | **`review`** | Broad QA, OWASP Top 10 security, performance, accessibility (WCAG 2.1 AA), code quality, ISO/IEC 25010 framing | Local repo, staging diff, or full workspace | Full QA report (`result-review-*.md`), optional fix-verify loop | No |
 | **`deep-review`** | Deterministic 9-dimension post-implementation analysis (correctness, regressions, state/data, UI, tests, dead code, security, perf, DRY) | Bounded diff, commit SHA, file list | Structured 9-dimension report (`result-deep-review-*.md`) | No |
 | **`forge-review`** | End-to-end Forge PR/MR audit against issue requirements with provider (`gh`/`glab`) integration | Remote PR/MR number, URL, or branch | PR Scorecard, inline suggestion comments, review deliverable | No (read + comment only) |
-| **`gardener-harvest`** | Automated sequential merge queue assessment and squash-merging of open PR batches | Batch of open PRs on GitHub/GitLab | Merge queue state (`pr-merge-queue.json`), summary table, squash-merges passing PRs | Yes (squash-merge only) |
+| **`gardener-sow`** | Open one evidence-backed draft micro-improvement | Target repo + gardener contract | Draft `chore(gardener):` PR on `gardener/run-*` | Yes (worktree + draft PR) |
+| **`gardener-tend`** | One maintenance action on an open gardener PR | Oldest gardener PR needing work | Rebase / CI fix / comment reply / close / promote | Yes (PR branch + comments; never delete comments) |
+| **`gardener-harvest`** | Decide one oldest non-draft gardener PR | Ready non-draft gardener PRs only | MERGE / NEEDS_FIX / CLOSE / SKIP; open/closed registries | Yes (squash-merge / comment / close only; never mutates branches) |
 
 ### Boundary and Cross-Routing Rules:
 1. **Forge PR/MR Context & Comments (`forge-review`)**:
@@ -119,8 +124,10 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
    - Route for general pre-commit or pre-ship checks across the local workspace, security audits, accessibility audits, or fix-verify loops with domain agents.
 3. **Pure Bounded Scope Analysis (`deep-review`)**:
    - Route when analyzing a strict, explicit diff/commit/patch without forge provider interactions, or when invoked as an analysis subagent by `forge-review` or implementation workflows.
-4. **Merge Automation & Queue Processing (`gardener-harvest`)**:
-   - Route when batch processing open PRs for automated sequential squash-merging. Never used for single-PR detailed qualitative reviews or issue audits.
+4. **Gardener family (`gardener-sow` → `gardener-tend` → `gardener-harvest`)**:
+   - `sow` creates one draft micro-improvement; `tend` maintains open gardener PRs (one action); `harvest` acts on exactly one oldest non-draft gardener PR then exits.
+   - Only one gardener skill at a time against the same `CONTROL_ROOT` + `MAIN_REPO`.
+   - Never route harvest for deep qualitative review of arbitrary PRs — that is `forge-review` / `deep-review`.
 
 ---
 

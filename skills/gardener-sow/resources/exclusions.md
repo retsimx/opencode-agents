@@ -1,35 +1,25 @@
-# Gardener — Hard Exclusions
+# Gardener Sow — Path Exclusions
 
-These paths must NEVER be read for modification, staged, or committed.
-
-## Auto-generated
-
-- `**/migrations/*.py` (except `__init__.py` if needed for package structure — do not edit migration bodies)
-
-## Vendored / compiled assets
-
-- `static/**/*.min.js`
-- `static/**/*.bundle.*`
-- Compiled CSS bundles (e.g. `*.min.css` under `static/`)
-
-## Build / cache / tooling output
-
-- `.venv/`
-- `node_modules/`
-- `coverage/`
-- `test_output/`
-- `htmlcov/`
-- `__pycache__/`
-- `*.pyc`
+Never read for modification, stage, or commit paths that are secrets,
+generated, or vendored. Prefer repository guidance when it names additional
+off-limits or generated paths.
 
 ## Secrets
 
-- `.env`
-- `.env.*`
-- `credentials.json`
-- `*.pem`, `*.key`
-- Any file containing API keys, tokens, or passwords
+- `.env`, `.env.*`
+- `credentials.json`, `*.pem`, `*.key`
+- Files that clearly contain API keys, tokens, or passwords
+
+## Generated / vendored / build output
+
+- `.venv/`, `node_modules/`, `vendor/` (when third-party trees)
+- `__pycache__/`, `*.pyc`, `*.pyo`
+- `coverage/`, `htmlcov/`, `test_output/`, `dist/`, `build/`
+- Minified or bundled static artifacts (`*.min.js`, `*.min.css`, `*.bundle.*`)
 
 ## Enforcement
 
-Before staging, run `git diff --name-only` and reject the iteration if any changed file matches an exclusion pattern. Return `EXCLUDED:<path>` to the orchestrator.
+Before staging: `git diff --name-only`. If any changed path matches, abort the
+ship/implement step and report the path. Do not invent framework-specific
+exclusions (e.g. app migrations) unless the target repository marks them
+generated or off-limits.

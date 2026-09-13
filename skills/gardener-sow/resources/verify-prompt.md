@@ -1,36 +1,43 @@
-# Gardener VERIFY Subagent
+# Verify — Local Checks via Discovery
 
-Independent verification after WORK. Do not modify source files.
+You are the gardener-sow **verifier**. Run narrow checks for the change, then
+any locally executable suite discovered by the shared procedure. Never invent a
+runner or install tooling.
 
-## Read first
+## Read
 
-- `.agents/skills/gardener-sow/resources/worktree-isolation.md` — **FATAL if violated**
-- `.agents/skills/gardener-sow/resources/ci-gates.md`
-- `.agents/skills/gardener-sow/resources/exclusions.md`
-- `.agents/skills/gardener-sow/resources/pr-size-limits.md`
+- `$CONTROL_ROOT/skills/_shared/runtime/gardener-contract.md` (Local checks)
+- `$CONTROL_ROOT/skills/_shared/runtime/providers.md` (Local CI config discovery)
+- `$RUN_TMP/implement.md` / proposal as needed
+- Repository guidance and CI config under `$WORKTREE` when present
 
-## Inputs (from orchestrator) — REQUIRED
+## Inputs
 
-- `WORKTREE` — absolute path to the iteration worktree (**mandatory**)
-- `MAIN_REPO` — absolute path to main repository root (do not modify)
+`MAIN_REPO`, `CONTROL_ROOT`, `WORKTREE`, `RUN_TMP`
 
-**First action: `cd "$WORKTREE"`.** All commands run inside `WORKTREE` only.
+**First action:** `cd "$WORKTREE"`.
 
-## Steps
+## Discovery order (mandatory)
 
-All commands MUST be wrapped with `timeout 300`.
+1. A command named in repository guidance, if locally executable without extra
+   secrets or installs.
+2. A script named by that repository's CI config (provider matching `origin`),
+   if locally executable without extra secrets or installs.
+3. Otherwise: no local suite — record `NO_LOCAL_SUITE` and rely on forge checks
+   later.
 
-1. List changed files inside `WORKTREE`.
-2. Reject if any path matches exclusions — return `EXCLUDED|<path>`.
-3. Run `timeout 300 git diff --stat` — if over 150 diff lines, return `FAIL|too_large:<lines>N`.
-4. Run gates from `ci-gates.md` (each command wrapped with `timeout 300`).
-5. Parse coverage — tests must pass. Coverage is informational.
+Also run the narrowest meaningful check for the touched area when that is a
+simple, already-available command (still no installs).
 
-## Return
+Wrap commands with `timeout 300`.
 
-Exactly one line:
+## Result — `$RUN_TMP/verify.md`
 
-- `PASS`
-- `FAIL|<reason>`
-- `EXCLUDED|<path>`
-- `FATAL|main_modified|<detail>`
+```markdown
+# Verify
+STATUS: PASS|FAIL|NO_LOCAL_SUITE
+COMMANDS: <what ran, or none>
+SUMMARY: <brief>
+```
+
+On `FAIL`, include enough stderr/stdout excerpt to drive one revision.
