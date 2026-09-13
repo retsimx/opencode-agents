@@ -29,6 +29,8 @@ verify/assessment failure. Do not expand scope.
 ```markdown
 # Revise
 STATUS: DONE|ABORT
-CHANGED: <paths or none>
+CHANGED: <comma-separated paths relative to WORKTREE, or none>
 NOTES: <what was corrected>
 ```
+
+Leave edits uncommitted. Update `CHANGED` for the next assessor pass.

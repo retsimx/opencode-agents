@@ -122,7 +122,11 @@ Spawn task with `resources/verify-prompt.md`.
 Spawn task with `resources/assessor-prompt.md`.
 
 - Result: `$RUN_TMP/assessment.md` with `PASS` or `FAIL`. Gate.
-- Parent independently skims the diff; must agree before ship.
+- Parent independently skims the **uncommitted** `$WORKTREE` patch
+  (`cd "$WORKTREE"`; `git status` / `git diff` / `git diff --cached`; open
+  `CHANGED` paths from `implement.md`). Must agree before ship. Do **not**
+  use `origin/<default>...HEAD` here — assess is before commit; an empty
+  committed range is not “no implementation.”
 
 ### 6. One revision (at most)
 
