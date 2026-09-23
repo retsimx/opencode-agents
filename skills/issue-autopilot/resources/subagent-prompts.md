@@ -2,6 +2,8 @@
 
 This resource provides standardized prompt templates for Task subagents dispatched during `issue-autopilot` execution. All subagents operate under **Zero-Context Relay** (pass-by-reference) and the **Universal File-First State I/O Architecture**.
 
+**Substitution contract**: replace every `<$VAR>` placeholder with the recorded absolute value before dispatch (e.g. `<$SESSION_ID>`, `<$RUN_TMP>`, `<$RESULTS_DIR>`, `<$WORKTREE>`).
+
 ---
 
 ## 1. SCM Specialist Subagent Prompt (Phase 4 Step 2)
@@ -14,9 +16,9 @@ Prompt:
 Load the scm skill (.agents/skills/scm/SKILL.md) and read the Conventional Commits section.
 WORKTREE: <$WORKTREE>
 RESULTS_DIR: <$RESULTS_DIR>
-SESSION_ID: <sessionId>
+SESSION_ID: <$SESSION_ID>
 RUN_TMP: <$RUN_TMP>
-OUTPUT_FILE: <$RESULTS_DIR>/result-scm-ship-<sessionId>.md
+OUTPUT_FILE: <$RESULTS_DIR>/result-scm-ship-<$SESSION_ID>.md
 
 1. Inspect changes in WORKTREE using `git diff --stat` and `git diff`.
 2. Determine the Conventional Commit type and scope (e.g. feat(scope), fix(scope)).
@@ -58,9 +60,9 @@ BRANCH: <branch-name>
 ISSUE_NUMBER: <number>
 PR_URL: <pr-url>
 RESULTS_DIR: <$RESULTS_DIR>
-SESSION_ID: <sessionId>
+SESSION_ID: <$SESSION_ID>
 RUN_TMP: <$RUN_TMP>
-OUTPUT_FILE: <$RESULTS_DIR>/result-issue-comment-<sessionId>.md
+OUTPUT_FILE: <$RESULTS_DIR>/result-issue-comment-<$SESSION_ID>.md
 
 Read .agents/skills/_shared/runtime/providers.md and use ONLY the Comment on issue command for PROVIDER.
 
@@ -108,9 +110,9 @@ Remediate local CI sanity failures in $WORKTREE prior to commit/PR.
 
 WORKTREE: <$WORKTREE>
 RESULTS_DIR: <$RESULTS_DIR>
-SESSION_ID: <sessionId>
+SESSION_ID: <$SESSION_ID>
 RUN_TMP: <$RUN_TMP>
-OUTPUT_FILE: <$RESULTS_DIR>/result-debug-ci-<sessionId>.md
+OUTPUT_FILE: <$RESULTS_DIR>/result-debug-ci-<$SESSION_ID>.md
 FAILURE_LOGS: <failure logs or error output>
 
 1. Inspect failures in WORKTREE:
