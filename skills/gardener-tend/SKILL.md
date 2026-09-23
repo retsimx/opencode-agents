@@ -1,164 +1,254 @@
 ---
 name: gardener-tend
 description: >
-  Tend open gardener PRs (`chore(gardener)` prefix): rebase, fix CI, act on
-  reviewer comments, or promote draft to ready. One change per invocation, then
-  exits. Works with GitHub (`gh`) and GitLab (`glab`). Family: gardener-sow →
-  gardener-tend → gardener-harvest.
+  One maintenance action on the oldest gardener PR that needs attention: honor
+  human reject/close, rebase, repair PR-attributable CI, address comments, or
+  promote a healthy draft. Then exit. Family: gardener-sow → gardener-tend →
+  gardener-harvest. Provider-agnostic (`gh` / `glab`).
 ---
 
-# Gardener Tend — PR Maintenance
+# Gardener Tend — One Maintenance Action
 
 ## Scheduling
 
 ### Goal
-Maintain PR health by checking merge status, diagnosing CI failures, and acting on reviewer comments. Makes **one change per invocation** in an isolated git worktree, then exits. The external loop schedules repeat invocations. Provider-agnostic: GitHub (`gh`) or GitLab (`glab`) per `.agents/skills/_shared/runtime/providers.md`.
+
+Perform **at most one** maintenance action on the oldest open gardener PR that
+needs work, then exit. If there is a backlog, exit **without** sleeping so the
+outer loop can start the next shot immediately. Sleep **only** on `all_clear`
+(nothing to tend) so idle polling does not burn continuous agent turns.
+
+Load before acting:
+
+- `.agents/skills/_shared/runtime/gardener-contract.md`
+- `.agents/skills/_shared/runtime/gardener-state.md`
+- `.agents/skills/_shared/runtime/gardener-running.md`
+- `.agents/skills/_shared/runtime/providers.md`
+- `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`
+- `.agents/rules/grug-principles.md`
 
 ### Intent signature
-- User wants automated PR maintenance for gardener PRs
-- User wants merge conflicts resolved automatically
-- User wants CI failures diagnosed and fixed
-- User wants reviewer comments acted upon
-- User wants healthy draft PRs promoted to ready
+
 - User invokes `/gardener-tend` or asks to tend gardener PRs
+- Automated maintenance: rebase, CI repair, comment response, draft promotion
+- Explicit human reject/close handling on gardener PRs
 
 ### When to use
-- Periodic PR health maintenance (cron or on-demand)
-- After pushing changes, to check if PRs need follow-up
-- Batch-fixing multiple PRs via external loop
-- Resolving rebase conflicts in `chore(gardener)` PRs
+
+- Periodic PR health maintenance (outer loop or on-demand)
+- After sow opens drafts that need rebase, CI, or comment follow-up
+- Before harvest, when drafts need promotion
 
 ### When NOT to use
-- Single PR with known issue (use `debug` skill)
-- Ready-to-merge PR (no failures/comments/conflicts)
-- Human-driven code review (use `review` skill)
-- Creating new micro-fix PRs (use `gardener-sow`)
-- Assessing/merging open PRs (use `gardener-harvest`)
+
+- Creating new micro-improvements → `gardener-sow`
+- Assessing/merging ready non-draft gardener PRs → `gardener-harvest`
+- Non-gardener PRs, fork PRs, or coordinated architecture work → out of scope
+- Deep human-driven review → `review` / `deep-review`
 
 ### Expected inputs
-- Repository with `gh` (GitHub) or `glab` (GitLab) CLI authenticated for `origin`
-- `AGENTS.md` and `TESTING.md` present
-- Main checkout may be dirty — skill does not require clean `main`
+
+- `MAIN_REPO` as cwd (target git repository)
+- Forge CLI authenticated for `origin` (`gh` or `glab`)
+- Agent pack containing `skills/gardener-sow` (`CONTROL_ROOT`)
+- Dirty main checkout is allowed — all edits run in a worktree
 
 ### Expected outputs
-- **One** PR updated per invocation (rebase, CI fix, comment action, or draft promotion)
-- No orphaned worktrees
-- Main checkout state unchanged
-- Resolved reviewer comments deleted after fix is pushed
+
+- Exactly one of: close, rebase push, CI-fix push, comment reply/resolution
+  (with optional content push), draft promotion, or a documented no-op exit
+- Updated `$CONTROL_ROOT/state/gardener/{open,closed,intent}.json` as required
+- No orphaned `gardener-*` worktrees after a completed action
+- Main checkout tracked project source unchanged
 
 ### Dependencies
-- Forge CLI (`gh` or `glab`) for PR queries, checks/pipelines, and comments — see `.agents/skills/_shared/runtime/providers.md`
-- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
-- `scm` skill for commit conventions
-- `debug` skill for CI failure diagnosis
-- Resources: `.agents/skills/gardener-tend/resources/worktree-isolation.md`, `.agents/skills/gardener-tend/resources/execution-protocol.md`
-- Local test/lint/coverage commands from project
+
+- Shared contract/state/providers (paths above)
+- Resources under `.agents/skills/gardener-tend/resources/`
+- Forge CLI only via `.agents/skills/_shared/runtime/providers.md`
+- Local checks only via the Local CI config discovery procedure in providers.md
+  (never invent runners; never hardcode a package manager or linter)
 
 ### Control-flow features
-- One change per invocation — exits after first action taken
-- Priority-ordered checks: merge status > CI failures > comments > draft promotion
-- Worktree isolation — main checkout never modified
-- Filters to `chore(gardener)` PRs only
-- Provider detection at Entry; all forge calls use the shared command map
+
+- One action per invocation; exit after the first action taken
+- Priority-ordered selection (see Scenes)
+- Intent write-ahead before forge/git mutations; reconcile on entry
+- Content changes: worktree + local discovery checks + fresh assessment + at
+  most one focused correction
+- Comments preserved (reply + resolve); never deleted
+- Forks ignored; only same-repo `gardener/run-` PRs targeting the default branch
 
 ## Structural Flow
 
 ### Entry
-1. Detect `PROVIDER` from `git remote get-url origin` per `.agents/skills/_shared/runtime/providers.md`. Verify CLI auth via a functional request against the repo (`gh repo view` / `glab repo view`).
-2. Fetch all open PRs with `chore(gardener)` title prefix (normalize fields per `.agents/skills/_shared/runtime/providers.md`).
-3. Order by age (oldest first).
-4. For each PR, run checks in priority order.
+
+1. Resolve `MAIN_REPO` (cwd) and `CONTROL_ROOT` (walk parents of this skill file
+   until a directory contains `skills/gardener-sow`).
+2. Detect `PROVIDER` from `origin`; verify auth with a functional repo view
+   (`gh repo view` / `glab repo view`). Resolve the default branch once. On
+   GitLab, resolve `:pid` once.
+3. If `intent.json` exists and `skill` is not `tend` → stop; report owning skill.
+4. Worktree cleanup: `git worktree list`; remove paths under
+   `$CONTROL_ROOT/worktrees/` matching `gardener-*` that are **not**
+   `intent.worktree_path` (no intent / empty path → remove all such paths).
+5. Validate/rebuild gardener state per `gardener-state.md` (paginated open
+   gardener metadata; never overwrite invalid `closed.json`).
+6. If `skill` is `tend` and `intent.json` exists → reconcile from actual
+   git/forge (execution-protocol.md), then **exit**. That reconcile **is**
+   this invocation. Do not walk PRs.
+7. List open PRs (full pagination). Keep only PRs that match **all** of:
+   - title prefix `chore(gardener):`
+   - branch prefix `gardener/run-`
+   - `baseRefName` equals the resolved default branch
+   - same-repository head (not a fork)
+   Sort by `createdAt` ascending. Sync `open.json` from this metadata set.
 
 ### Scenes
-1. **CHECK_MERGE**: Normalize `mergeStateStatus` via View single PR. If conflicts or behind → rebase in worktree → push → exit.
-2. **CHECK_CI**: Fetch CI/pipeline status. If any failed → create worktree → diagnose + fix all failures → verify locally → push → exit.
-3. **CHECK_COMMENTS**: Fetch reviewer comments/notes. If actionable (code snippet) → implement change → delete comment → push → exit. If vague → ask for clarification → exit.
-4. **CHECK_DRAFT**: If PR is draft + all CI complete + no failures + no comments → promote to ready → exit.
-5. **ALL_CLEAR**: If no changes across all PRs → **MANDATORY** `sleep 300` (5 minutes) → confirm the sleep completed → exit silently.
+
+Walk oldest-first. For each PR, evaluate checks in this **strict priority**.
+On the first actionable item, perform that single action and exit.
+
+1. **HUMAN_REJECT** — non-marked comment explicitly asks to reject or close
+   → `tend_close` (authoritative).
+2. **REBASE** — conflicts or behind base → `tend_rebase`.
+3. **CI_REPAIR** — decide from **actual check/pipeline status**, not from
+   GitHub `mergeStateStatus: UNSTABLE` (that is not “running — skip”).
+   - Failed checks **attributable to this PR** → `tend_ci`.
+   - Pending/running CI → skip this PR (continue the oldest-first walk).
+   - Unrelated / base / infrastructure failures → post a marked comment
+     explaining no PR change; that comment **is** the one action; **exit**.
+     Do not fold those failures into the PR.
+4. **COMMENTS** — other actionable reviewer comments → `tend_comment`.
+   Vague comments → reply asking clarification (still one action), exit.
+5. **PROMOTE** — draft, mergeable, CI complete+green, no actionable unresolved
+   comments, fresh assessment of exact head passes → `tend_promote`.
+6. **ALL_CLEAR** — no PR needed action → report `all_clear`, **`sleep 300`**,
+   then exit. Do **not** sleep after a real tend action (close / rebase / CI /
+   comment / promote) — exit immediately so a queue drains fast.
 
 ### Transitions
-- If one PR needs action → act → exit. Next invocation continues from next PR.
-- If a check produces multiple diagnosis (e.g. multiple CI failures) → fix all in one pass.
-- If a fix fails local verification → fix it (local verification cannot fail by design).
+
+- Own-skill intent reconcile (when present) wins → finish it → exit.
+- First actionable PR+check wins → act → exit.
+- Content-changing actions (rebase, CI repair, comment implementation): after
+  pushable patch is ready → discovery local checks → fresh assessment → on
+  FAIL allow **one** focused correction + full re-verify/reassess → on second
+  FAIL stop without push.
+- After any successful content push, reassess whether further tend work is
+  needed on a **later** invocation (this invocation already spent its action).
+- Never mix close + push + promote in one invocation.
 
 ### Failure and recovery
-- If provider CLI is not authenticated → exit with error message.
-- If worktree creation fails → skip PR and try next.
-- If push fails (force-push rejected) → fetch latest and retry.
-- If comment is ambiguous → add reply asking for clarification, do not delete.
+
+| Failure | Recovery |
+|---------|----------|
+| Auth / provider detect fails | Stop before mutation |
+| Intent owned by another gardener skill | Stop; report that skill |
+| Invalid `closed.json` | Stop; do not overwrite |
+| Open state absent/invalid/wrong repo | Rebuild from forge metadata |
+| Worktree setup fails | Stop without source mutation |
+| Remote head changed vs captured SHA | Abort push; do not overwrite |
+| Local checks fail | Stop without push (failures are allowed) |
+| Assessment FAIL after one correction | Stop without push |
+| Unrelated CI failure | Marked gardener comment explaining skip; no code change |
+| Rate limit (429) | Save state; exit |
+| Cleanup failure | Report exact retained path; never claim clean completion |
 
 ### Exit
-- Success: one PR updated (rebase, fix, comment, or promotion).
-- No-op: all PRs healthy → **MANDATORY** `sleep 300` (5 minutes) before exiting — never end the turn until the sleep has completed.
-- Error: blocker documented.
+
+- Success: one tend operation completed and intent cleared after verification.
+- No-op: no gardener PR needed action.
+- Failure: blocker reported; no silent partial registry writes.
 
 ## Logical Operations
 
 ### Actions
+
 | Action | SSL primitive | Evidence |
 |--------|---------------|----------|
-| Detect provider | `READ` | `git remote get-url origin` |
-| Fetch open PRs | `CALL_TOOL` | List open PRs (`.agents/skills/_shared/runtime/providers.md`) |
-| Check merge state | `CALL_TOOL` | View single PR → normalize `mergeStateStatus` |
-| Check CI status | `CALL_TOOL` | Fetch CI / pipeline status |
-| Fetch comments | `CALL_TOOL` | Reviewer comments / notes |
-| Create worktree | `CALL_TOOL` | `git worktree add` |
-| Rebase branch | `CALL_TOOL` | `GIT_EDITOR=true GIT_SEQUENCE_EDITOR=true git rebase` + conflict resolution |
-| Diagnose CI fail | `CALL_TOOL` + `INFER` | Read CI logs + fix |
-| Run local verify | `VALIDATE` | Test/lint/coverage commands |
-| Push changes | `CALL_TOOL` | `git push --force-with-lease` |
-| Delete comment | `CALL_TOOL` | Delete comment/note (`.agents/skills/_shared/runtime/providers.md`) |
-| Promote draft | `CALL_TOOL` | Promote draft → ready |
-| Clean up worktree | `CALL_TOOL` | `git worktree remove` |
+| Resolve paths / provider / default branch | `READ` | origin, skill parents, repo view |
+| Reconcile intent | `COMPARE` | intent.json vs forge/git |
+| Reconcile open registry | `UPDATE_STATE` | paginated gardener PR metadata |
+| Select oldest actionable PR | `SELECT` | priority checks |
+| Write tend intent | `WRITE` | intent.json before mutation |
+| Worktree add/remove | `CALL_TOOL` | `$CONTROL_ROOT/worktrees/gardener-<run-id>` |
+| Non-interactive rebase / commit | `CALL_TOOL` | GIT_EDITOR bypasses |
+| Local discovery checks | `VALIDATE` | providers.md Local CI discovery |
+| Spawn implement/verify/assess/revise | `CALL_TOOL` | `task` + dispatch gate |
+| Push with lease | `CALL_TOOL` | `--force-with-lease` + captured SHA |
+| Reply / resolve comments | `CALL_TOOL` | marked `<!-- gardener -->` body |
+| Close + registries | `UPDATE_STATE` | closed rejected + remove open |
+| Promote draft | `CALL_TOOL` | ready when promotion gate passes |
 
 ### Canonical workflow path
 
 ```
-1. Detect PROVIDER; auth check via `gh repo view` / `glab repo view` (functional request against the repo)
-2. List open PRs; filter title startswith "chore(gardener)"; sort createdAt asc
-3. Per PR: normalize mergeStateStatus → CI → comments → draft promotion
-4. All forge commands from `.agents/skills/_shared/runtime/providers.md` for PROVIDER
+1. Entry: paths, provider, auth, default branch
+2. Stop if another gardener skill owns intent
+3. Cleanup orphan gardener-* worktrees; reconcile open.json (stop if closed.json invalid)
+4. If tend intent exists → reconcile from git/forge → EXIT (do not walk)
+5. List same-repo gardener/run- PRs targeting default; oldest first
+6. Priority walk → one of: close | rebase | ci | comment | promote | no-op
+7. For mutations: write intent → perform → verify forge/git → update registries → clear intent
+8. Exit
 ```
 
 ### Resource scope
-| Scope | Resource target |
-|-------|-----------------|
-| `CODEBASE` | PR source code, tests, CI config |
-| `LOCAL_FS` | Git worktrees for isolated changes |
-| `PROCESS` | `gh` / `glab`, test/lint/coverage commands |
-| `MEMORY` | PR state, diagnosis notes, verification evidence |
-| `NETWORK` | GitHub or GitLab API via forge CLI |
+
+| Scope | Target |
+|-------|--------|
+| `CODEBASE` | PR branch only, via `WORKTREE` |
+| `LOCAL_FS` | `$CONTROL_ROOT/state/gardener/`, worktrees, temp ledgers |
+| `PROCESS` | forge CLI, discovered local check commands, git |
+| `NETWORK` | forge API via CLI |
+| `MEMORY` | intent, open/closed registries, subagent ledger |
 
 ### Preconditions
-- Matching forge CLI is authenticated and has access to the repository.
-- Test, lint, and coverage commands are available locally.
-- Main checkout may be in any state (worktrees used for all changes).
+
+- Functional forge auth against the repo
+- Identification rules from gardener-contract.md
+- Content edits only in `WORKTREE`
 
 ### Effects and side effects
-- Pushes force-pushed commits to PR branches.
-- Deletes resolved reviewer comments/notes.
-- Promotes draft PRs to ready for review.
-- Creates and removes git worktrees.
+
+- May force-with-lease push the PR branch
+- May reply to / resolve comments (never delete)
+- May close a PR and write `rejected` closed learning
+- May promote draft → ready
+- May create/remove gardener worktrees under `CONTROL_ROOT`
 
 ### Guardrails
-1. **chore(gardener) only** — never operate on non-gardener PRs
-2. **One change per invocation** — rebase, fix, comment, or promote, never mixed
-3. **Never push failing CI** — always verify locally before push
-4. **Delete comments atomically** — only after push succeeds
-5. **Worktree isolation** — all changes in worktrees, never main repo
-6. **Fix all CI failures in one pass** — diagnose and fix every failed step
-7. **Ask when vague** — ambiguous comments get a reply, not a delete
-8. **Age priority** — oldest PRs first
-9. **Provider-agnostic** — never hardcode `gh` or `glab`; use `.agents/skills/_shared/runtime/providers.md`
-10. **No-op sleep is mandatory** — on ALL_CLEAR, run `sleep 300` (5 minutes) and confirm it completed before ending the turn; never exit early
-11. **Never run interactive git commands** — never run `git rebase --continue` or any git command that may open an editor (rebase, merge, commit, etc.) without a non-interactive bypass: `GIT_EDITOR=true` (plus `GIT_SEQUENCE_EDITOR=true` for interactive rebases), or `git config core.editor true` in the worktree
+
+1. **One action only** — then exit.
+2. **Gardener identity** — title + `gardener/run-` + default target + same-repo; forks out of scope.
+3. **Never delete comments** — reply with outcome; resolve when supported.
+4. **Every gardener comment** includes the exact line `<!-- gardener -->`.
+5. **Human reject/close** (non-marked explicit ask) is authoritative → close, write
+   `closed.json` category `rejected` with `suppress_equivalent: true`, remove open entry.
+6. **Agent CLOSE comments are marked** and must not suppress.
+7. **PR-attributable CI only** — do not absorb unrelated failures.
+8. **Capture head SHA** before content work; push `--force-with-lease`; abort on unexpected remote head.
+9. **Non-interactive git only** — `GIT_EDITOR=true` / `GIT_SEQUENCE_EDITOR=true` (or equivalent).
+10. **Local checks** via discovery procedure only — no Poetry/Ruff/coverage hardcoding.
+11. **Idle sleep only** — `sleep 300` solely on `all_clear`. Never sleep after
+    a completed tend action.
+12. **Verification can fail** — stop without push; never claim verification cannot fail.
+13. **Dispatch gate** — delegated implement/verify/revise/assess outputs must pass
+    `.agents/skills/_shared/runtime/subagent-dispatch-gate.md` before consumption.
+14. **Do not require** any particular project guidance filename by name.
+15. **Intent ops only**: `tend_rebase`, `tend_ci`, `tend_comment`, `tend_close`, `tend_promote`.
 
 ## References
 
-- How to run (outer loops): `.agents/skills/_shared/runtime/gardener-running.md`
-- Sibling skills: `gardener-sow` (create PRs), `gardener-harvest` (merge queue)
-- Provider CLI map: `.agents/skills/_shared/runtime/providers.md`
-- Worktree isolation: `.agents/skills/gardener-tend/resources/worktree-isolation.md`
-- Execution protocol: `.agents/skills/gardener-tend/resources/execution-protocol.md`
-- Context loading: `.agents/skills/_shared/core/context-loading.md`
-- Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Contract: `.agents/skills/_shared/runtime/gardener-contract.md`
+- State: `.agents/skills/_shared/runtime/gardener-state.md`
+- Running: `.agents/skills/_shared/runtime/gardener-running.md`
+- Providers + Local CI discovery: `.agents/skills/_shared/runtime/providers.md`
+- Dispatch gate: `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`
+- Execution: `.agents/skills/gardener-tend/resources/execution-protocol.md`
+- Worktrees: `.agents/skills/gardener-tend/resources/worktree-isolation.md`
+- Assessment prompt: `.agents/skills/gardener-tend/resources/assessment-prompt.md`
+- Implement prompt: `.agents/skills/gardener-tend/resources/implement-prompt.md`
+- Revise prompt: `.agents/skills/gardener-tend/resources/revise-prompt.md`
+- Scenarios: `.agents/skills/gardener-tend/resources/scenarios.md`
