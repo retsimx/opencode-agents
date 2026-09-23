@@ -135,7 +135,7 @@ All result, progress, review, and state files MUST be written to the **project r
 ## On Start
 
 1. Confirm assigned task parameters: `SESSION_ID`, `TASK_SLUG`, and designated `OUTPUT_FILE` (or apply Standalone Fallback).
-2. Read `.agents/results/task-board.md` (or parent task prompt) to confirm requirements and dependencies.
+2. Read `.agents/results/task-board-{sessionId}.md` (or parent task prompt) to confirm requirements and dependencies.
 3. Pre-flight load `docs/checklists/<domain>.md` in host root (fallback: `.agents/skills/<skill>/resources/checklist.md`).
 4. Initialize `.agents/results/progress-{role}-{taskSlug}-{sessionId}.md` with initial task status, plan, and target files.
 

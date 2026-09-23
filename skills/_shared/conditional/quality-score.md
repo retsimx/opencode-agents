@@ -90,7 +90,7 @@ ELSE:
 ### Delta Recording
 
 Every scored change is recorded in the Experiment Ledger (see `.agents/skills/_shared/conditional/experiment-ledger.md`).
-Append a row to `.agents/results/experiment-ledger.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
+Append a row to `.agents/results/experiment-ledger-{sessionId}.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 
 ---
 

@@ -9,7 +9,7 @@ Inspired by autoresearch's git-commit-as-experiment-log pattern.
 
 The ledger follows the file-based coordination protocol (see `.agents/skills/_shared/runtime/coordination-protocol.md`):
 
-- **Location**: `.agents/results/experiment-ledger.md`
+- **Location**: `.agents/results/experiment-ledger-{sessionId}.md`
 
 The orchestrate creates the ledger; agents append rows with the built-in `read` / `edit` tools.
 
@@ -61,7 +61,7 @@ Do NOT record: trivial formatting, changes with no measurable impact, PLAN phase
 3. Measure new quality score
 4. Calculate delta: `score_after - score_before`
 5. Apply Keep/Discard rule from `.agents/skills/_shared/conditional/quality-score.md`
-6. Append a row to `.agents/results/experiment-ledger.md` via `edit` (see `.agents/skills/_shared/runtime/coordination-protocol.md`)
+6. Append a row to `.agents/results/experiment-ledger-{sessionId}.md` via `edit` (see `.agents/skills/_shared/runtime/coordination-protocol.md`)
 
 ### Who Records
 

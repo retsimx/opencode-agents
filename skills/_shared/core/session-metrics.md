@@ -46,7 +46,7 @@ Agents that frequently require re-direction consume more tokens and user time th
 
 ## Session Log Format
 
-Orchestrator maintains this log in `.agents/results/session-metrics.md` during execution.
+Orchestrator maintains this log in `.agents/results/session-metrics-{sessionId}.md` during execution.
 
 ```markdown
 ## Session: {SESSION_ID}
@@ -81,7 +81,7 @@ When user sends a correction/clarification during session:
    - Is user correcting a misunderstanding? → `correct`
    - Is user rejecting work and asking for restart? → `redo`
 
-2. **Record** by appending to `.agents/results/session-metrics.md` with `edit` (see `.agents/skills/_shared/runtime/coordination-protocol.md`).
+2. **Record** by appending to `.agents/results/session-metrics-{sessionId}.md` with `edit` (see `.agents/skills/_shared/runtime/coordination-protocol.md`).
 
 3. **Check threshold** after each event:
    - If CD >= 80: Pause and request re-specification
@@ -169,7 +169,7 @@ This data is sourced from the Experiment Ledger at session end (see `.agents/ski
 
 ## Metrics Retention
 
-- **Active session**: `.agents/results/session-metrics.md`
+- **Active session**: `.agents/results/session-metrics-{sessionId}.md`
 - **Completed sessions**: Archived to `.agents/results/archive/metrics-{date}.md`
 - **Retention**: 30 days (configurable)
 - **Aggregation**: `stats` command summarizes trends

@@ -51,7 +51,16 @@ All subagent task deliverables follow the 4-part formula:
 When orchestrators or subagents resolve `SESSION_ID`, follow this strict priority order:
 1. **Issue / Epic Slug**: If executing against a tracked issue or feature ticket (e.g., `issue-104`, `epic-booking-pdf`), use the normalized issue slug.
 2. **Conversation Prefix**: If running in an interactive conversation session without an issue slug, use the first 8 characters of the conversation ID (e.g., `conv-97e0b488`).
-3. **Timestamp Fallback**: If neither is available, auto-generate `YYYYMMDD-HHMMSS` (e.g., `20260828-160543`).
+3. **Timestamp Fallback**: If neither is available, use the literal `session`.
+
+Then ALWAYS append a run suffix: `SESSION_ID = <slug>-<YYYYMMDD-HHMMSS>-<rand4hex>` (e.g. `issue-104-20260923-131500-a3f9`; `openssl rand -hex 2`). The `<rand4hex>` suffix guarantees uniqueness when two sessions share a slug or start within the same second.
+
+### Session Artifact Naming & Run Temp (NORMATIVE)
+
+- **Artifact filenames**: every session-scoped artifact MUST place `sessionId` LAST before its extension — `<base>-<sessionId>.<ext>` (e.g. `result-qa-alignment-<sessionId>.md`, `plan-<sessionId>.json`, `task-board-<sessionId>.md`). A session artifact with a fixed, non-suffixed name is FORBIDDEN: two concurrent sessions must never share a filename.
+- **Shared-within-session**: `task-board-<sessionId>.md`, `session-ultrawork-<sessionId>.md`, `experiment-ledger-<sessionId>.md`, and `session-metrics-<sessionId>.md` are each shared by all agents of ONE session and unique across sessions. Never use the unsuffixed forms.
+- **Run temp directory (`RUN_TMP`)**: all inter-agent scratch I/O MUST live under a session-scoped directory `RUN_TMP=".agents/results/tmp/<skill>-<sessionId>/"` anchored to the control/parent repo and passed to subagents by reference (e.g. `RUN_TMP/commit-msg.txt`, `RUN_TMP/pr-body.txt`). Global fixed-name temp paths such as `/tmp/pr-body.txt` are FORBIDDEN — they collide across concurrent runs (including across repositories) and are a shared-write hazard.
+- **Cleanup**: delete `RUN_TMP` on successful completion. On failure or blockage, preserve it with the worktree (Worktree Preservation Invariant) for reproduction.
 
 ### Orchestrator Zero-Context Relay Protocol (Pass-by-Reference)
 
@@ -75,7 +84,7 @@ To prevent unbounded disk storage growth while retaining session auditability:
 ## On Start
 
 1. Confirm `SESSION_ID`, `TASK_SLUG`, and designated `OUTPUT_FILE` from prompt (or apply Standalone Fallback).
-2. Read `.agents/results/task-board.md` (or task prompt) to confirm requirements.
+2. Read `.agents/results/task-board-{sessionId}.md` (or task prompt) to confirm requirements.
 3. Write initial status to `.agents/results/progress-{role}-{taskSlug}-{sessionId}.md`.
 
 ## During Execution
@@ -112,7 +121,7 @@ To prevent unbounded disk storage growth while retaining session auditability:
 ## Experiment Tracking (Optional Extension)
 
 When a workflow activates Quality Score measurement, agents record experiments
-in `.agents/results/experiment-ledger.md`. After each measurable change, append
+in `.agents/results/experiment-ledger-{sessionId}.md`. After each measurable change, append
 a row:
 
 ```
