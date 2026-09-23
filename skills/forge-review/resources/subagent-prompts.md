@@ -8,7 +8,7 @@ All heavy inputs (`DIFF_FILE`, `SPEC_FILE`, `PR_CONTEXT_FILE`, `RAW_REVIEW_FILE`
 
 ## 1. Subagent 0: `context-ingestion` (Context Ingestion & Sanitization Specialist)
 
-> **Dispatch type (HARD OVERRIDE)**: Subagent 0 MUST be dispatched with the `general` subagent type (`subagent_type="general"`), overriding any default that routes all subagents to a high-power model (e.g. `m365gpt`). Subagent 0 is mostly mechanical (forge CLI, shell, file writes) and does not need a high-power model; a smaller, faster `general` subagent is sufficient and more reliable. This override applies ONLY to Subagent 0; Subagents 1–4 follow the default dispatch type.
+> **Dispatch type (HARD OVERRIDE — NO EXCEPTIONS)**: The Subagent 0 task MUST set the EXPLICIT argument `subagent_type="general"`. Never omit the argument (a harness default is NOT acceptable) and never pass any other value, even when the harness default subagent is a different or higher-powered model. Subagent 0 is mechanical (forge CLI, shell, file writes); only `general` is reliable for it, whereas a shell-restricted default/higher-powered subagent is not. Record `"dispatch_type": "general"` in `state.json`; any other value invalidates the dispatch and requires re-dispatch. This override applies ONLY to Subagent 0; Subagents 1–4 use the harness-configured default subagent type.
 
 ```json
 {

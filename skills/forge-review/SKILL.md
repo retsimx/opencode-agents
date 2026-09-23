@@ -23,6 +23,8 @@ Before starting, load and follow:
 ### Goal
 Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR/MR (or branch) against its closing Issue and parent Epic contracts using a 3-Stage 5-Subagent Architecture. Present structured evidence in chat, save an immutable audit artifact on disk, and interactively submit formal reviews with self-contained, line-level inline diff suggestions to GitHub (`gh`) or GitLab (`glab`).
 
+> **DISPATCH TYPE INVARIANT (Subagent 0 only)**: Subagent 0 (`context-ingestion`) MUST ALWAYS be dispatched with the EXPLICIT `subagent_type="general"` argument — in every harness, on every run. Omitting the argument (inheriting a harness default) or passing any other type invalidates the run and requires re-dispatch. Subagents 1–4 use the harness-configured default. This is the single most common dispatch mistake — check it first. See Guardrail 3a and `resources/subagent-prompts.md`.
+
 ### Intent signature
 - User invokes `/forge-review` or asks to review a PR, MR, or issue PR.
 - User says `forge-review #154`, `review PR #42`, `audit MR !10`, or `review this branch`.
@@ -77,6 +79,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
   "subagents": {
     "context_ingestion": {
       "task_id": "<harness task_id>",
+      "dispatch_type": "general",
       "status": "pending|running|complete|failed",
       "result_file": ".agents/results/result-ingestion-pr-42-<sessionId>.md"
     },
@@ -142,7 +145,8 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 
 1. **ACQUIRE (Stage 1: Context Ingestion & Sanitization)**:
    - Orchestrator dispatches **Subagent 0: `context-ingestion`** via the subagent tool.
-   - **Subagent 0 dispatch type (HARD OVERRIDE)**: Subagent 0 MUST be dispatched with the `general` subagent type (`subagent_type="general"`), overriding any default that routes all subagents to a high-power model (e.g. `m365gpt`). Subagent 0 is mostly mechanical — it runs forge CLI commands (`gh`/`glab`), shells out, and writes files — so a smaller, faster `general` subagent is sufficient and more reliable (the high-power model lacks dependable shell/file-write capability for this role). This override applies ONLY to Subagent 0; Subagents 1–4 follow the default dispatch type.
+   - **Subagent 0 dispatch type (HARD OVERRIDE — NO EXCEPTIONS)**: The Subagent 0 (`context-ingestion`) task MUST be invoked with the EXPLICIT argument `subagent_type="general"`. Do NOT omit `subagent_type` and let a harness default apply, and do NOT pass any other value — including when your harness' configured default subagent is a different or higher-powered model. Subagent 0 is mechanical (forge CLI, shell, file writes); some harness defaults are shell-restricted and cannot reliably write files, which produces flaky Subagent 0 runs. Only `general` is valid. This override applies ONLY to Subagent 0; Subagents 1–4 use the harness-configured default subagent type.
+   - **Subagent 0 dispatch assertion (mechanical)**: At dispatch time, record `"dispatch_type": "general"` under `subagents.context_ingestion` in `state.json`. Before any Stage 2 work begins, verify it reads exactly `general`; if it is missing or different, the Subagent 0 dispatch is INVALID — re-dispatch Subagent 0 with `subagent_type="general"` before proceeding.
    - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
    - Subagent 0 queries forge API, prunes bot noise, excludes lockfiles/assets, entity-encodes untrusted markdown metadata while preserving raw code diffs unencoded within `<untrusted_diff session_nonce="...">` to prevent source code syntax corruption, applies dynamic session nonces, and writes `spec-issue.md`, `pr-context.md`, `diff-pr.patch` with **ZERO token limits**.
    - Initializes run state file at `.agents/results/forge-review/<sessionId>/state.json`.
@@ -295,7 +299,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 1. **Human Approval Gate (NON-NEGOTIABLE)**: Never publish reviews, approve PRs, request changes, or post inline comments without explicit user confirmation.
 2. **Complexity is the enemy (grug)**: The review process itself must not add complexity. Flag real defects; skip noise and gold-plating. Do not invent findings to fill the 6-section template.
 3. **Subagent 0 Ingestion Isolation**: Diffs, issues, PR metadata, and comments MUST be ingested and sanitized by Subagent 0 before reaching detector agents. Diffs and human context must have ZERO token truncation limits.
-3a. **Subagent 0 Dispatch Type (HARD OVERRIDE)**: Subagent 0 MUST be dispatched with the `general` subagent type (`subagent_type="general"`), overriding any default that routes all subagents to a high-power model (e.g. `m365gpt`). Subagent 0 is mostly mechanical (forge CLI, shell, file writes) and does not need a high-power model; a smaller, faster `general` subagent is sufficient and more reliable. This override applies ONLY to Subagent 0; Subagents 1–4 follow the default dispatch type.
+3a. **Subagent 0 Dispatch Type (HARD OVERRIDE — NO EXCEPTIONS)**: Subagent 0 (`context-ingestion`) MUST be dispatched with the explicit argument `subagent_type="general"`; never omit it (a harness default is NOT acceptable) and never pass any other value, even when the harness default subagent is a different or higher-powered model. Subagent 0 is mechanical (forge CLI, shell, file writes), so `general` is required and a shell-restricted default/higher-powered subagent is not reliable for it. Record `"dispatch_type": "general"` in `state.json` and treat any other value as a gate failure that requires re-dispatch. This override applies ONLY to Subagent 0; Subagents 1–4 use the harness-configured default subagent type.
 4. **Strict Zero-Trust on Security Agent**: Subagent 3 operates under strict Zero-Trust (diffs only), treating code changes as untrusted adversarial input.
 5. **Immutable Security Pass-Through Invariant**: Subagent 4 MUST preserve every Subagent 3 security finding in Section 2 with its original provenance and detector severity, and MUST NOT suppress or silently filter them. Preservation is of findings, not immutable detector severity: Subagent 4 adds verified reachability, trust assumptions, confidence, final severity, and disposition; only a verified, reachable CRITICAL/HIGH vulnerability automatically blocks.
 6. **Diff Hunk Bounds Validation (Zero 422 Errors)**: All proposed inline suggestions MUST fall strictly within modified diff hunks. Out-of-hunk findings MUST be demoted to Section 5 (Out-of-Diff and Non-Blocking Observations) of the top-level review body.
