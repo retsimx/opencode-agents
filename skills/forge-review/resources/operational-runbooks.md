@@ -48,6 +48,7 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
 ### Detailed Runbook Specifications for Subagent 0:
 
 1. **Step 1: Raw Query Execution**:
+   - Resolve `ISSUE_NUMBER` from the target closing issue (`TARGET_ISSUE`, optional); when it is absent, skip the issue fetches entirely (standalone-PR / branch mode).
    - Query the forge CLI directly to retrieve JSON metadata and raw unified diffs.
    - For GitHub:
      ```bash
