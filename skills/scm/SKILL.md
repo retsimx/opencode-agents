@@ -400,12 +400,13 @@ If HEREDOC is unstable in your shell (or body is long), use file-based commit in
 
 ```bash
 git add <specific-files>
-cat > /tmp/commit-msg.txt <<'EOF'
+COMMIT_MSG_FILE=$(mktemp)
+cat > "$COMMIT_MSG_FILE" <<'EOF'
 <type>(<scope>): <description>
 
 [optional body]
 EOF
-git commit -F /tmp/commit-msg.txt
+git commit -F "$COMMIT_MSG_FILE"
 ```
 
 Use HEREDOC by default, and switch to `-F` for long or flaky terminal sessions.

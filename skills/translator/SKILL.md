@@ -328,7 +328,7 @@ When translating multiple strings (e.g., UI keys):
 Use when the English source has changed and one or more existing target-language translations need to be brought back in sync. Triggered by `docs` v2 multilingual sync, manual i18n catch-up after a docs PR, or any "the source moved, the translation didn't" scenario.
 
 **Inputs**:
-- A unified diff of the English source (`/tmp/en-diff.patch` or git diff snippet)
+- A unified diff of the English source (e.g. a `git diff` snippet, or a session-unique file such as `$(mktemp)` output)
 - One or more target-language file paths (existing translations of the same source)
 - Optional: per-locale glossary or terminology hints
 
