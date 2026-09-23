@@ -80,9 +80,10 @@ Automatically orchestrate multi-agent execution with task decomposition, paralle
 
 Look for a plan file:
 
-1. Check `.agents/results/plan-{sessionId}.json` (current session's plan).
-2. If not found: find the most recent `.agents/results/plan-*.json` file.
-3. If none exist: ask the user to run the plan skill first, or ask them to describe the tasks to execute.
+1. If the caller provided an explicit `PLAN_FILE` path, use it.
+2. Else check `.agents/results/plan-{sessionId}.json` for the current session.
+3. Else, if exactly one `.agents/results/plan-*.json` exists, use it. If more than one exists, list them and ask the user to choose — do NOT silently pick the most recent (a concurrent session's plan may be selected).
+4. If none exist: ask the user to run the plan skill first, or ask them to describe the tasks to execute.
 - **Do NOT proceed without a plan.**
 
 ---

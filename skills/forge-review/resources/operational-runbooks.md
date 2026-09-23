@@ -54,16 +54,16 @@ Subagent 0 guarantees that input contracts, diffs, and context files are complet
      gh pr view 42 --json number,title,body,baseRefName,headRefOid,changedFiles,author,comments,reviews > raw-pr.json
      gh api repos/{owner}/{repo}/pulls/42/comments > raw-review-comments.json
      gh api repos/{owner}/{repo}/issues/42/comments > raw-pr-conversation.json
-     [ -n "<ISSUE_NUMBER>" ] && gh api repos/{owner}/{repo}/issues/<ISSUE_NUMBER>/comments > raw-issue-comments.json  # only when a closing issue exists
+     [ -n "$ISSUE_NUMBER" ] && gh api repos/{owner}/{repo}/issues/"$ISSUE_NUMBER"/comments > raw-issue-comments.json  # only when a closing issue exists
      gh pr diff 42 > raw-diff.patch
-     gh issue view 154 --json number,title,body,labels,author > raw-issue.json
+     [ -n "$ISSUE_NUMBER" ] && gh issue view "$ISSUE_NUMBER" --json number,title,body,labels,author > raw-issue.json  # only when a closing issue exists
      ```
    - For GitLab:
      ```bash
      glab mr view 42 --output json > raw-mr.json
      glab api projects/:id/merge_requests/42/notes > raw-mr-notes.json
      glab api projects/:id/merge_requests/42/discussions > raw-mr-discussions.json
-     [ -n "<ISSUE_NUMBER>" ] && glab api projects/:id/issues/<ISSUE_NUMBER>/notes > raw-issue-notes.json  # only when a closing issue exists
+     [ -n "$ISSUE_NUMBER" ] && glab api projects/:id/issues/"$ISSUE_NUMBER"/notes > raw-issue-notes.json  # only when a closing issue exists
      glab mr diff 42 > raw-diff.patch
      glab api /projects/:id/merge_requests/42/versions > versions.json
      ```

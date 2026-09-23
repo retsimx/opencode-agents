@@ -90,8 +90,8 @@
 - Recommended filename patterns:
   - `docs/design-docs/ADR-{NNN}-{topic}.md`
   - `.agents/results/result-architecture-{sessionId}.md`
-  - `.agents/results/architecture/architecture-recommendation-<topic>.md`
-  - `.agents/results/architecture/cbam-<topic>.md`
+  - `.agents/results/architecture/architecture-recommendation-<topic>-{sessionId}.md`
+  - `.agents/results/architecture/cbam-<topic>-{sessionId}.md`
 
 ## On Completion
 1. Confirm deliverable file is written to disk.

@@ -21,7 +21,7 @@ WORKTREE=$(realpath ../<repo-name>-<number>)
 RESULTS_DIR="${PARENT_REPO}/.agents/results"
 
 # 4. Allocate a unique run identity and session-scoped temp dir
-SESSION_ID="issue-<number>-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
+SESSION_ID="issue-<number>-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2 2>/dev/null || head -c2 /dev/urandom | od -An -tx1 | tr -d ' \n')"
 RUN_TMP="${RESULTS_DIR}/tmp/issue-autopilot-${SESSION_ID}"
 mkdir -p "${RESULTS_DIR}" "${RUN_TMP}"
 ```

@@ -113,7 +113,7 @@ All subagent coordination, deliverables, reviews, and progress tracking MUST fol
 
 3. **Standalone Fallback**:
    - If `OUTPUT_FILE` is not explicitly passed in the subagent prompt template, the subagent MUST auto-generate a timestamped destination:
-     `.agents/results/result-{role}-{taskSlug}-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2).md`
+     `.agents/results/result-{role}-{taskSlug}-session-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2 2>/dev/null || head -c2 /dev/urandom | od -An -tx1 | tr -d ' \n').md`
 
 4. **Universal 4-Line Chat Return Contract**:
    - Upon completing execution (whether SUCCESS, BLOCKED, or FAILED), subagents MUST return ONLY the concise 4-line standardized format in chat to conserve orchestrator context:

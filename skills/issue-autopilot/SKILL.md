@@ -90,7 +90,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
    PARENT_REPO=$(git rev-parse --show-toplevel)
    WORKTREE=$(realpath ../<repo-name>-<number>)
    RESULTS_DIR="${PARENT_REPO}/.agents/results"
-   SESSION_ID="issue-<number>-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
+   SESSION_ID="issue-<number>-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2 2>/dev/null || head -c2 /dev/urandom | od -An -tx1 | tr -d ' \n')"
    RUN_TMP="${RESULTS_DIR}/tmp/issue-autopilot-${SESSION_ID}"
    mkdir -p "${RUN_TMP}"
    ```
@@ -184,7 +184,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
    - **Phase 3: VERIFY (Steps 6–8)**: Dispatches QA Agent for Alignment Review (Step 6), Security/Bug Review (Step 7), and Improvement/Regression Review (Step 8). Enforces root-cause-first remediation.
    - **Phase 4: REFINE (Steps 9–13)**: Dispatches Debug Agent for splitting large files (>500 lines), reusability review, side-effect analysis, and dead code cleanup.
    - **Phase 5: SHIP (Steps 14–17)**: Dispatches QA Agent for final code quality checks, UX flow verification, cascade impact review, and deployment readiness review.
-5. All child output artifacts (`result-*-${SESSION_ID}.md`, `session-ultrawork-${SESSION_ID}.md`, `experiment-ledger-${SESSION_ID}.md`) are persisted directly to `${RESULTS_DIR}` (session-unique; never the unsuffixed names).
+5. All child output artifacts (`result-*-${SESSION_ID}*.md`, `session-ultrawork-${SESSION_ID}.md`, `experiment-ledger-${SESSION_ID}.md`) are persisted directly to `${RESULTS_DIR}` (session-unique; never the unsuffixed names).
 6. Await `ultrawork` completion return (`Status: SUCCESS`).
 7. After implementation completes, verify no application code files were modified outside `$WORKTREE`.
 

@@ -164,7 +164,7 @@ When user wants fixes too, execute review then fix then re-review loop:
      - For multi-domain fixes, spawn separate tasks per domain
    - Record the harness-returned `task_id` for each spawned fix agent in `.agents/results/subagent-ledger-{sessionId}.json`.
 
-3. Re-spawn review agent (via OpenCode `task` tool) to re-review fixed code and write updated `.agents/results/result-review-{taskSlug}-{sessionId}-verify.md`. Record the harness-returned `task_id` in `.agents/results/subagent-ledger-{sessionId}.json`.
+3. Re-spawn review agent (via OpenCode `task` tool) to re-review fixed code and write updated `.agents/results/result-review-{taskSlug}-verify-{sessionId}.md`. Record the harness-returned `task_id` in `.agents/results/subagent-ledger-{sessionId}.json`.
 4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.
 
 Before consuming any spawned review/fix agent's deliverable, run the Dispatch Gate Check: confirm a non-empty `task_id` is recorded, `status == complete`, and the `result_file` exists and is non-empty. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.

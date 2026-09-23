@@ -50,10 +50,10 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 - `forge`: GitHub (`gh`) or GitLab (`glab`), auto-detected via `git remote get-url origin`.
 
 ### Expected outputs
-- Ingested diff saved at `.agents/results/diff-pr-{n}-{sessionId}.patch`.
-- Ingested issue spec saved at `.agents/results/spec-issue-{n}-{sessionId}.md`.
-- Ingested PR context (current-state only), including a labelled untrusted author/maintainer comments block, saved at `.agents/results/pr-context-{n}-{sessionId}.md`.
-- Ingested historical review findings saved at `.agents/results/pr-history-{n}-{sessionId}.md`.
+- Ingested diff saved at `.agents/results/diff-pr-{sessionId}.patch`.
+- Ingested issue spec saved at `.agents/results/spec-issue-{sessionId}.md`.
+- Ingested PR context (current-state only), including a labelled untrusted author/maintainer comments block, saved at `.agents/results/pr-context-{sessionId}.md`.
+- Ingested historical review findings saved at `.agents/results/pr-history-{sessionId}.md`.
 - Raw audit findings at `.agents/results/raw-findings-pr-{n}-{sessionId}.md`.
 - Pristine, verified 6-section audit artifact at `.agents/results/review-pr-{n}-{sessionId}.md`.
 - 6-Section alignment scorecard and deep review summary in chat.
@@ -73,10 +73,10 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
   "pr_number": 42,
   "issue_number": 154,
   "epic_number": 12,
-  "diff_file": ".agents/results/diff-pr-42-<sessionId>.patch",
-  "spec_file": ".agents/results/spec-issue-154-<sessionId>.md",
-  "pr_context_file": ".agents/results/pr-context-42-<sessionId>.md",
-  "pr_history_file": ".agents/results/pr-history-42-<sessionId>.md",
+  "diff_file": ".agents/results/diff-pr-<sessionId>.patch",
+  "spec_file": ".agents/results/spec-issue-<sessionId>.md",
+  "pr_context_file": ".agents/results/pr-context-<sessionId>.md",
+  "pr_history_file": ".agents/results/pr-history-<sessionId>.md",
   "subagents": {
     "context_ingestion": {
       "task_id": "<harness task_id>",

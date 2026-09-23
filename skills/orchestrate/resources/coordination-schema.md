@@ -26,7 +26,7 @@ Created by the orchestrator at session start. Updated throughout execution.
 
 ```markdown
 # Orchestrator Session
-## ID: session-{YYYYMMDD}-{HHMMSS}
+## ID: session-{YYYYMMDD}-{HHMMSS}-{rand4hex}
 ## Started: {ISO timestamp}
 ## Status: running | completed | failed | aborted
 

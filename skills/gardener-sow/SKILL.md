@@ -151,7 +151,7 @@ if needed), cleanup, exit.
 4. Verify PR exists; update `open.json` (number, url, title, branch, head_sha,
    topic, rationale, areas, created_at).
 5. Delete `intent.json` only after expected result is verified.
-6. Cleanup: remove `WORKTREE` + branch local ref as appropriate; delete `RUN_TMP`.
+6. Cleanup: remove `WORKTREE` + branch local ref as appropriate; **retain** `RUN_TMP` (session artifacts are the audit trail and are not auto-deleted).
 
 ### 8. Exit
 
