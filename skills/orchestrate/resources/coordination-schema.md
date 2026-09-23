@@ -57,7 +57,7 @@ understand their assignment but never write to it.
 
 ```markdown
 # Task Board
-## Session: session-{YYYYMMDD}-{HHMMSS}
+## Session: session-{YYYYMMDD}-{HHMMSS}-{rand4hex}
 
 ### task-1
 - **Agent**: backend

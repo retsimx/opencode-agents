@@ -15,7 +15,9 @@ Quick check to determine conversion strategy:
 
 ```bash
 # Check if PDF has text layer (vs scanned image)
-uvx opendataloader-pdf input.pdf --format text --output-dir "$(mktemp -d)"
+OUT_DIR=$(mktemp -d)
+uvx opendataloader-pdf input.pdf --format text --output-dir "$OUT_DIR"
+ls "$OUT_DIR"
 ```
 
 - If output contains readable text → standard mode

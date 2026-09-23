@@ -112,7 +112,7 @@ If you discover a necessary change outside your domain:
 | `{AGENT_ROLE}` | Agent SKILL.md title | "Backend Specialist" |
 | `{AGENT_ID}` | Task assignment | "backend" |
 | `{TASK_SLUG}` | Task assignment | "jwt-auth-api" |
-| `{OUTPUT_FILE}` | Orchestrator session | ".agents/results/result-backend-jwt-auth-api-session-20260405-100835.md" |
+| `{OUTPUT_FILE}` | Orchestrator session | ".agents/results/result-backend-jwt-auth-api-session-20260405-100835-a3f9.md" |
 | `{AGENT_SKILL_CONTENT}` | Agent SKILL.md body | Full markdown content |
 | `{TASK_ID}` | task-board-{sessionId}.md | "task-1" |
 | `{TASK_TITLE}` | task-board-{sessionId}.md | "JWT authentication API" |
@@ -121,4 +121,4 @@ If you discover a necessary change outside your domain:
 | `{ACCEPTANCE_CRITERIA}` | task-board-{sessionId}.md | Bulleted list |
 | `{WORKSPACE_PATH}` | Orchestrator config | "/path/to/project" |
 | `{MAX_TURNS}` | Orchestrator config | "20" |
-| `{SESSION_ID}` | Orchestrator session | "session-20260405-100835" |
+| `{SESSION_ID}` | Orchestrator session | "session-20260405-100835-a3f9" |

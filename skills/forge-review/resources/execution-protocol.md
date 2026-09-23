@@ -239,7 +239,7 @@ glab api \
 #### 3. Top-Level Review Summary & Approval
 ```bash
 # Post top-level summary note
-glab mr note <MR_IID> --message "$(cat .agents/results/review-summary-${SESSION_ID}.md)"
+glab mr note <MR_IID> --message "$(cat .agents/results/review-pr-<n>-${SESSION_ID}.md)"
 
 # The approval action below derives from the VERIFIER'S FINAL VERDICT (Subagent 4), not from raw
 # detector severity. A CRITICAL/HIGH detector finding alone does not force REQUEST_CHANGES.
@@ -349,7 +349,7 @@ When submitting an inline suggestion to GitHub/GitLab:
 ### C. Review Body Size Limit & Truncation
 
 GitHub imposes a 65,536-character limit on review comments and issue bodies.
-1. **Detection**: Measure character count of synthesized `review-summary-${SESSION_ID}.md`.
+1. **Detection**: Measure character count of synthesized `review-pr-<n>-${SESSION_ID}.md`.
 2. **Handling**:
    - If length > 60,000 characters:
      - Retain full Acceptance Criteria Matrix (Section 1), Threat Model Matrix (Section 2), and 9-Dimension summary table (Section 3).

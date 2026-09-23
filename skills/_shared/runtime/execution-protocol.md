@@ -104,9 +104,9 @@ All subagent coordination, deliverables, reviews, and progress tracking MUST fol
      - `{type}`: Artifact type (e.g., `result`, `progress`, `review`, `adr`, `test`, `benchmark`).
      - `{role}`: Agent role identifier (e.g., `backend`, `frontend`, `qa`, `reviewer`, `pm`, `designer`).
      - `{taskSlug}`: Concise kebab-case task identifier (e.g., `auth-jwt`, `cart-api`, `perf-audit`).
-     - `{sessionId}`: Session identifier (e.g., `issue-104`, `conv-97e0b488`, `20260828-160543`).
+     - `{sessionId}`: Session identifier (e.g., `issue-104-20260828-160543-a3f9`, `conv-97e0b488-20260828-160543-a3f9`, `session-20260828-160543-a3f9`) — always `<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`.
      - `[-{index}]`: Optional numeric index when multiple artifacts or turns are produced.
-   - Example: `.agents/results/result-backend-auth-jwt-issue-104.md` or `.agents/results/review-security-cart-api-20260828-160543-1.md`.
+   - Example: `.agents/results/result-backend-auth-jwt-issue-104-20260828-160543-a3f9.md` or `.agents/results/review-security-cart-api-20260828-160543-a3f9-1.md`.
 
 2. **Write Verification Before Chat Return**:
    - Subagents MUST verify that the deliverable file was successfully written and non-empty on disk before outputting their chat completion message.

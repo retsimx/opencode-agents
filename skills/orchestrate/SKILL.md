@@ -91,7 +91,7 @@ Look for a plan file:
 
 // turbo
 
-1. Generate session ID (`<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`, e.g. `orchestrate-20260923-131500-a3f9`).
+1. Generate session ID (`<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`, e.g. `session-20260923-131500-a3f9`). The slug is an issue/epic slug, a conversation prefix, or the literal `session` (never a skill name).
 2. Write `orchestrator-session-{sessionId}.md` and `task-board-{sessionId}.md` to `.agents/results/`.
 3. Set session status to RUNNING.
 
