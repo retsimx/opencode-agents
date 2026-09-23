@@ -111,7 +111,7 @@ At session end, if total CD >= 50:
 | **Orchestrator** | Records events, checks thresholds, triggers pauses |
 | **QA Agent** | Reviews session metrics, generates RCA if needed |
 | **Dashboard** | Displays real-time CD score (optional) |
-| **Retro Command** | Aggregates CD across sessions for trend analysis |
+| **Retro Command** | Aggregates CD across sessions (globs `session-metrics-*.md`) for trend analysis |
 
 ---
 
@@ -169,10 +169,10 @@ This data is sourced from the Experiment Ledger at session end (see `.agents/ski
 
 ## Metrics Retention
 
-- **Active session**: `.agents/results/session-metrics-{sessionId}.md`
-- **Completed sessions**: Archived to `.agents/results/archive/metrics-{date}.md`
-- **Retention**: 30 days (configurable)
-- **Aggregation**: `stats` command summarizes trends
+- **Active session**: `.agents/results/session-metrics-{sessionId}.md` (one file per session)
+- **Completed sessions**: Retained in place; optionally copied to `.agents/results/archive/metrics-{sessionId}.md`
+- **Retention**: indefinite (session artifacts are session-unique and are not auto-purged)
+- **Aggregation**: `stats`/`retro` glob `.agents/results/session-metrics-*.md` across sessions (never a single fixed filename)
 
 ---
 

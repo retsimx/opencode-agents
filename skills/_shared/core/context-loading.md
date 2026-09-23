@@ -172,7 +172,7 @@ When the Orchestrator composes subagent prompts, reference the mapping above
 to include only resource paths matching the task type in the prompt.
 
 Additionally, under the **Universal File-First State I/O Architecture**, the orchestrator MUST explicitly inject context variables and output mandates into every subagent prompt template:
-- `SESSION_ID`: Resolved session ID, format `<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>` (see `.agents/skills/_shared/runtime/coordination-protocol.md`). Session artifacts use `<base>-<sessionId>.<ext>` and scratch I/O uses a session-scoped `RUN_TMP`.
+- `SESSION_ID`: Resolved session ID; its format, the artifact-naming rule, and `RUN_TMP` are defined normatively in `.agents/skills/_shared/runtime/coordination-protocol.md` (Session ID Resolution Priority + Session Artifact Naming & Run Temp).
 - `TASK_SLUG`: Kebab-case identifier of the assigned task (e.g., `cart-api`, `auth-jwt`).
 - `OUTPUT_FILE`: Designated repository artifact path (`.agents/results/{type}-{role}-{taskSlug}-{sessionId}[-{index}].md`).
 - `UPSTREAM_ARTIFACTS`: Explicit file paths to upstream subagent outputs (Pass-by-Reference for Zero-Context Relay).
@@ -181,6 +181,7 @@ Additionally, under the **Universal File-First State I/O Architecture**, the orc
 Prompt composition:
 1. Context Variables & Output Mandate:
    - SESSION_ID: <resolved-session-id>
+   - RUN_TMP: <absolute session scratch dir>
    - TASK_SLUG: <task-slug>
    - OUTPUT_FILE: .agents/results/{type}-{role}-{taskSlug}-{sessionId}.md
    - UPSTREAM_ARTIFACTS: [paths to upstream deliverable files, if applicable]

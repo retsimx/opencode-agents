@@ -144,7 +144,7 @@ When a trigger fires, the Orchestrator executes:
 
 1. **Checkpoint**: Save agent's current state
    ```
-   write(".agents/results/checkpoint-{agent-id}", content)
+   write(".agents/results/checkpoint-{agent-id}-{sessionId}.md", content)
    ```
    Content (assembled by Orchestrator from progress file):
    - Completed items with file paths

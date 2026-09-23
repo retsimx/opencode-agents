@@ -12,7 +12,7 @@ require human review via `retro`.
 ## Tuning Loop
 
 ```
-Sessions accumulate EA events in session-metrics.md
+Sessions accumulate EA events in `session-metrics-{sessionId}.md` (glob `.agents/results/session-metrics-*.md` for cross-session EA)
     ↓
 [1] Trigger: EA >= 30 on rolling 3-session window
     ↓

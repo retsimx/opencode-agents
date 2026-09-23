@@ -113,7 +113,7 @@ All subagent coordination, deliverables, reviews, and progress tracking MUST fol
 
 3. **Standalone Fallback**:
    - If `OUTPUT_FILE` is not explicitly passed in the subagent prompt template, the subagent MUST auto-generate a timestamped destination:
-     `.agents/results/result-{role}-{taskSlug}-$(date +%Y%m%d-%H%M%S).md`
+     `.agents/results/result-{role}-{taskSlug}-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2).md`
 
 4. **Universal 4-Line Chat Return Contract**:
    - Upon completing execution (whether SUCCESS, BLOCKED, or FAILED), subagents MUST return ONLY the concise 4-line standardized format in chat to conserve orchestrator context:
@@ -129,7 +129,7 @@ All subagent coordination, deliverables, reviews, and progress tracking MUST fol
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, review, and state files MUST be written to the **project root** `.agents/results/` directory, never to a subdirectory or volatile temp directory.
+All result, progress, review, and state files MUST be written to the **project root** `.agents/results/` directory, never to a subdirectory or volatile temp directory (the session-scoped `RUN_TMP` scratch directory defined in `coordination-protocol.md` is the sole exception).
 - **Project root** = the git repository root (where `.git` exists).
 
 ## On Start

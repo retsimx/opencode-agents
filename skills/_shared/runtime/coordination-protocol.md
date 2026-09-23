@@ -53,14 +53,16 @@ When orchestrators or subagents resolve `SESSION_ID`, follow this strict priorit
 2. **Conversation Prefix**: If running in an interactive conversation session without an issue slug, use the first 8 characters of the conversation ID (e.g., `conv-97e0b488`).
 3. **Timestamp Fallback**: If neither is available, use the literal `session`.
 
-Then ALWAYS append a run suffix: `SESSION_ID = <slug>-<YYYYMMDD-HHMMSS>-<rand4hex>` (e.g. `issue-104-20260923-131500-a3f9`; `openssl rand -hex 2`). The `<rand4hex>` suffix guarantees uniqueness when two sessions share a slug or start within the same second.
+Then ALWAYS append a run suffix: `SESSION_ID = <slug>-<YYYYMMDD-HHMMSS>-<rand4hex>` (e.g. `issue-104-20260923-131500-a3f9`). Generate `<rand4hex>` with `openssl rand -hex 2`, or the portable fallback `head -c2 /dev/urandom | od -An -tx1 | tr -d ' \n'`. The suffix guarantees uniqueness when two sessions share a slug or start within the same second. The slug MUST be an issue/epic slug, a conversation prefix, or the literal `session` — never a skill name.
+
+**Placeholder vs shell variable**: `{sessionId}` (equivalently `<sessionId>`) is the PLACEHOLDER used in artifact paths, templates, and state schemas. `$SESSION_ID` / `${SESSION_ID}` is the SHELL variable. Both denote the same resolved value. Never use the lowercase shell form `${sessionId}`.
 
 ### Session Artifact Naming & Run Temp (NORMATIVE)
 
-- **Artifact filenames**: every session-scoped artifact MUST place `sessionId` LAST before its extension — `<base>-<sessionId>.<ext>` (e.g. `result-qa-alignment-<sessionId>.md`, `plan-<sessionId>.json`, `task-board-<sessionId>.md`). A session artifact with a fixed, non-suffixed name is FORBIDDEN: two concurrent sessions must never share a filename.
-- **Shared-within-session**: `task-board-<sessionId>.md`, `session-ultrawork-<sessionId>.md`, `experiment-ledger-<sessionId>.md`, and `session-metrics-<sessionId>.md` are each shared by all agents of ONE session and unique across sessions. Never use the unsuffixed forms.
-- **Run temp directory (`RUN_TMP`)**: all inter-agent scratch I/O MUST live under a session-scoped directory `RUN_TMP=".agents/results/tmp/<skill>-<sessionId>/"` anchored to the control/parent repo and passed to subagents by reference (e.g. `RUN_TMP/commit-msg.txt`, `RUN_TMP/pr-body.txt`). Global fixed-name temp paths such as `/tmp/pr-body.txt` are FORBIDDEN — they collide across concurrent runs (including across repositories) and are a shared-write hazard.
-- **Cleanup**: delete `RUN_TMP` on successful completion. On failure or blockage, preserve it with the worktree (Worktree Preservation Invariant) for reproduction.
+- **Artifact filenames**: every session-scoped artifact MUST include `sessionId` immediately before its extension — `<base>-<sessionId>.<ext>` — or, for multi-part deliverables, before the optional sequence suffix — `<base>-<sessionId>-<index>.<ext>` (matching `...-{sessionId}[-{index}].md`). Examples: `result-qa-alignment-<sessionId>.md`, `plan-<sessionId>.json`, `task-board-<sessionId>.md`. A session artifact with a fixed, non-suffixed name is FORBIDDEN: two concurrent sessions must never share a filename.
+- **Shared-within-session**: `task-board-<sessionId>.md`, `orchestrator-session-<sessionId>.md`, `session-ultrawork-<sessionId>.md`, `session-work-<sessionId>.md`, `session-ralph-<sessionId>.md`, `experiment-ledger-<sessionId>.md`, `session-metrics-<sessionId>.md`, and `subagent-ledger-<sessionId>.json` are each shared by all agents of ONE session and unique across sessions. Never use the unsuffixed forms.
+- **Run temp directory (`RUN_TMP`)**: all inter-agent scratch I/O MUST live under a session-scoped directory `RUN_TMP="$PARENT_REPO/.agents/results/tmp/<skill>-<sessionId>/"` — an ABSOLUTE path anchored to the control/parent repo — passed to subagents by reference (e.g. `$RUN_TMP/commit-msg.txt`, `$RUN_TMP/pr-body.txt`). This `results/tmp/` scratch directory is the explicit exception to the "no subdirectory" rule for result/state files. Global fixed-name temp paths such as `/tmp/pr-body.txt` are FORBIDDEN — they collide across concurrent runs (including across repositories) and are a shared-write hazard. `$(mktemp)` is permitted ONLY for single-command scratch where no session context exists; when a session context exists, use `RUN_TMP`.
+- **Retention**: `RUN_TMP` and all session artifacts are RETAINED after completion as an immutable audit trail (they are session-unique and cannot collide). Do NOT auto-delete results, session files, or scratch; there is no automatic purge.
 
 ### Orchestrator Zero-Context Relay Protocol (Pass-by-Reference)
 
@@ -69,15 +71,6 @@ To prevent orchestrator context degradation, orchestrators MUST operate on a **p
 2. **Downstream Injection**: When a downstream subagent (e.g. QA, Reviewer, dependent Implementation agent) requires outputs from an upstream task, the orchestrator passes the upstream artifact file path (`file:///.../.agents/results/{type}-{role}-{taskSlug}-{sessionId}.md`) as a reference in `UPSTREAM_ARTIFACTS`.
 3. **Direct Subagent Ingestion**: Downstream subagents view and parse upstream deliverable files directly in their isolated contexts.
 4. **4-Line Ingestion Only**: The orchestrator context receives ONLY the concise 4-line chat completion summary from each subagent.
-
-### 30-Day LRU Purge Hook
-
-To prevent unbounded disk storage growth while retaining session auditability:
-- Result files in `.agents/results/*.md` older than 30 days are purged during orchestration startup or maintenance cycles via the LRU purge hook:
-  ```bash
-  find .agents/results/ -maxdepth 1 -type f \( -name "result-*.md" -o -name "progress-*.md" \) -mtime +30 -delete
-  ```
-- **Preserved Exceptions**: Post-mortems in `.agents/results/bugs/` and architecture decision records in `docs/` or `.agents/results/` referenced in active docs are excluded from automatic purge.
 
 ---
 
