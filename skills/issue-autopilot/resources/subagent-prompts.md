@@ -15,6 +15,7 @@ Load the scm skill (.agents/skills/scm/SKILL.md) and read the Conventional Commi
 WORKTREE: <$WORKTREE>
 RESULTS_DIR: <$RESULTS_DIR>
 SESSION_ID: <sessionId>
+RUN_TMP: <$RUN_TMP>
 OUTPUT_FILE: <$RESULTS_DIR>/result-scm-ship-<sessionId>.md
 
 1. Inspect changes in WORKTREE using `git diff --stat` and `git diff`.
@@ -27,7 +28,7 @@ OUTPUT_FILE: <$RESULTS_DIR>/result-scm-ship-<sessionId>.md
 4. Write a PR/MR body:
    - Bullet points summarizing what was implemented and verified.
    - Reference: Closes #<number>
-5. Write the commit message to /tmp/commit-msg.txt and the PR body to /tmp/pr-body.txt.
+5. Write the commit message to <$RUN_TMP>/commit-msg.txt and the PR body to <$RUN_TMP>/pr-body.txt.
 6. Write technical summary to OUTPUT_FILE and verify it exists on disk.
 
 Return ONLY the standard 4-line chat completion summary:
@@ -36,7 +37,7 @@ Return ONLY the standard 4-line chat completion summary:
 - **Summary**:
   - Title: <commit title>
   - Type/Scope: <type>(<scope>)
-  - Artifacts: /tmp/commit-msg.txt, /tmp/pr-body.txt
+  - Artifacts: <$RUN_TMP>/commit-msg.txt, <$RUN_TMP>/pr-body.txt
 - **Artifact**: `file:///<OUTPUT_FILE>`
 ```
 
@@ -58,6 +59,7 @@ ISSUE_NUMBER: <number>
 PR_URL: <pr-url>
 RESULTS_DIR: <$RESULTS_DIR>
 SESSION_ID: <sessionId>
+RUN_TMP: <$RUN_TMP>
 OUTPUT_FILE: <$RESULTS_DIR>/result-issue-comment-<sessionId>.md
 
 Read .agents/skills/_shared/runtime/providers.md and use ONLY the Comment on issue command for PROVIDER.
@@ -78,9 +80,9 @@ Then write a comment following these strict rules:
 5. FORMAT: short paragraphs, no markdown headings, no bullet lists.
 
 Fetch the issue for context using the View issue command for PROVIDER.
-Write the comment to /tmp/issue-comment.txt and post it with the Comment on issue command for PROVIDER:
-  GitHub: gh issue comment <ISSUE_NUMBER> --body-file /tmp/issue-comment.txt
-  GitLab: glab issue note <ISSUE_NUMBER> --message "$(cat /tmp/issue-comment.txt)"
+Write the comment to <$RUN_TMP>/issue-comment.txt and post it with the Comment on issue command for PROVIDER:
+  GitHub: gh issue comment <ISSUE_NUMBER> --body-file <$RUN_TMP>/issue-comment.txt
+  GitLab: glab issue note <ISSUE_NUMBER> --message "$(cat <$RUN_TMP>/issue-comment.txt)"
 
 Write technical summary to OUTPUT_FILE and verify it exists on disk.
 Return ONLY the standard 4-line chat completion summary with the posted comment text in the summary bullets:
@@ -107,6 +109,7 @@ Remediate local CI sanity failures in $WORKTREE prior to commit/PR.
 WORKTREE: <$WORKTREE>
 RESULTS_DIR: <$RESULTS_DIR>
 SESSION_ID: <sessionId>
+RUN_TMP: <$RUN_TMP>
 OUTPUT_FILE: <$RESULTS_DIR>/result-debug-ci-<sessionId>.md
 FAILURE_LOGS: <failure logs or error output>
 

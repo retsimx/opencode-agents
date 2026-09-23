@@ -19,7 +19,11 @@ WORKTREE=$(realpath ../<repo-name>-<number>)
 
 # 3. Define persistent results directory
 RESULTS_DIR="${PARENT_REPO}/.agents/results"
-mkdir -p "${RESULTS_DIR}"
+
+# 4. Allocate a unique run identity and session-scoped temp dir
+SESSION_ID="issue-<number>-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
+RUN_TMP="${RESULTS_DIR}/tmp/issue-autopilot-${SESSION_ID}"
+mkdir -p "${RESULTS_DIR}" "${RUN_TMP}"
 ```
 
 ### Worktree Creation
@@ -75,11 +79,11 @@ Standardized commands for opening draft PRs and fallback procedures when automat
 ### Provider Draft PR Commands
 - **GitHub (`gh`)**:
   ```bash
-  gh pr create --draft --base main --title "<title>" --body-file /tmp/pr-body.txt
+  gh pr create --draft --base main --title "<title>" --body-file "$RUN_TMP/pr-body.txt"
   ```
 - **GitLab (`glab`)**:
   ```bash
-  glab mr create --draft --target-branch main --title "<title>" --description "$(cat /tmp/pr-body.txt)"
+  glab mr create --draft --target-branch main --title "<title>" --description "$(cat "$RUN_TMP/pr-body.txt")"
   ```
 
 ### Manual Fallback Instructions (If CLI Fails)

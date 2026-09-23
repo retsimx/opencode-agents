@@ -85,23 +85,26 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
    git pull origin main
    ```
 7. Generate a branch name from the issue title: `feat-<kebab-title>-<number>` (or `fix-...`).
-8. **Resolve and export canonical absolute paths (Guardrail 3)**:
+8. **Resolve and export canonical absolute paths + run identity (Guardrail 3)**:
    ```bash
    PARENT_REPO=$(git rev-parse --show-toplevel)
    WORKTREE=$(realpath ../<repo-name>-<number>)
    RESULTS_DIR="${PARENT_REPO}/.agents/results"
+   SESSION_ID="issue-<number>-$(date -u +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)"
+   RUN_TMP="${RESULTS_DIR}/tmp/issue-autopilot-${SESSION_ID}"
+   mkdir -p "${RUN_TMP}"
    ```
 9. Create a git worktree from main:
    ```bash
    git worktree add "$WORKTREE" -b "$BRANCH" main
    ```
-10. Record `$WORKTREE`, `$PARENT_REPO`, `$RESULTS_DIR`, `$BRANCH`, and `$PROVIDER`. Pass these canonical paths to all subsequent phases and subagents.
+10. Record `$WORKTREE`, `$PARENT_REPO`, `$RESULTS_DIR`, `$SESSION_ID`, `$RUN_TMP`, `$BRANCH`, and `$PROVIDER`. Pass these canonical paths and the run identity to all subsequent phases and subagents. All inter-agent scratch files (commit message, PR body, issue comment) MUST live under `$RUN_TMP`; never use fixed global `/tmp/<name>` paths.
 
 ### GATE EXIT
 - [ ] Provider detected and CLI authenticated
 - [ ] Issue details captured and normalized
 - [ ] Local main is up to date
-- [ ] Canonical paths resolved (`$PARENT_REPO`, `$WORKTREE`, `$RESULTS_DIR`)
+- [ ] Canonical paths resolved (`$PARENT_REPO`, `$WORKTREE`, `$RESULTS_DIR`) and a unique run identity allocated (`$SESSION_ID`, `$RUN_TMP`)
 - [ ] Worktree created at `$WORKTREE` on branch `$BRANCH`
 - [ ] `PROVIDER` and `CLI` recorded
 
@@ -181,7 +184,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
    - **Phase 3: VERIFY (Steps 6–8)**: Dispatches QA Agent for Alignment Review (Step 6), Security/Bug Review (Step 7), and Improvement/Regression Review (Step 8). Enforces root-cause-first remediation.
    - **Phase 4: REFINE (Steps 9–13)**: Dispatches Debug Agent for splitting large files (>500 lines), reusability review, side-effect analysis, and dead code cleanup.
    - **Phase 5: SHIP (Steps 14–17)**: Dispatches QA Agent for final code quality checks, UX flow verification, cascade impact review, and deployment readiness review.
-5. All child output artifacts (`result-*.md`, `session-ultrawork.md`, `experiment-ledger.md`) are persisted directly to `${RESULTS_DIR}`.
+5. All child output artifacts (`result-*-${sessionId}.md`, `session-ultrawork-${sessionId}.md`, `experiment-ledger-${sessionId}.md`) are persisted directly to `${RESULTS_DIR}` (session-unique; never the unsuffixed names).
 6. Await `ultrawork` completion return (`Status: SUCCESS`).
 7. After implementation completes, verify no application code files were modified outside `$WORKTREE`.
 
@@ -231,16 +234,16 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 1. `cd $WORKTREE`
 2. Spawn an SCM Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#1-scm-specialist-subagent-prompt):
    - `Role`: `"SCM Specialist Agent"`
-   - `Prompt`: Instruct agent to inspect `WORKTREE` diffs, adhere to `.agents/skills/scm/SKILL.md` Conventional Commits (`Closes #<number>`), write `/tmp/commit-msg.txt` and `/tmp/pr-body.txt`, and write execution technical summary to `${RESULTS_DIR}/result-scm-ship-${sessionId}.md`.
+   - `Prompt`: Instruct agent to inspect `WORKTREE` diffs, adhere to `.agents/skills/scm/SKILL.md` Conventional Commits (`Closes #<number>`), write `$RUN_TMP/commit-msg.txt` and `$RUN_TMP/pr-body.txt`, and write execution technical summary to `${RESULTS_DIR}/result-scm-ship-${sessionId}.md`.
 3. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${sessionId}.json` (role `scm-ship`, `result_file` `${RESULTS_DIR}/result-scm-ship-${sessionId}.md`).
-4. Pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm non-empty `task_id`, `status == complete`, and `${RESULTS_DIR}/result-scm-ship-${sessionId}.md` exists and is non-empty. Also confirm `/tmp/commit-msg.txt` and `/tmp/pr-body.txt` exist. On gate failure, re-dispatch the SCM subagent — do NOT write the commit message inline.
+4. Pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm non-empty `task_id`, `status == complete`, and `${RESULTS_DIR}/result-scm-ship-${sessionId}.md` exists and is non-empty. Also confirm `$RUN_TMP/commit-msg.txt` and `$RUN_TMP/pr-body.txt` exist (session-unique; never global `/tmp`). On gate failure, re-dispatch the SCM subagent — do NOT write the commit message inline.
 
 #### Step 3: Git Commit, Push, and Draft PR Creation (Orchestrator Inline)
 
 4. Commit using the generated message:
    ```bash
    git add <specific files>    # NEVER git add -A / git add .
-   git commit -F /tmp/commit-msg.txt
+   git commit -F "$RUN_TMP/commit-msg.txt"
    ```
 5. Push to the remote:
    ```bash
@@ -249,11 +252,11 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 6. Create a draft PR using the Create draft PR row in `.agents/skills/_shared/runtime/providers.md` for `$PROVIDER`:
    - **GitHub**:
      ```bash
-     gh pr create --draft --base main --title "<title>" --body-file /tmp/pr-body.txt
+     gh pr create --draft --base main --title "<title>" --body-file "$RUN_TMP/pr-body.txt"
      ```
    - **GitLab**:
      ```bash
-     glab mr create --draft --target-branch main --title "<title>" --description "$(cat /tmp/pr-body.txt)"
+     glab mr create --draft --target-branch main --title "<title>" --description "$(cat "$RUN_TMP/pr-body.txt")"
      ```
 7. Report the PR/MR URL to the user in chat.
 
@@ -297,7 +300,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 1. Spawn a Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#2-issue-communicator-subagent-prompt):
    - `Role`: `"Issue Communicator Agent"`
-   - `Prompt`: Instruct agent to read `.agents/skills/_shared/runtime/providers.md`, inspect merged diff from `$PARENT_REPO`, write non-technical plain-English summary (no code references or technical jargon) to `/tmp/issue-comment.txt`, post using provider CLI command, and write technical summary to `${RESULTS_DIR}/result-issue-comment-${sessionId}.md`.
+   - `Prompt`: Instruct agent to read `.agents/skills/_shared/runtime/providers.md`, inspect merged diff from `$PARENT_REPO`, write non-technical plain-English summary (no code references or technical jargon) to `$RUN_TMP/issue-comment.txt`, post using provider CLI command, and write technical summary to `${RESULTS_DIR}/result-issue-comment-${sessionId}.md`.
 2. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${sessionId}.json` (role `issue-comment`, `result_file` `${RESULTS_DIR}/result-issue-comment-${sessionId}.md`).
 3. Pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm non-empty `task_id`, `status == complete`, and `${RESULTS_DIR}/result-issue-comment-${sessionId}.md` exists and is non-empty. On gate failure, re-dispatch — do NOT write the comment inline.
 4. Present the posted comment text in chat to the user.
@@ -321,7 +324,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 | **2: Plan** | User rejects plan | Modify task breakdown or sizing per feedback. | Loop back to Phase 1 if architectural changes needed. |
 | **3: Implement** | Subagent build or test failure | `ultrawork` re-spawns Dev Agent with error logs (up to 3 retries). | Escalate to QA Review if unresolvable. |
 | **3: Implement** | VERIFY gate failure (Regression / Safety) | `ultrawork` activates root-cause remediation prompt to Dev Agent. | If 2nd failure on same issue, trigger Exploration Loop. |
-| **3: Implement** | Review loop cap (5 cycles) or cost cap hit | `ultrawork` halts, writes diagnostics to `session-ultrawork.md`. | **Guardrail 4: Preserve worktree intact.** Report roadblock in chat. |
+| **3: Implement** | Review loop cap (5 cycles) or cost cap hit | `ultrawork` halts, writes diagnostics to `session-ultrawork-${sessionId}.md`. | **Guardrail 4: Preserve worktree intact.** Report roadblock in chat. |
 | **4: Forge Ship** | Fast-Fail Local CI Gate fails | Spawn targeted Debug Agent to fix lint/type/test failures. | If fix fails, **DO NOT COMMIT**. Leave worktree intact and alert user. |
 | **4: Forge Ship** | Remote git push rejected | Fetch and rebase against latest `origin/main` in worktree. | If conflicts arise, spawn merge subagent or alert user. |
 | **4: Forge Ship** | Draft PR creation fails | Verify branch pushed; retry with explicit `-R OWNER/REPO`. | Branch is pushed; provide manual CLI create command to user. |
