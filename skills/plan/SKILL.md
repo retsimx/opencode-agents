@@ -18,6 +18,7 @@ description: Product-management planning workflow that turns ambiguous or comple
 Before starting, load and follow:
 - `.agents/rules/grug-principles.md` — universal engineering rules
 - `.agents/rules/tool-compatibility.md` — cross-harness tool naming
+- `.agents/skills/_shared/runtime/coordination-protocol.md` — resolve `SESSION_ID` (`<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`) for every session-scoped artifact
 
 ---
 

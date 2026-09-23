@@ -15,6 +15,7 @@ Before starting, load and follow:
 - `.agents/rules/tool-compatibility.md` — cross-harness tool naming
 - `.agents/rules/i18n-guide.md` — response language
 - `.agents/skills/_shared/core/quality-principles.md` — quality principles
+- `.agents/skills/_shared/runtime/coordination-protocol.md` — resolve `SESSION_ID` (`<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`) for every session-scoped artifact
 
 
 > Load `.agents/rules/grug-principles.md` before reviewing. Apply its rules when
