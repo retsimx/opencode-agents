@@ -36,7 +36,7 @@ Before starting, load and follow:
 5. Read `.agents/skills/_shared/core/quality-principles.md` (4 principles)
 6. Read `.agents/skills/ultrawork/resources/phase-gates.md` (gate definitions)
 7. Record session start:
-   - Write `.agents/results/session-ultrawork.md`
+   - Write `.agents/results/session-ultrawork-{sessionId}.md`
    - Include: session start time, user request summary, workflow version (ultrawork)
 
 ---
@@ -54,8 +54,8 @@ Activate PM Agent to execute Steps 1-4:
 5. Execute Meta Review (Step 3).
 6. Execute Over-Engineering Review (Step 4).
 7. Save plan to `.agents/results/plan-{sessionId}.json`.
-8. Create `task-board.md` in `.agents/results/` for dashboard compatibility.
-9. Write plan completion to `.agents/results/session-ultrawork.md`.
+8. Create `task-board-{sessionId}.md` in `.agents/results/` for dashboard compatibility.
+9. Write plan completion to `.agents/results/session-ultrawork-{sessionId}.md`.
 
 ### Step 2: Plan Review (Completeness)
 - **Executed by PM Agent**: Ensure requirements are fully mapped.
@@ -73,7 +73,7 @@ Activate PM Agent to execute Steps 1-4:
 - [ ] Over-engineering review done
 - [ ] **User confirmation**
 
-**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
+**On gate pass**: Update `.agents/results/session-ultrawork-{sessionId}.md` phase completion
 
 **Gate failure → Return to Step 1**
 
@@ -126,7 +126,7 @@ Spawn implementation agents in parallel using the OpenCode `task` tool:
 2. Read `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` files if tracking active turns.
 3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` deliverable files exist on disk.
 4. **Subagent Dispatch Gate**: for each spawned agent, confirm a non-empty `task_id` is recorded in `.agents/results/subagent-ledger-{sessionId}.json`, `status == complete`, and the deliverable file exists and is non-empty (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`). A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent.
-5. Update `.agents/results/session-ultrawork.md` with monitoring results and artifact paths.
+5. Update `.agents/results/session-ultrawork-{sessionId}.md` with monitoring results and artifact paths.
 
 **Continue polling until all agents report completion or failure.**
 
@@ -136,7 +136,7 @@ If automated measurement is available (tests, lint exist):
 
 1. Read `.agents/skills/_shared/conditional/quality-score.md` (conditional, per context-loading guide)
 2. Run tests, lint, type-check via Bash to measure baseline
-3. Create Experiment Ledger: write `.agents/results/experiment-ledger.md` with initial baseline row
+3. Create Experiment Ledger: write `.agents/results/experiment-ledger-{sessionId}.md` with initial baseline row
 4. Record composite score as the IMPL baseline
 
 If no measurement tools: skip; gates fall back to binary checklist.
@@ -147,7 +147,7 @@ If no measurement tools: skip; gates fall back to binary checklist.
 - [ ] Only planned files modified
 - [ ] (If measured) Baseline Quality Score recorded in Experiment Ledger
 
-**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
+**On gate pass**: Update `.agents/results/session-ultrawork-{sessionId}.md` phase completion
 
 **Gate failure → Return to Step 5, re-spawn failed agents, and repeat monitoring until GATE passes.**
 
@@ -193,7 +193,7 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
 
 1. Monitor QA Agent 4-line chat completion return.
 2. Verify `.agents/results/result-qa-verify-{sessionId}.md` exists on disk.
-3. Update `.agents/results/session-ultrawork.md` with QA results and artifact link.
+3. Update `.agents/results/session-ultrawork-{sessionId}.md` with QA results and artifact link.
 
 **Continue polling until QA Agent reports completion.**
 
@@ -211,7 +211,7 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
 If baseline was measured at Step 5.2:
 1. Measure Quality Score incorporating QA findings
 2. Calculate delta from IMPL baseline
-3. Record as experiment in `.agents/results/experiment-ledger.md`
+3. Record as experiment in `.agents/results/experiment-ledger-{sessionId}.md`
 
 ### VERIFY_GATE
 - [ ] Implementation = Requirements
@@ -220,7 +220,7 @@ If baseline was measured at Step 5.2:
 - [ ] No regressions
 - [ ] (If measured) Quality Score >= 75 (Grade B)
 
-**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
+**On gate pass**: Update `.agents/results/session-ultrawork-{sessionId}.md` phase completion
 
 **Gate failure (1st time)** → Before re-spawning for the next VERIFY cycle, check the session cost cap:
 
@@ -281,7 +281,7 @@ Spawn Debug Agent via OpenCode `task` tool (subagent_type="general"):
 
 1. Monitor Debug Agent 4-line chat completion return.
 2. Verify `.agents/results/result-refine-{sessionId}.md` exists on disk.
-3. Update `.agents/results/session-ultrawork.md` with refinement results and artifact link.
+3. Update `.agents/results/session-ultrawork-{sessionId}.md` with refinement results and artifact link.
 
 **Continue polling until Debug Agent reports completion.**
 
@@ -315,7 +315,7 @@ If baseline was measured at Step 5.2:
 - [ ] Code cleaned
 - [ ] (If measured) Quality Score >= Post-VERIFY score (no regression from refinement)
 
-**On gate pass**: Update `.agents/results/session-ultrawork.md` phase completion
+**On gate pass**: Update `.agents/results/session-ultrawork-{sessionId}.md` phase completion
 
 **Gate failure → Before re-spawning the Debug Agent, apply the same termination check:**
 
@@ -368,7 +368,7 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
 
 1. Monitor QA Agent 4-line chat completion return.
 2. Verify `.agents/results/result-qa-ship-{sessionId}.md` exists on disk.
-3. Update `.agents/results/session-ultrawork.md` with final QA results and artifact link.
+3. Update `.agents/results/session-ultrawork-{sessionId}.md` with final QA results and artifact link.
 
 **Continue polling until QA Agent reports completion.**
 
@@ -397,7 +397,7 @@ If Quality Score was measured during this session:
    - Review all QA findings: any disputed by impl agents? → `false_positive`
    - Review runtime verification results: any stubs caught that static review missed? → `missed_stub`
    - Review impl agent self-check results: any bugs caught by QA that self-check missed? → `good_catch`
-6. Append EA events to `.agents/results/session-metrics.md` (protocol: `.agents/skills/_shared/core/session-metrics.md`)
+6. Append EA events to `.agents/results/session-metrics-{sessionId}.md` (protocol: `.agents/skills/_shared/core/session-metrics.md`)
 7. If rolling 3-session EA >= 30: Flag in final report
    → "QA tuning suggested. Run `retro` to review."
 
@@ -410,7 +410,7 @@ If Quality Score was measured during this session:
 - [ ] (If measured) Experiment Ledger summary recorded
 - [ ] **User final approval**
 
-**On gate pass**: Write final results in `session-ultrawork.md`
+**On gate pass**: Write final results in `session-ultrawork-{sessionId}.md`
 
 **Gate failure → Address issues, re-run affected steps, and repeat until GATE passes.**
 

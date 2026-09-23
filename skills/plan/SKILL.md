@@ -151,7 +151,7 @@ Generate both artifacts.
 
 ### 7a. Machine-readable plan
 
-Save `.agents/results/plan-{sessionId}.json` (and `.agents/results/result-plan.md` for human consumption). The JSON shape follows `.agents/skills/plan/resources/task-template.json`. Write a memory summary via the configured memory tool.
+Save `.agents/results/plan-{sessionId}.json` (and `.agents/results/result-plan-{sessionId}.md` for human consumption). The JSON shape follows `.agents/skills/plan/resources/task-template.json`. Write a memory summary via the configured memory tool.
 
 ### 7b. Human-readable tracker (Medium/Complex only)
 

@@ -44,7 +44,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Minimize dependencies for maximum parallel execution
 - Priority tiers: 1 = independent (run first), 2 = depends on tier 1, etc.
 - Complexity: Low / Medium / High / Very High
-- Save to `.agents/results/plan-{sessionId}.json` and `.agents/results/result-plan.md`
+- Save to `.agents/results/plan-{sessionId}.json` and `.agents/results/result-plan-{sessionId}.md`
 
 ## Step 4: Validate Plan
 - Check: Can each task be done independently given its dependencies?
@@ -52,7 +52,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Check: Is security considered from the start (not deferred)?
 - Check: Are API contracts defined before frontend/mobile tasks?
 - Check: Are major risks, owners, and approval points explicit when needed?
-- Output task-board.md format for orchestrate compatibility
+- Output task-board-{sessionId}.md format for orchestrate compatibility
 
 ## On Error
 See `.agents/skills/plan/resources/error-playbook.md` for recovery steps.

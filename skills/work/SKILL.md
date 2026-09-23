@@ -33,7 +33,7 @@ Before starting, load and follow:
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
 3. Read `.agents/skills/_shared/runtime/coordination-protocol.md` for the coordination protocol.
 4. Record session start:
-   - Write `.agents/results/session-work.md`
+   - Write `.agents/results/session-work-{sessionId}.md`
    - Include: session start time, user request summary.
 
 ---
@@ -59,7 +59,7 @@ Activate PM Agent to:
 3. Create a prioritized task breakdown.
 4. Save plan to `.agents/results/plan-{sessionId}.json`.
 5. Return standardized 4-line chat completion summary with artifact link.
-6. Record plan completion in `.agents/results/session-work.md`.
+6. Record plan completion in `.agents/results/session-work-{sessionId}.md`.
 
 ---
 
@@ -116,7 +116,7 @@ Spawn agents using the OpenCode `task` tool:
 2. Use `read` to check `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` files for active progress if tracking turns.
 3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` files exist on disk upon completion.
 4. **Subagent Dispatch Gate**: for each spawned agent, confirm a non-empty `task_id` is recorded in `.agents/results/subagent-ledger-{sessionId}.json`, `status == complete`, and the deliverable file exists and is non-empty (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`). A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent.
-5. Record monitoring results and artifact links in `.agents/results/session-work.md`.
+5. Record monitoring results and artifact links in `.agents/results/session-work-{sessionId}.md`.
 
 ---
 
@@ -139,7 +139,7 @@ After all implementation agents complete, use the OpenCode `task` tool to spawn 
 If automated measurement is available:
 1. Read `.agents/skills/_shared/conditional/quality-score.md` (conditional, per context-loading guide)
 2. Measure Quality Score based on QA findings
-3. Record as baseline in `.agents/results/experiment-ledger.md` (see `.agents/skills/_shared/conditional/experiment-ledger.md`)
+3. Record as baseline in `.agents/results/experiment-ledger-{sessionId}.md` (see `.agents/skills/_shared/conditional/experiment-ledger.md`)
 
 ---
 

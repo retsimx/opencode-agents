@@ -7,7 +7,7 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
 
 - **NEVER skip phases.** Execute from Phase 0 in order. Explicitly report completion of each phase to the user before proceeding to the next.
 - **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
-- **Subagent Dispatch Gate (HARD INVARIANT)**: any subagent spawned directly by ralph (not via ultrawork) MUST have its harness-returned `task_id` recorded in the session state file (`.agents/results/session-ralph.md` or a dedicated `subagent-ledger-{sessionId}.json`) alongside its role and result_file. The orchestrator MUST NOT perform a delegated subagent's work inline. A subagent with no recorded `task_id` (or a missing/empty result_file) MUST be re-dispatched — do not proceed by doing the work inline. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: any subagent spawned directly by ralph (not via ultrawork) MUST have its harness-returned `task_id` recorded in the session state file (`.agents/results/session-ralph-{sessionId}.md` or a dedicated `subagent-ledger-{sessionId}.json`) alongside its role and result_file. The orchestrator MUST NOT perform a delegated subagent's work inline. A subagent with no recorded `task_id` (or a missing/empty result_file) MUST be re-dispatched — do not proceed by doing the work inline. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
 - **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
@@ -62,7 +62,7 @@ criteria:
 1. Set `max_iterations: 5` (default safeguard)
 2. Set `current_iteration: 0`
 3. Record session start:
-   - Write `.agents/results/session-ralph.md`
+   - Write `.agents/results/session-ralph-{sessionId}.md`
    - Include: session start time, user request summary, completion criteria, max_iterations
 
 ---
@@ -94,7 +94,7 @@ Delegate to the ultrawork skill:
 ### Step 1.3: Record EXEC Completion
 
 1. Increment `current_iteration`
-2. Update `.agents/results/session-ralph.md` with iteration start
+2. Update `.agents/results/session-ralph-{sessionId}.md` with iteration start
 
 ---
 
@@ -171,7 +171,7 @@ If all criteria are either PASS or BLOCKED:
 
 1. **If any BLOCKED exists**: Report partial completion with BLOCKED items listed
 2. **If all PASS**: Report full completion
-3. Update `.agents/results/session-ralph.md` with final results
+3. Update `.agents/results/session-ralph-{sessionId}.md` with final results
 4. Output completion summary:
    ```
    ## Ralph Complete — Iteration {N}/{max}
@@ -202,7 +202,7 @@ If `current_iteration >= max_iterations`:
 
    Recommendation: Review FAILED criteria manually or increase max_iterations.
    ```
-3. Update `.agents/results/session-ralph.md` with safeguard trigger
+3. Update `.agents/results/session-ralph-{sessionId}.md` with safeguard trigger
 4. Workflow ends.
 
 ---
@@ -252,7 +252,7 @@ Compose a focused task description containing the remaining work, separating reg
 
 ### Step 3.3: Loop Back
 
-1. Update `.agents/results/session-ralph.md` with REPLAN status
+1. Update `.agents/results/session-ralph-{sessionId}.md` with REPLAN status
 2. Return to **Phase 1: EXEC** with the narrowed scope
 
 ---

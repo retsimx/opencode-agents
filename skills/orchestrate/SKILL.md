@@ -91,8 +91,8 @@ Look for a plan file:
 
 // turbo
 
-1. Generate session ID (format: `session-YYYYMMDD-HHMMSS`).
-2. Write `orchestrator-session.md` and `task-board.md` to `.agents/results/`.
+1. Generate session ID (`<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`, e.g. `orchestrate-20260923-131500-a3f9`).
+2. Write `orchestrator-session-{sessionId}.md` and `task-board-{sessionId}.md` to `.agents/results/`.
 3. Set session status to RUNNING.
 
 ---
@@ -103,7 +103,7 @@ Look for a plan file:
 For each priority tier (P0 first, then P1, etc.):
 
 - Each agent gets: task description, API contracts, relevant context from `.agents/skills/_shared/core/context-loading.md`.
-- Use `edit` to update `.agents/results/task-board.md` with agent status.
+- Use `edit` to update `.agents/results/task-board-{sessionId}.md` with agent status.
 
 #### Dispatch via OpenCode `task` tool
 
@@ -152,7 +152,7 @@ Each `task` tool invocation receives:
 1. Monitor subagents for 4-line chat completion returns.
 2. Use `read` to check `.agents/results/progress-{agent}-{taskSlug}-{sessionId}.md` for active status and turn tracking if needed.
 3. Verify designated `.agents/results/result-{agent}-{taskSlug}-{sessionId}.md` exists on disk upon completion.
-4. Use `edit` to update `.agents/results/task-board.md` with turn counts, status changes, and artifact paths.
+4. Use `edit` to update `.agents/results/task-board-{sessionId}.md` with turn counts, status changes, and artifact paths.
 5. Watch for: completion, failures, crashes.
 
 #### Context Anxiety Check (per polling cycle)
@@ -169,7 +169,7 @@ At each poll, evaluate for every in-progress agent:
 | >= 80% | < 50% | **Context Reset**: Checkpoint + re-spawn (see `.agents/skills/_shared/core/context-budget.md`) |
 | 100% (max turns) | < 100% | **Context Reset**: Force checkpoint + re-spawn with remaining items |
 
-Record reset events in `task-board.md`:
+Record reset events in `task-board-{sessionId}.md`:
 ```
 | Agent | Status | Note |
 | backend | reset-1 | Turn budget 80%, progress 40%, checkpoint saved |
@@ -220,7 +220,7 @@ Present session summary to the user.
 
 - If any tasks failed after retries, list them with error details.
 - Suggest next steps: manual fix, re-run specific agents, or run the review skill for QA.
-- Write final results to `.agents/results/orchestrator-session.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
+- Write final results to `.agents/results/orchestrator-session-{sessionId}.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 - If Quality Score was measured during this session:
   - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
   - Auto-generate post-mortems from discarded experiments (delta <= -5) into `.agents/results/bugs/` and extract guardrail rules into `docs/checklists/<domain>.md`
@@ -323,7 +323,7 @@ When user sends feedback during session:
 | `redo` >= 2 | **Scope Lock**: Request explicit allowlist confirmation before continuing |
 
 ### Recording
-After each user correction event, append event to `.agents/results/session-metrics.md` Events table (protocol: `.agents/skills/_shared/core/session-metrics.md`).
+After each user correction event, append event to `.agents/results/session-metrics-{sessionId}.md` Events table (protocol: `.agents/skills/_shared/core/session-metrics.md`).
 
 At session end, if CD >= 50:
 1. Include CD summary in final report
@@ -353,8 +353,8 @@ All coordination is file-based in `.agents/results/`. See `.agents/skills/orches
 
 | File | Owner | Others |
 |------|-------|--------|
-| `orchestrator-session.md` | orchestrate | read-only |
-| `task-board.md` | orchestrate | read-only |
+| `orchestrator-session-{sessionId}.md` | orchestrate | read-only |
+| `task-board-{sessionId}.md` | orchestrate | read-only |
 | `progress-{agent}*.md` | that agent | orchestrate reads |
 | `result-{agent}*.md` | that agent | orchestrate reads |
 

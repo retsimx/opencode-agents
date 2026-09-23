@@ -10,8 +10,8 @@ write conflicts between concurrent agents.
 
 ```
 .agents/results/
-  orchestrator-session.md              # Session metadata (orchestrator only)
-  task-board.md                        # Master task list (orchestrator writes, agents read)
+  orchestrator-session-{sessionId}.md              # Session metadata (orchestrator only)
+  task-board-{sessionId}.md                        # Master task list (orchestrator writes, agents read)
   progress-{agent-id}-{sessionId}.md  # Per-agent progress log (owning agent only)
   result-{agent-id}-{sessionId}.md    # Per-agent final result (owning agent only)
 ```
@@ -20,7 +20,7 @@ write conflicts between concurrent agents.
 > In monorepos, never write to a subdirectory's results path. The session ID
 > suffix prevents conflicts between concurrent sessions.
 
-## orchestrator-session.md
+## orchestrator-session-{sessionId}.md
 
 Created by the orchestrator at session start. Updated throughout execution.
 
@@ -50,7 +50,7 @@ Created by the orchestrator at session start. Updated throughout execution.
 - Issues: [list]
 ```
 
-## task-board.md
+## task-board-{sessionId}.md
 
 Master task list created by the orchestrator. Subagents read this to
 understand their assignment but never write to it.
@@ -110,7 +110,7 @@ Only the owning agent writes to this file.
 ## Started: {ISO timestamp}
 
 ### Turn 1 - {ISO timestamp}
-- **Action**: Reading task-board.md and understanding requirements
+- **Action**: Reading task-board-{sessionId}.md and understanding requirements
 - **Status**: in_progress
 - **Details**: Identified 4 acceptance criteria for JWT auth API
 

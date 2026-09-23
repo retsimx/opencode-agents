@@ -43,7 +43,7 @@ If you are running low on turns, prioritize:
 Use `.agents/results/` for shared state coordination:
 
 - **Target Output File**: `{OUTPUT_FILE}`
-- **On start**: Read `.agents/results/task-board.md` to confirm your task.
+- **On start**: Read `.agents/results/task-board-{sessionId}.md` to confirm your task.
   Write `.agents/results/progress-{AGENT_ID}-{TASK_SLUG}-{SESSION_ID}.md` with initial status.
 - **During execution**: Every 3-5 turns, edit
   `.agents/results/progress-{AGENT_ID}-{TASK_SLUG}-{SESSION_ID}.md` to append progress.
@@ -114,11 +114,11 @@ If you discover a necessary change outside your domain:
 | `{TASK_SLUG}` | Task assignment | "jwt-auth-api" |
 | `{OUTPUT_FILE}` | Orchestrator session | ".agents/results/result-backend-jwt-auth-api-session-20260405-100835.md" |
 | `{AGENT_SKILL_CONTENT}` | Agent SKILL.md body | Full markdown content |
-| `{TASK_ID}` | task-board.md | "task-1" |
-| `{TASK_TITLE}` | task-board.md | "JWT authentication API" |
-| `{TASK_PRIORITY}` | task-board.md | "1" |
-| `{TASK_DESCRIPTION}` | task-board.md | Full description text |
-| `{ACCEPTANCE_CRITERIA}` | task-board.md | Bulleted list |
+| `{TASK_ID}` | task-board-{sessionId}.md | "task-1" |
+| `{TASK_TITLE}` | task-board-{sessionId}.md | "JWT authentication API" |
+| `{TASK_PRIORITY}` | task-board-{sessionId}.md | "1" |
+| `{TASK_DESCRIPTION}` | task-board-{sessionId}.md | Full description text |
+| `{ACCEPTANCE_CRITERIA}` | task-board-{sessionId}.md | Bulleted list |
 | `{WORKSPACE_PATH}` | Orchestrator config | "/path/to/project" |
 | `{MAX_TURNS}` | Orchestrator config | "20" |
 | `{SESSION_ID}` | Orchestrator session | "session-20260405-100835" |

@@ -162,7 +162,7 @@ The cache for criterion C is invalidated when ANY of:
 
 ### Cache record format
 
-Maintain in `session-ralph.md`:
+Maintain in `session-ralph-{sessionId}.md`:
 
 ```markdown
 verification_cache:
