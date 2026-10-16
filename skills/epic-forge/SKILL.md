@@ -71,7 +71,7 @@ convention (run-scoped artifacts).
 - `_shared/core/clarification-protocol.md` — when to ask.
 - `brainstorm` + `plan` skills — decomposition engine (referenced, not reimplemented).
 - `skill-creator` — SSL-lite format + validation checklist.
-- Local resources: `resources/epic-template.md`, `resources/issue-template.md`, `resources/style-guide.md`, `resources/examples/`.
+- Local resources: `.agents/skills/epic-forge/resources/epic-template.md`, `.agents/skills/epic-forge/resources/issue-template.md`, `.agents/skills/epic-forge/resources/style-guide.md`, `.agents/skills/epic-forge/resources/examples/`.
 
 ### Control-flow features
 - Branches by mode (create vs update).
@@ -99,9 +99,9 @@ convention (run-scoped artifacts).
 
 1. **PREPARE**: Load the design. If it is not an approved design (no design doc / vague description), run the `brainstorm` phase to produce one (save to `docs/plans/designs/`). Confirm the design with the user before decomposing.
 2. **ACQUIRE**: Read the design; detect existing issue prefixes in the target repos (scan open + closed issues) to propose a non-colliding per-epic prefix; ask if ambiguous.
-3. **REASON**: Decompose using `plan`-skill heuristics — waves, dependencies, critical path, cross-repo gates. Priority ladder is per epic-forge (`resources/style-guide.md`): P0 = critical-path foundation; P1 = high; P2 = medium; P3 = polish. Produce the epic + task DAG.
+3. **REASON**: Decompose using `plan`-skill heuristics — waves, dependencies, critical path, cross-repo gates. Priority ladder is per epic-forge (`.agents/skills/epic-forge/resources/style-guide.md`): P0 = critical-path foundation; P1 = high; P2 = medium; P3 = polish. Produce the epic + task DAG.
 4. **Gate 1 (DAG review)**: present the DAG (prefix-based) for approval. Include a grug decomposition checklist (rules 2, 12, 20, 21): no speculative issues, each issue independently valuable or dependency-necessary, no abstraction-only task, no unrelated work bundled. On rejection, revise.
-5. **ACT (draft)**: Write epic + issue bodies from the templates (`resources/epic-template.md`, `resources/issue-template.md`) following `resources/style-guide.md`. Bodies use prefix references + `{SIBLING_EPIC}` placeholders. Save all bodies + a manifest (prefix → title → phase → priority → deps → status) + an empty state file to `.agents/results/epic-forge/<run>/`.
+5. **ACT (draft)**: Write epic + issue bodies from the templates (`.agents/skills/epic-forge/resources/epic-template.md`, `.agents/skills/epic-forge/resources/issue-template.md`) following `.agents/skills/epic-forge/resources/style-guide.md`. Bodies use prefix references + `{SIBLING_EPIC}` placeholders. Save all bodies + a manifest (prefix → title → phase → priority → deps → status) + an empty state file to `.agents/results/epic-forge/<run>/`.
 6. **Gate 2 (summary review)**: present per-epic summary — issue cards (title, 2–3 line summary, files, acceptance count, depends-on) + numbered dependency hierarchy + critical path. **Verify write access to all target repos** (functional check per repo; fail fast). On approval, proceed.
 7. **ACT (create + link + annotate)** — three passes:
    - Pass 1: create epics per `providers.md` "Epic representation & creation" (GitHub: issue + `epic` label; GitLab: native epic or issue+label fallback) — get numbers, then create issues (bodies reference `Epic: #N`). Record prefix → number in the state file. Pace calls; on 429 back off and resume from the state file; idempotency guard (skip already-created by title).

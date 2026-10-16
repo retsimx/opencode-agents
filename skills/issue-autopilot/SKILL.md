@@ -232,7 +232,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 **CRITICAL: Delegate commit message and PR description generation to a Task subagent. Do not write them inline.**
 
 1. `cd $WORKTREE`
-2. Spawn an SCM Task subagent per [Subagent Prompts](resources/subagent-prompts.md#1-scm-subagent-prompt-phase-4-step-2):
+2. Spawn an SCM Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#1-scm-subagent-prompt-phase-4-step-2):
    - `Role`: `"scm agent"`
    - `Prompt`: Instruct agent to inspect `WORKTREE` diffs, adhere to `.agents/skills/scm/SKILL.md` Conventional Commits (`Closes #<number>`), write `$RUN_TMP/commit-msg.txt` and `$RUN_TMP/pr-body.txt`, and write execution technical summary to `${RESULTS_DIR}/result-scm-ship-${SESSION_ID}.md`.
 3. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${SESSION_ID}.json` (role `scm-ship`, `result_file` `${RESULTS_DIR}/result-scm-ship-${SESSION_ID}.md`).
@@ -298,7 +298,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 **CRITICAL: Delegate this entire phase to a Task subagent. Do not write the comment inline.**
 
-1. Spawn a Task subagent per [Subagent Prompts](resources/subagent-prompts.md#2-issue-communicator-subagent-prompt-phase-5-step-1):
+1. Spawn a Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#2-issue-communicator-subagent-prompt-phase-5-step-1):
    - `Role`: `"Issue Communicator Agent"`
    - `Prompt`: Instruct agent to read `.agents/skills/_shared/runtime/providers.md`, inspect merged diff from `$PARENT_REPO`, write non-technical plain-English summary (no code references or technical jargon) to `$RUN_TMP/issue-comment.txt`, post using provider CLI command, and write technical summary to `${RESULTS_DIR}/result-issue-comment-${SESSION_ID}.md`.
 2. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${SESSION_ID}.json` (role `issue-comment`, `result_file` `${RESULTS_DIR}/result-issue-comment-${SESSION_ID}.md`).

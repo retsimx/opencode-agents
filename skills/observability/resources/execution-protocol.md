@@ -144,12 +144,12 @@ Intent: setup  Mode: auto
 Layer: L7 + mesh    Boundary: cross-application    Signal: metrics + logs + traces
 
 Primary recommendation:
-  - resources/transport/collector-topology.md §Two-tier hybrid — DaemonSet + Deployment gateway
-  - resources/vendor-categories.md §OSS Full-Stack — Grafana LGTM+ (2026-Q2)
+  - .agents/skills/observability/resources/transport/collector-topology.md §Two-tier hybrid — DaemonSet + Deployment gateway
+  - .agents/skills/observability/resources/vendor-categories.md §OSS Full-Stack — Grafana LGTM+ (2026-Q2)
 
 Secondary considerations:
-  - resources/transport/sampling-recipes.md §Tail-based — consistent routing via loadbalancing exporter
-  - resources/anti-patterns.md §Section C — avoid sidecar as default on k8s; use DaemonSet
+  - .agents/skills/observability/resources/transport/sampling-recipes.md §Tail-based — consistent routing via loadbalancing exporter
+  - .agents/skills/observability/resources/anti-patterns.md §Section C — avoid sidecar as default on k8s; use DaemonSet
 
 Delegation target:
   - No single vendor skill (OSS self-host); use /search for component docs

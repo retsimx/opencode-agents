@@ -82,7 +82,7 @@ wrap with `timeout 300`.
 
 ### 1. Scanner → proposal
 
-Spawn task with `resources/scanner-prompt.md`.
+Spawn task with `.agents/skills/gardener-sow/resources/scanner-prompt.md`.
 
 - Result: `$RUN_TMP/proposal.md` with required markers (see prompt).
 - Gate, then read. If `NO_PROPOSAL` / empty worthwhile work → cleanup, exit.
@@ -97,7 +97,7 @@ open/`rejected` row. A cited `unknown` row does **not** suppress. On suppress
 
 ### 3. Implementation preflight + implement
 
-Spawn task with `resources/implement-prompt.md` (preflight then edit).
+Spawn task with `.agents/skills/gardener-sow/resources/implement-prompt.md` (preflight then edit).
 
 - Preflight must validate proposal against current `WORKTREE` code. Invalid →
   cleanup, exit.
@@ -107,7 +107,7 @@ Spawn task with `resources/implement-prompt.md` (preflight then edit).
 
 ### 4. Local checks
 
-Spawn task with `resources/verify-prompt.md`.
+Spawn task with `.agents/skills/gardener-sow/resources/verify-prompt.md`.
 
 - Discover checks per contract / `providers.md` Local CI discovery. Never invent
   runners or install tooling.
@@ -119,7 +119,7 @@ Spawn task with `resources/verify-prompt.md`.
 
 ### 5. Assessor
 
-Spawn task with `resources/assessor-prompt.md`.
+Spawn task with `.agents/skills/gardener-sow/resources/assessor-prompt.md`.
 
 - Result: `$RUN_TMP/assessment.md` with `PASS` or `FAIL`. Gate.
 - Parent independently skims the **uncommitted** `$WORKTREE` patch
@@ -130,15 +130,15 @@ Spawn task with `resources/assessor-prompt.md`.
 
 ### 6. One revision (at most)
 
-On verify fail or assessor `FAIL`: spawn `resources/revise-prompt.md` once, then
+On verify fail or assessor `FAIL`: spawn `.agents/skills/gardener-sow/resources/revise-prompt.md` once, then
 re-run verify + assessor. Second failure → abandon (revert worktree dirty state
 if needed), cleanup, exit.
 
 ### 7. Ship
 
-1. Spawn `resources/ship-prompt.md` **MODE=COMMIT**: one local commit
+1. Spawn `.agents/skills/gardener-sow/resources/ship-prompt.md` **MODE=COMMIT**: one local commit
    `chore(gardener): …`, write `$RUN_TMP/pr-body.md` from
-   `resources/pr-body-template.md` + verified patch. Return commit SHA. Gate,
+   `.agents/skills/gardener-sow/resources/pr-body-template.md` + verified patch. Return commit SHA. Gate,
    then require `STATUS: COMMITTED` and a non-empty `HEAD_SHA`. On `FAIL` or
    missing SHA → do **not** write intent; do not publish; cleanup, exit.
 2. Atomically write `$STATE_DIR/intent.json` with
@@ -173,8 +173,8 @@ Do not fall through to allocate a new `run-id` or open a second draft.
 ## PR body
 
 Sections: **Improvement**, **Safety**, **Verification**, **Grug**, optional
-**Prior proposal**. See `resources/pr-body-template.md`. Examples:
-`resources/acme-examples.md`.
+**Prior proposal**. See `.agents/skills/gardener-sow/resources/pr-body-template.md`. Examples:
+`.agents/skills/gardener-sow/resources/acme-examples.md`.
 
 ## Guardrails
 
@@ -185,21 +185,21 @@ Sections: **Improvement**, **Safety**, **Verification**, **Grug**, optional
 4. No `gardener/iter-`. Do not use a legacy Markdown state *table*. The shared
    protocol `.agents/skills/_shared/runtime/gardener-state.md` is required.
 5. Draft PRs only; title `chore(gardener):`; branch `gardener/run-…`.
-6. Exclusions: `resources/exclusions.md` (secrets / generated / vendored only).
+6. Exclusions: `.agents/skills/gardener-sow/resources/exclusions.md` (secrets / generated / vendored only).
 7. Do not touch excluded paths; do not invent local CI.
 
 ## Resources
 
 | File | Role |
 |------|------|
-| `resources/scanner-prompt.md` | Evidence-backed proposal |
-| `resources/implement-prompt.md` | Preflight + implement |
-| `resources/verify-prompt.md` | Local check discovery |
-| `resources/assessor-prompt.md` | Independent patch assessment |
-| `resources/revise-prompt.md` | One focused revision |
-| `resources/ship-prompt.md` | Commit / publish |
-| `resources/pr-body-template.md` | Public PR body |
-| `resources/acme-examples.md` | Good/bad proposal examples |
-| `resources/exclusions.md` | Generic path exclusions |
+| `.agents/skills/gardener-sow/resources/scanner-prompt.md` | Evidence-backed proposal |
+| `.agents/skills/gardener-sow/resources/implement-prompt.md` | Preflight + implement |
+| `.agents/skills/gardener-sow/resources/verify-prompt.md` | Local check discovery |
+| `.agents/skills/gardener-sow/resources/assessor-prompt.md` | Independent patch assessment |
+| `.agents/skills/gardener-sow/resources/revise-prompt.md` | One focused revision |
+| `.agents/skills/gardener-sow/resources/ship-prompt.md` | Commit / publish |
+| `.agents/skills/gardener-sow/resources/pr-body-template.md` | Public PR body |
+| `.agents/skills/gardener-sow/resources/acme-examples.md` | Good/bad proposal examples |
+| `.agents/skills/gardener-sow/resources/exclusions.md` | Generic path exclusions |
 
 - Routing: `.agents/skills/_shared/core/skill-routing.md`

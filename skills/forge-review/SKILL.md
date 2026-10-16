@@ -24,7 +24,7 @@ Before starting, load and follow:
 ### Goal
 Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR/MR (or branch) against its closing Issue and parent Epic contracts using a 3-Stage 5-Subagent Architecture. Present structured evidence in chat, save an immutable audit artifact on disk, and interactively submit formal reviews with self-contained, line-level inline diff suggestions to GitHub (`gh`) or GitLab (`glab`).
 
-> **DISPATCH TYPE INVARIANT (Subagent 0 only)**: Subagent 0 (`context-ingestion`) MUST ALWAYS be dispatched with the EXPLICIT `subagent_type="general"` argument — in every harness, on every run. Omitting the argument (inheriting a harness default) or passing any other type invalidates the run and requires re-dispatch. Subagents 1–4 use the harness-configured default. This is the single most common dispatch mistake — check it first. See Guardrail 3a and `resources/subagent-prompts.md`.
+> **DISPATCH TYPE INVARIANT (Subagent 0 only)**: Subagent 0 (`context-ingestion`) MUST ALWAYS be dispatched with the EXPLICIT `subagent_type="general"` argument — in every harness, on every run. Omitting the argument (inheriting a harness default) or passing any other type invalidates the run and requires re-dispatch. Subagents 1–4 use the harness-configured default. This is the single most common dispatch mistake — check it first. See Guardrail 3a and `.agents/skills/forge-review/resources/subagent-prompts.md`.
 
 ### Intent signature
 - User invokes `/forge-review` or asks to review a PR, MR, or issue PR.
@@ -122,7 +122,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 - `_shared/core/clarification-protocol.md` — clarification rules & human approval gating.
 - `_shared/core/context-loading.md` — dynamic resource loading.
 - Subagent skills: `.agents/skills/deep-review/SKILL.md`, `.agents/skills/review/SKILL.md`, `.agents/skills/deepsec/SKILL.md`.
-- Local resources: `resources/comment-template.md`, `resources/review-template.md`, `resources/execution-protocol.md`, `resources/subagent-prompts.md`, `resources/operational-runbooks.md`.
+- Local resources: `.agents/skills/forge-review/resources/comment-template.md`, `.agents/skills/forge-review/resources/review-template.md`, `.agents/skills/forge-review/resources/execution-protocol.md`, `.agents/skills/forge-review/resources/subagent-prompts.md`, `.agents/skills/forge-review/resources/operational-runbooks.md`.
 
 ### Control-flow features
 - Branching by forge provider (`gh` vs `glab`).
@@ -179,7 +179,7 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
      4. *Check 4 (Deduplication & Recalibration)*: Merges overlapping findings across specialists; recalibrates overall verdict across all 6 sections.
      5. *Check 5 (Immutable Security Pass-Through)*: Preserves every Subagent 3 security finding for Section 2 (Dedicated Security & Threat Model Audit) with original provenance and detector severity, while adding verified reachability, trust assumptions, confidence, final severity, and disposition (preservation of findings, not immutable detector severity).
      6. *Check 6 (Contract Grounding & Merge Disposition)*: Classifies each finding as BLOCKING or NON-BLOCKING against the acceptance-criteria matrix, applying the extra-contract merge-safety override for verified reachable defects, and derives the contract-led verdict.
-   - Writes pristine deliverable conforming to the 6-Section structure (`resources/review-template.md`) to `.agents/results/review-pr-{n}-{sessionId}.md`.
+   - Writes pristine deliverable conforming to the 6-Section structure (`.agents/skills/forge-review/resources/review-template.md`) to `.agents/results/review-pr-{n}-{sessionId}.md`.
 
 5. **PRESENT & GATE (Human Approval Gate)**:
    - The Orchestrator MUST render the COMPLETE, UNCOLLAPSED, RICH Markdown review deliverable directly in chat immediately before asking the user. This MUST include:
@@ -290,11 +290,11 @@ Perform an exhaustive, multi-pass alignment, quality, and security audit of a PR
 - The subagent tool for Subagents 0, 1, 2, 3, and 4.
 - The question tool for interactive human approval gates.
 - Read/write/edit the file for file-first state management.
-- `resources/comment-template.md` for inline diff suggestions.
-- `resources/review-template.md` for top-level review synthesis.
-- `resources/subagent-prompts.md` for JSON subagent prompt templates.
-- `resources/operational-runbooks.md` for detailed subagent runbooks.
-- `resources/execution-protocol.md` for execution protocol & API commands.
+- `.agents/skills/forge-review/resources/comment-template.md` for inline diff suggestions.
+- `.agents/skills/forge-review/resources/review-template.md` for top-level review synthesis.
+- `.agents/skills/forge-review/resources/subagent-prompts.md` for JSON subagent prompt templates.
+- `.agents/skills/forge-review/resources/operational-runbooks.md` for detailed subagent runbooks.
+- `.agents/skills/forge-review/resources/execution-protocol.md` for execution protocol & API commands.
 
 ### Guardrails
 1. **Human Approval Gate (NON-NEGOTIABLE)**: Never publish reviews, approve PRs, request changes, or post inline comments without explicit user confirmation.
