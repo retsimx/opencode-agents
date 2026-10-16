@@ -74,4 +74,4 @@ If `packages/i18n/` exists in the project, ARB files are the **single source of 
 
 - Subagent **result files** (`result-*.md`) are written in the user's language
 - **Internal communication** between subagents (charter, status keywords) stays in English
-- Agent definition files (`.agents/agents/*.md`) stay in English
+- Agent definition files (`.agents/skills/*/SKILL.md`) stay in English

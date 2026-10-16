@@ -87,7 +87,7 @@ When user sends a correction/clarification during session:
    - If CD >= 80: Pause and request re-specification
    - If `redo` >= 2: Request explicit scope confirmation
 
-### For QA Agent (Post-Session)
+### For review agent (Post-Session)
 
 At session end, if total CD >= 50:
 
@@ -109,7 +109,7 @@ At session end, if total CD >= 50:
 | Component | How It Uses Session Metrics |
 |-----------|----------------------------|
 | **Orchestrator** | Records events, checks thresholds, triggers pauses |
-| **QA Agent** | Reviews session metrics, generates RCA if needed |
+| **review agent** | Reviews session metrics, generates RCA if needed |
 | **Dashboard** | Displays real-time CD score (optional) |
 | **Retro Command** | Aggregates CD across sessions (globs `session-metrics-*.md`) for trend analysis |
 
@@ -178,7 +178,7 @@ This data is sourced from the Experiment Ledger at session end (see `.agents/ski
 
 ## Evaluator Accuracy Tracking
 
-QA agents improve only when their judgment errors are tracked.
+review agents improve only when their judgment errors are tracked.
 Unlike CD (tracked in real-time), Evaluator Accuracy (EA) is a
 **retrospective metric**; most errors are discovered after the session ends.
 
@@ -186,11 +186,11 @@ Unlike CD (tracked in real-time), Evaluator Accuracy (EA) is a
 
 | Event | Points | When Discovered |
 |-------|--------|-----------------|
-| `false_negative` | +30 | Next session or production: bug that QA missed |
-| `false_positive` | +15 | During session: impl agent disputes QA finding successfully |
+| `false_negative` | +30 | Next session or production: bug that review missed |
+| `false_positive` | +15 | During session: impl agent disputes review finding successfully |
 | `severity_mismatch` | +10 | During session or retro: wrong severity assigned |
 | `missed_stub` | +20 | During session: runtime verification catches display-only feature |
-| `good_catch` | -10 | During session: QA caught non-obvious bug (reward signal) |
+| `good_catch` | -10 | During session: review caught non-obvious bug (reward signal) |
 
 ### Recording
 
@@ -207,9 +207,9 @@ EA = sum(accuracy_event_points across last 3 sessions)
 
 | Threshold | Action |
 |-----------|--------|
-| EA >= 30 | **TUNING SUGGESTED**: `retro` flags QA patterns for review |
-| EA >= 50 | **TUNING REQUIRED**: Review and update QA execution-protocol.md |
-| `false_negative` >= 3 across window | **CHECKLIST UPDATE**: Add detection pattern to QA checklist.md |
+| EA >= 30 | **TUNING SUGGESTED**: `retro` flags review patterns for tuning |
+| EA >= 50 | **TUNING REQUIRED**: update the review execution protocol |
+| `false_negative` >= 3 across window | **CHECKLIST UPDATE**: Add detection pattern to review checklist.md |
 | `good_catch` >= 5 across window | **PROPAGATE**: Document successful pattern in evaluator-tuning.md |
 
 ### Accuracy Log Format
@@ -219,9 +219,9 @@ Separate from CD events. Appended to session log:
 ```markdown
 ### Evaluator Accuracy Events
 
-| Session | Event | Detail | QA Prompt Gap |
+| Session | Event | Detail | Review Prompt Gap |
 |---------|-------|--------|---------------|
-| current | false_positive | QA flagged unused import that was actually used in test | Over-aggressive dead code rule |
+| current | false_positive | review flagged unused import that was actually used in test | Over-aggressive dead code rule |
 | current | missed_stub | File upload button rendered but no handler | Runtime verification not performed |
 | prev-session | false_negative | Auth bypass via token reuse not caught | No token lifecycle check in checklist |
 | current | good_catch | Caught N+1 in nested serializer | SQL logging pattern worked |

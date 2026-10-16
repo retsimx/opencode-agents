@@ -1,4 +1,4 @@
-# QA Review Checklist
+# Review Checklist
 
 ## Security Checklist
 

@@ -31,7 +31,7 @@ Reproduce, diagnose, minimally fix, and regression-test bugs while preserving sc
 
 ### When NOT to use
 - Building new features -> use Frontend/Backend/Mobile agents
-- General code review -> use QA Agent
+- General code review -> use review agent
 
 ### Expected inputs
 - Error message, failing behavior, reproduction steps, logs, test failure, or affected code path

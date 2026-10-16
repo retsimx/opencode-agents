@@ -1,6 +1,6 @@
-# QA Agent - Self-Check
+# review agent - Self-Check
 
-Verify your own review quality before submitting the QA report.
+Verify your own review quality before submitting the review report.
 
 ## Completeness
 - [ ] All files in scope were reviewed (none skipped)

@@ -1,4 +1,4 @@
-# QA Agent - Execution Protocol
+# review agent - Execution Protocol
 
 ## Step 0: Prepare
 1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
@@ -60,7 +60,7 @@ at runtime. This step requires interacting with the running application.
    ```
    - Pages in the same `isolatedContext` share cookies/storage
    - Pages in different contexts are fully isolated
-   - Always use `isolatedContext: "review-test"` for QA verification
+   - Always use `isolatedContext: "review-test"` for review verification
 3. Navigate and inspect:
    ```
    navigate_page(url)            → navigate within the isolated context (SPA routes, sub-pages)
@@ -121,7 +121,7 @@ at runtime. This step requires interacting with the running application.
 
 ### Recording Results
 
-Append to the QA report under a new section:
+Append to the review report under a new section:
 
 ```markdown
 ## Runtime Verification Results
@@ -180,7 +180,7 @@ Write a complete, structured report to designated `OUTPUT_FILE` (`.agents/result
 1. Confirm `.agents/results/result-review-{taskSlug}-{sessionId}.md` is fully written to disk.
 2. Return strictly the 4-line chat completion summary to the orchestrator:
    ```markdown
-   ### Task Complete: QA Reviewer — {Task Name}
+   ### Task Complete: review agent — {Task Name}
    - **Status**: SUCCESS | BLOCKED | FAILED
    - **Summary**:
      - {Overall audit verdict: PASS / WARNING / FAIL}

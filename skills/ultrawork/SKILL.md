@@ -1,13 +1,13 @@
 ---
 name: ultrawork
-description: High-quality 5-phase development workflow with 11 review steps out of 17 total — PLAN (PM-driven task breakdown), IMPL (parallel agent spawning), VERIFY (QA alignment/safety/regression), REFINE (deep review, split large files, side-effect analysis), and SHIP (final QA, UX, deployment readiness). Use for high-stakes features requiring deep quality gates at every phase.
+description: High-quality 5-phase development workflow with 11 review steps out of 17 total — PLAN (plan-driven task breakdown), IMPL (parallel agent spawning), VERIFY (review alignment/safety/regression), REFINE (deep review, split large files, side-effect analysis), and SHIP (final review, UX, deployment readiness). Use for high-stakes features requiring deep quality gates at every phase.
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
 - **Use Task subagents for isolated work** — delegate distinct subtasks to subagents rather than doing everything inline. Subagents are cheap; they prevent context dilution and scope creep.
-- **Subagent Dispatch Gate (HARD INVARIANT)**: Every spawned implementation/QA/debug agent MUST have its harness-returned `task_id` recorded in `.agents/results/subagent-ledger-{sessionId}.json`. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
+- **Subagent Dispatch Gate (HARD INVARIANT)**: Every spawned implementation/review/debug agent MUST have its harness-returned `task_id` recorded in `.agents/results/subagent-ledger-{sessionId}.json`. A deliverable written inline by the orchestrator (no recorded `task_id`) does NOT satisfy the gate — re-dispatch the agent. See `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`.
 - **Use the `question` tool when uncertain** — never make assumptions. Guessing leads to wasted work. Ask a quick question instead.
 - Use OpenCode's built-in tools for all operations:
   - `read`, `write`, `edit`, `grep`, `glob`, `bash` for code exploration and file operations
@@ -45,7 +45,7 @@ Before starting, load and follow:
 
 ### Step 1: Create Plan & Review
 // turbo
-Activate PM Agent to execute Steps 1-4:
+Activate plan agent to execute Steps 1-4:
 
 1. Analyze requirements.
 2. Define API contracts.
@@ -58,13 +58,13 @@ Activate PM Agent to execute Steps 1-4:
 9. Write plan completion to `.agents/results/session-ultrawork-{sessionId}.md`.
 
 ### Step 2: Plan Review (Completeness)
-- **Executed by PM Agent**: Ensure requirements are fully mapped.
+- **Executed by plan agent**: Ensure requirements are fully mapped.
 
 ### Step 3: Review Verification (Meta Review)
-- **Executed by PM Agent**: Self-verify if the review was sufficient.
+- **Executed by plan agent**: Self-verify if the review was sufficient.
 
 ### Step 4: Over-Engineering Review (Simplicity)
-- **Executed by PM Agent**: Check for unnecessary complexity (MVP focus).
+- **Executed by plan agent**: Check for unnecessary complexity (MVP focus).
 
 ### PLAN_GATE
 - [ ] Plan documented
@@ -88,7 +88,7 @@ Spawn Implementation Agents (Backend/Frontend/Mobile) in parallel.
 ### Dispatch via OpenCode `task` tool
 
 Spawn implementation agents in parallel using the OpenCode `task` tool:
-- Use `subagent_type="general"` for all implementation agents
+- Spawn one implementation agent per task; the orchestrator's routing policy selects the subagent type (pass the agent role — backend/frontend/mobile — in the prompt)
 - Inject explicit context parameters into each subagent prompt:
   - `SESSION_ID`: Active session identifier (e.g. `{sessionId}`)
   - `TASK_SLUG`: Concise kebab-case task identifier (e.g. `{taskSlug}`)
@@ -155,28 +155,28 @@ If no measurement tools: skip; gates fall back to binary checklist.
 
 ## Phase 3: VERIFY (Steps 6-8)
 
-### Step 6-8: QA Verification
+### Step 6-8: Review Verification
 // turbo
-Spawn QA Agent to execute Steps 6-8.
+Spawn review agent to execute Steps 6-8.
 
-Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
-- Inject context parameters into the QA Agent prompt:
+Spawn the review agent via the `task` tool (type selected by the orchestrator's routing policy):
+- Inject context parameters into the review agent prompt:
   - `SESSION_ID`: Active session identifier (`{sessionId}`)
   - `TASK_SLUG`: `qa-verify`
   - `OUTPUT_FILE`: `.agents/results/result-qa-verify-{sessionId}.md`
-- Enforce **Zero-Context Relay**: Pass implementation `OUTPUT_FILE` paths (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`) and plan path (`.agents/results/plan-{sessionId}.json`) by reference. Instruct QA Agent to audit these files directly from disk.
-- **Rule loading (MANDATORY)**: instruct the QA subagent to load before starting:
+- Enforce **Zero-Context Relay**: Pass implementation `OUTPUT_FILE` paths (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`) and plan path (`.agents/results/plan-{sessionId}.json`) by reference. Instruct review agent to audit these files directly from disk.
+- **Rule loading (MANDATORY)**: instruct the review subagent to load before starting:
   - `.agents/rules/grug-principles.md`
   - `.agents/rules/tool-compatibility.md`
   - `.agents/rules/i18n-guide.md`
   - `.agents/skills/_shared/core/quality-principles.md`
 - Mandate **File-First State I/O**:
-  - QA Agent must write full verification matrices, checklist audits (with line citations), security checks, and regression results to `.agents/results/result-qa-verify-{sessionId}.md`.
-  - QA Agent must also include a **Grug compliance** section in `result-qa-verify-{sessionId}.md` assessing: unnecessary vs necessary complexity, gold-plating, premature abstraction, unused extension points, and whether an existing mechanism could have been used.
-  - QA Agent must verify `OUTPUT_FILE` exists on disk before returning.
-  - QA Agent MUST return ONLY the standardized 4-line chat completion summary:
+  - review agent must write full verification matrices, checklist audits (with line citations), security checks, and regression results to `.agents/results/result-qa-verify-{sessionId}.md`.
+  - review agent must also include a **Grug compliance** section in `result-qa-verify-{sessionId}.md` assessing: unnecessary vs necessary complexity, gold-plating, premature abstraction, unused extension points, and whether an existing mechanism could have been used.
+  - review agent must verify `OUTPUT_FILE` exists on disk before returning.
+  - review agent MUST return ONLY the standardized 4-line chat completion summary:
     ```markdown
-    ### Task Complete: QA Agent — QA Verification
+    ### Task Complete: review agent — Review Verification
     - **Status**: SUCCESS | BLOCKED | FAILED
     - **Summary**:
       - {Key verification finding or verdict 1}
@@ -187,29 +187,29 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
 
 ---
 
-### Monitor QA Agent Progress
+### Monitor review agent Progress
 
-**Wait for QA Agent to complete verification before proceeding.**
+**Wait for review agent to complete verification before proceeding.**
 
-1. Monitor QA Agent 4-line chat completion return.
+1. Monitor review agent 4-line chat completion return.
 2. Verify `.agents/results/result-qa-verify-{sessionId}.md` exists on disk.
-3. Update `.agents/results/session-ultrawork-{sessionId}.md` with QA results and artifact link.
+3. Update `.agents/results/session-ultrawork-{sessionId}.md` with review results and artifact link.
 
-**Continue polling until QA Agent reports completion.**
+**Continue polling until review agent reports completion.**
 
 ### Step 6: Alignment Review
-- **Executed by QA Agent**: Compare implementation vs plan.
+- **Executed by review agent**: Compare implementation vs plan.
 
 ### Step 7: Security/Bug Review (Safety)
-- **Executed by QA Agent**: Check for vulnerabilities (Safety).
+- **Executed by review agent**: Check for vulnerabilities (Safety).
 
 ### Step 8: Improvement Review (Regression Prevention)
-- **Executed by QA Agent**: Run regression tests.
+- **Executed by review agent**: Run regression tests.
 
 ### Step 8.1: Measure Post-VERIFY Quality Score (Conditional)
 
 If baseline was measured at Step 5.2:
-1. Measure Quality Score incorporating QA findings
+1. Measure Quality Score incorporating review findings
 2. Calculate delta from IMPL baseline
 3. Record as experiment in `.agents/results/experiment-ledger-{sessionId}.md`
 
@@ -230,7 +230,7 @@ If baseline was measured at Step 5.2:
 >
 > If neither condition is met, return to Step 5 and continue.
 
-**Root-cause-first fix mandate:** when re-spawning implementation agents to address QA findings, the fix prompt MUST require root-cause remediation and pass the QA `OUTPUT_FILE` reference (`.agents/results/result-qa-verify-{sessionId}.md`). Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
+**Root-cause-first fix mandate:** when re-spawning implementation agents to address review findings, the fix prompt MUST require root-cause remediation and pass the review `OUTPUT_FILE` reference (`.agents/results/result-qa-verify-{sessionId}.md`). Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
 
 **Gate failure (2nd time on same issue, and termination conditions not yet met)** → Activate **Exploration Loop**:
 1. Read `.agents/skills/_shared/conditional/exploration-loop.md` (conditional, per context-loading guide)
@@ -247,9 +247,9 @@ If baseline was measured at Step 5.2:
 
 ### Step 9-13: Deep Refinement
 // turbo
-Spawn Debug Agent (or Senior Dev Agent) to execute Steps 9-13.
+Spawn Debug Agent (or implementation agent) to execute Steps 9-13.
 
-Spawn Debug Agent via OpenCode `task` tool (subagent_type="general"):
+Spawn the debug agent via the `task` tool (type selected by the orchestrator's routing policy):
 - Inject context parameters into the Debug Agent prompt:
   - `SESSION_ID`: Active session identifier (`{sessionId}`)
   - `TASK_SLUG`: `refine`
@@ -331,27 +331,27 @@ If baseline was measured at Step 5.2:
 
 ## Phase 5: SHIP (Steps 14-17)
 
-### Step 14-17: Final QA & Deployment Readiness
+### Step 14-17: Final Review & Deployment Readiness
 // turbo
-Spawn QA Agent to execute Steps 14-17.
+Spawn review agent to execute Steps 14-17.
 
-Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
-- Inject context parameters into the QA Agent prompt:
+Spawn the review agent via the `task` tool (type selected by the orchestrator's routing policy):
+- Inject context parameters into the review agent prompt:
   - `SESSION_ID`: Active session identifier (`{sessionId}`)
   - `TASK_SLUG`: `qa-ship`
   - `OUTPUT_FILE`: `.agents/results/result-qa-ship-{sessionId}.md`
 - Enforce **Zero-Context Relay**: Pass prerequisite artifacts (`.agents/results/result-refine-{sessionId}.md`, implementation output files) by reference.
-- **Rule loading (MANDATORY)**: instruct the QA subagent to load before starting:
+- **Rule loading (MANDATORY)**: instruct the review subagent to load before starting:
   - `.agents/rules/grug-principles.md`
   - `.agents/rules/tool-compatibility.md`
   - `.agents/rules/i18n-guide.md`
   - `.agents/skills/_shared/core/quality-principles.md`
 - Mandate **File-First State I/O**:
-  - QA Agent writes full final audit, UX verification, cascade checks, and deployment checklists to `.agents/results/result-qa-ship-{sessionId}.md`.
-  - QA Agent must verify `OUTPUT_FILE` exists on disk before returning.
-  - QA Agent MUST return ONLY the standardized 4-line chat completion summary:
+  - review agent writes full final audit, UX verification, cascade checks, and deployment checklists to `.agents/results/result-qa-ship-{sessionId}.md`.
+  - review agent must verify `OUTPUT_FILE` exists on disk before returning.
+  - review agent MUST return ONLY the standardized 4-line chat completion summary:
     ```markdown
-    ### Task Complete: QA Agent — Final QA & Deployment Readiness
+    ### Task Complete: review agent — Final Review & Deployment Readiness
     - **Status**: SUCCESS | BLOCKED | FAILED
     - **Summary**:
       - {Key final check outcome 1}
@@ -362,27 +362,27 @@ Spawn QA Agent via OpenCode `task` tool (subagent_type="general"):
 
 ---
 
-### Monitor Final QA Progress
+### Monitor Final Review Progress
 
-**Wait for QA Agent to complete final review before proceeding.**
+**Wait for review agent to complete final review before proceeding.**
 
-1. Monitor QA Agent 4-line chat completion return.
+1. Monitor review agent 4-line chat completion return.
 2. Verify `.agents/results/result-qa-ship-{sessionId}.md` exists on disk.
-3. Update `.agents/results/session-ultrawork-{sessionId}.md` with final QA results and artifact link.
+3. Update `.agents/results/session-ultrawork-{sessionId}.md` with final review results and artifact link.
 
-**Continue polling until QA Agent reports completion.**
+**Continue polling until review agent reports completion.**
 
 ### Step 14: Code Quality Review
-- **Executed by QA Agent**: Lint, Types, Coverage.
+- **Executed by review agent**: Lint, Types, Coverage.
 
 ### Step 15: UX Flow Verification
-- **Executed by QA Agent**: User journey check.
+- **Executed by review agent**: User journey check.
 
 ### Step 16: Related Issues Review (Cascade Impact 2nd)
-- **Executed by QA Agent**: Final impact check.
+- **Executed by review agent**: Final impact check.
 
 ### Step 17: Deployment Readiness Review (Final)
-- **Executed by QA Agent**: Secrets, Migrations, checklist.
+- **Executed by review agent**: Secrets, Migrations, checklist.
 
 ### Step 17.1: Final Quality Score & Session Summary (Conditional)
 
@@ -394,12 +394,12 @@ If Quality Score was measured during this session:
 
 **Always** (regardless of Quality Score availability):
 5. Record Evaluator Accuracy events for this session:
-   - Review all QA findings: any disputed by impl agents? → `false_positive`
+   - Review all findings from the review agent: any disputed by impl agents? → `false_positive`
    - Review runtime verification results: any stubs caught that static review missed? → `missed_stub`
-   - Review impl agent self-check results: any bugs caught by QA that self-check missed? → `good_catch`
+   - Review impl agent self-check results: any bugs caught by review that self-check missed? → `good_catch`
 6. Append EA events to `.agents/results/session-metrics-{sessionId}.md` (protocol: `.agents/skills/_shared/core/session-metrics.md`)
 7. If rolling 3-session EA >= 30: Flag in final report
-   → "QA tuning suggested. Run `retro` to review."
+   → "Review tuning suggested. Run `retro` to review."
 
 ### SHIP_GATE
 - [ ] Quality checks pass
@@ -427,11 +427,11 @@ This hook is opt-in; skip by default.
 
 | Phase  | Steps | Agent       | Execution | Perspective                       |
 | ------ | ----- | ----------- | --------- | --------------------------------- |
-| PLAN   | 1-4   | PM Agent    | Inline    | Completeness, Meta, Simplicity    |
-| IMPL   | 5     | Dev Agents  | Spawn     | Implementation                    |
-| VERIFY | 6-8   | QA Agent    | Spawn     | Alignment, Safety, Regression     |
+| PLAN   | 1-4   | plan agent    | Inline    | Completeness, Meta, Simplicity    |
+| IMPL   | 5     | implementation agents  | Spawn     | Implementation                    |
+| VERIFY | 6-8   | review agent    | Spawn     | Alignment, Safety, Regression     |
 | REFINE | 9-13  | Debug Agent | Spawn     | Reusability, Cascade, Consistency |
-| SHIP   | 14-17 | QA Agent    | Spawn     | Quality, UX, Cascade 2nd, Deploy  |
+| SHIP   | 14-17 | review agent    | Spawn     | Quality, UX, Cascade 2nd, Deploy  |
 
 **Total 11 review steps + conditional Quality Score checkpoints → High quality guaranteed**
 
@@ -450,3 +450,5 @@ This workflow conditionally incorporates patterns from autoresearch:
 | **Auto-learning** | At session end, if experiments exist | checklist guardrail & bug post-mortem auto-generation |
 
 All protocols are loaded **conditionally** per `.agents/skills/_shared/core/context-loading.md`, not at Phase 0.
+
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

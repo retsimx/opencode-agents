@@ -63,8 +63,8 @@ Agents should reference the following resources instead of `lessons-learned.md`:
 | **Frontend Agent (Impl)** | `docs/checklists/frontend.md` (Tier 0 Domain Checklist) | `.agents/results/bugs/` |
 | **Mobile Agent (Impl)** | `docs/checklists/mobile.md` (Tier 0 Domain Checklist) | `.agents/results/bugs/` |
 | **Debug Agent** | Relevant `docs/checklists/<domain>.md` (Tier 0 Domain Checklist) | `.agents/results/bugs/` |
-| **QA / Review Agent** | `docs/checklists/common.md` + `docs/checklists/<domain>.md` | `.agents/results/bugs/` |
-| **PM / Plan Agent** | Macro Architectural Context (`ARCHITECTURE.md`, `docs/design-docs/`, `docs/product-specs/`, `docs/plans/work/tech-debt-tracker.md`) | `.agents/results/bugs/` |
+| **review agent** | `docs/checklists/common.md` + `docs/checklists/<domain>.md` | `.agents/results/bugs/` |
+| **plan agent** | Macro Architectural Context (`ARCHITECTURE.md`, `docs/design-docs/`, `docs/product-specs/`, `docs/plans/work/tech-debt-tracker.md`) | `.agents/results/bugs/` |
 | **Orchestrator** | `docs/checklists/<domain>.md` | `.agents/results/bugs/` |
 
 ---
@@ -77,7 +77,7 @@ When closing a bug in `.agents/results/bugs/`:
 - Extract a concise 1-line rule and append it to `docs/checklists/<domain>.md` using the standardized pattern:
   `- [ ] **{Topic}**: {Rule} (❌ Anti-pattern: `{X}`, ✅ Required: `{Y}`) [Ref: .agents/results/bugs/{incident-file}.md]`
 
-### 2. High Clarification Debt (CD >= 50) & Review RCAs (QA Agent / Orchestrator)
+### 2. High Clarification Debt (CD >= 50) & Review RCAs (review agent / Orchestrator)
 When Clarification Debt threshold is breached (CD >= 50) or recurring review failures occur:
 - Record the full RCA post-mortem in `.agents/results/bugs/`.
 - Append the corresponding 1-line prevention rule to `docs/checklists/<domain>.md`.

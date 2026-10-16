@@ -164,7 +164,7 @@ convention (run-scoped artifacts).
 ### Tools and instruments
 - `gh` / `glab` (per `providers.md`).
 - `question` tool (all user interaction).
-- `task` tool (subagents for review/qa/refine when executing via ultrawork).
+- `task` tool (subagents for review/refine when executing via ultrawork).
 - Local resources: templates, style-guide, examples.
 
 ### Canonical workflow path

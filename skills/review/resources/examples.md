@@ -1,4 +1,4 @@
-# QA Agent - Examples
+# review agent - Examples
 
 ## Example 1: Security Audit
 
@@ -6,7 +6,7 @@
 
 **Output**:
 ```
-# QA Report: Authentication System
+# Review Report: Authentication System
 Status: FAIL
 
 ## Security Audit
@@ -39,7 +39,7 @@ Status: FAIL
 
 **Output**:
 ```
-# QA Report: Frontend Performance
+# Review Report: Frontend Performance
 Status: WARNING
 
 ## Performance
@@ -68,11 +68,11 @@ Status: WARNING
 
 ## Example 3: Full Pre-Launch Audit
 
-**Input**: "Complete QA review before production deployment"
+**Input**: "Complete the review before production deployment"
 
 **Output**:
 ```
-# QA Report: Pre-Launch Audit
+# Review Report: Pre-Launch Audit
 Status: WARNING
 
 ## Summary
@@ -99,13 +99,13 @@ Status: WARNING
 - [x] Test coverage > 80%
 ```
 
-## Example 4: Standards-Aligned QA Review
+## Example 4: Standards-Aligned Review
 
 **Input**: "Review this release candidate and suggest ISO 25010 / 29119 improvements"
 
 **Output**:
 ```
-# QA Report: Release Candidate
+# Review Report: Release Candidate
 Status: WARNING
 
 ## Standards Alignment

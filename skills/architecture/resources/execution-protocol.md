@@ -108,6 +108,5 @@
 
 ## Escalation
 - If the question is really about task sequencing -> hand off to plan
-- If the decision is really infra implementation -> hand off to tf-infra
 - If the issue is primarily code correctness -> hand off to debug
 - If the issue is primarily security/performance/accessibility verification -> hand off to review

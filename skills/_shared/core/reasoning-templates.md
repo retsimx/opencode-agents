@@ -34,7 +34,7 @@ Verdict: Correct → Set default value of todos to []
 
 ---
 
-## 2. Architecture Decision (PM Agent, Backend Agent)
+## 2. Architecture Decision (plan agent, Backend Agent)
 
 Fill in this matrix when technology selection or design decisions are needed.
 
@@ -132,7 +132,7 @@ Unrelated → Record in result only (never fix)
 
 ---
 
-## 5. Performance Bottleneck Analysis (Debug Agent, QA Agent)
+## 5. Performance Bottleneck Analysis (Debug Agent, review agent)
 
 Systematically find bottlenecks for "it's slow" reports.
 
@@ -185,7 +185,7 @@ Fallback: If all LOW confidence, escalate to user
 
 Problem: Input validation keeps failing security review
 Current Score: 68
-Attempts So Far: 2 (both rejected by QA for bypass vulnerability)
+Attempts So Far: 2 (both rejected by review for bypass vulnerability)
 
 Hypothesis A: Zod schema validation at router level
   Predicted Impact: Security +15, Correctness +5

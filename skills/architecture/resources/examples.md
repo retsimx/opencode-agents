@@ -44,7 +44,7 @@
 **Good Output Shape**:
 - Symptom summary
 - Likely architecture cause
-- Why this is an architecture problem instead of a bug/QA issue
+- Why this is an architecture problem instead of a bug/review issue
 - Selected next mode: Recommendation or ATAM-style
 
 ## Example 5: ADR Mode

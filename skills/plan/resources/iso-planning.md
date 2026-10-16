@@ -1,4 +1,4 @@
-# PM Agent - ISO 21500 / 31000 / 38500 Guide
+# plan agent - ISO 21500 / 31000 / 38500 Guide
 
 Use this file when the user wants standards-based planning, enterprise delivery structure, risk-aware prioritization, or governance-oriented recommendations.
 
@@ -10,7 +10,7 @@ Use this file when the user wants standards-based planning, enterprise delivery 
 
 Do not turn these into ceremony for simple tasks. Use them when they improve clarity, accountability, or delivery confidence.
 
-## 1. ISO 21500 for PM Work
+## 1. ISO 21500 for Plan Work
 
 Use ISO 21500 thinking to strengthen:
 
@@ -21,7 +21,7 @@ Use ISO 21500 thinking to strengthen:
 - roles and responsibilities
 - deliverable clarity
 
-Practical PM outputs:
+Practical plan outputs:
 
 - explicit scope and exclusions
 - task decomposition with dependencies
@@ -39,7 +39,7 @@ Use ISO 31000 thinking to improve:
 - treatment / mitigation planning
 - residual risk visibility
 
-Practical PM outputs:
+Practical plan outputs:
 
 - top risks list
 - mitigation tasks
@@ -57,7 +57,7 @@ Use ISO 38500 lightly for:
 - oversight expectations
 - alignment between business intent and technical execution
 
-Practical PM outputs:
+Practical plan outputs:
 
 - approver or decision owner
 - who must be informed

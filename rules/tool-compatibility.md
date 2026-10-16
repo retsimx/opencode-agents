@@ -15,6 +15,9 @@ when you need to know the exact tool name a given harness exposes.
   `invoke_subagent` tool)".
 - Never name a tool that exists in only one harness (e.g. `view_file`,
   `ask_question`, `StrReplace`) — it will be wrong for the others.
+- Never name a concrete subagent type in a skill. Name the role and let the
+  orchestrator's routing policy select the type; only the spawning tool
+  (`task`/`invoke_subagent`) may be named. An explicit, deliberate dispatch-type override documented in a skill (e.g. forge-review's Subagent 0) is permitted and overrides this rule for that skill; a deliberate override is one the skill states explicitly (e.g. a "HARD OVERRIDE"/"DISPATCH TYPE INVARIANT" clause), never an incidental mention.
 
 ## Capability → Tool map
 

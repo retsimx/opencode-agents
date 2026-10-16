@@ -10,7 +10,7 @@ to generate code that matches the design system without additional guidance.
 The 9-section structure below is aligned with the community
 [getdesign](https://getdesign.md) schema so that templates fetched by
 `.agents/skills/design/resources/getdesign-fetcher.md` drop in as Phase 2 seeds without shape
-mismatch. Downstream agents (`frontend`, `frontend-engineer`) are
+mismatch. Downstream agents (`frontend`) are
 expected to read Section 9 ("Agent Prompt Guide") verbatim as
 copy-paste instructions.
 

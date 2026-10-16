@@ -1,9 +1,9 @@
-# PM Agent - Execution Protocol
+# plan agent - Execution Protocol
 
 ## Step 0: Prepare
 1. **Assess difficulty**: see `.agents/skills/_shared/core/difficulty-guide.md`
    - **Simple**: Lightweight plan, 3-5 tasks | **Medium**: Full 4 steps | **Complex**: Full + API contracts
-2. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md` (critical for PM)
+2. **Clarify requirements**: follow `.agents/skills/_shared/core/clarification-protocol.md` (critical for the plan agent)
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
 3. **Use reasoning templates**: for architecture decisions, use `.agents/skills/_shared/core/reasoning-templates.md` (decision matrix)

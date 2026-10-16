@@ -28,7 +28,7 @@ Before starting, load and follow:
 ## Scheduling
 
 ### Goal
-Automatically orchestrate multi-agent execution with task decomposition, parallel agent spawning, file-based progress tracking, verification, QA cross-review, retry, and result collection.
+Automatically orchestrate multi-agent execution with task decomposition, parallel agent spawning, file-based progress tracking, verification, cross-review, retry, and result collection.
 
 ### Intent signature
 - User asks to orchestrate, run in parallel, automate multi-agent execution, or coordinate full-stack work end to end.
@@ -37,7 +37,7 @@ Automatically orchestrate multi-agent execution with task decomposition, paralle
 ### When to use
 - Complex feature requires multiple specialized agents working in parallel
 - User wants automated execution without manually spawning agents
-- Full-stack implementation spanning backend, frontend, mobile, and QA
+- Full-stack implementation spanning backend, frontend, mobile, and review
 - User says "run it automatically", "run in parallel", or similar automation requests
 
 ### When NOT to use
@@ -52,7 +52,7 @@ Automatically orchestrate multi-agent execution with task decomposition, paralle
 
 ### Expected outputs
 - Session state, task board, progress files, result files, and final summary
-- Specialist agent outputs after mechanical checks, automated verify, and QA cross-review
+- Specialist agent outputs after mechanical checks, automated verify, and cross-review
 - Review history and retry/remediation status when loops fail
 
 ### Dependencies
@@ -60,7 +60,7 @@ Automatically orchestrate multi-agent execution with task decomposition, paralle
 - Subagent prompt template, scripts, task templates, verify script, and session metrics
 
 ### Control-flow features
-- Branches by priority tiers, agent completion/failure, verification status, QA verdict, retry limits, and clarification debt
+- Branches by priority tiers, agent completion/failure, verification status, review verdict, retry limits, and clarification debt
 - Spawns agents via the `task` tool and reads/writes coordination files
 - Blocks termination until persistent workflows complete
 
@@ -111,22 +111,10 @@ For each priority tier (P0 first, then P1, etc.):
 Spawn agents using the OpenCode `task` tool. All same-priority tasks should be spawned in parallel (multiple `task` tool calls in one message).
 - **Record `task_id` for every spawned agent**: after each `task` tool call, record the harness-returned `task_id` (with role and `OUTPUT_FILE`) in `.agents/results/subagent-ledger-{sessionId}.json` (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`).
 
-| Domain | subagent_type |
-|:-------|:--------------|
-| backend | general |
-| frontend | general |
-| mobile | general |
-| db | general |
-| review | general |
-| debug | general |
-| plan | general |
-| architecture | general |
-| tf-infra | general |
-| docs | explore |
+Select the subagent type by the orchestrator's routing policy; pass the domain/role in the prompt. (`.agents/skills/_shared/core/skill-routing.md` maps domains to skills.)
 
 Each `task` tool invocation receives:
 - `description`: short label
-- `subagent_type`: "general" (or "explore" for docs/analysis)
 - `prompt`:
   - **Injected Context Variables**:
     - `SESSION_ID`: Active session identifier (`{sessionId}`)
@@ -220,7 +208,7 @@ Use `read` to inspect them and compile summary: completed tasks, failed tasks, f
 Present session summary to the user.
 
 - If any tasks failed after retries, list them with error details.
-- Suggest next steps: manual fix, re-run specific agents, or run the review skill for QA.
+- Suggest next steps: manual fix, re-run specific agents, or run the review skill.
 - Write final results to `.agents/results/orchestrator-session-{sessionId}.md` per `.agents/skills/_shared/runtime/coordination-protocol.md`.
 - If Quality Score was measured during this session:
   - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
@@ -243,7 +231,7 @@ Agent completes work
 [2] Verify: Run the agent's verification commands (build, test, lint)
     ↓ FAIL → Agent receives feedback (via file reference), fixes, back to [1]
     ↓ PASS
-[3] Cross-Review: QA agent reviews the changes
+[3] Cross-Review: review agent audits the changes
     ↓ FAIL → Agent receives review feedback (via file reference), fixes, back to [1]
     ↓ PASS
 Accept result
@@ -259,7 +247,7 @@ Before requesting external review, the implementation agent must:
 
 **Quality judgment is NOT performed in this step.**
 Design quality, architecture alignment, and acceptance criteria satisfaction
-are evaluated exclusively in [3] Cross-Review by the QA agent.
+are evaluated exclusively in [3] Cross-Review by the review agent.
 Reason: Self-evaluation bias causes agents to consistently overrate their own output.
 
 **[2] Automated Verify**:
@@ -267,11 +255,11 @@ Reason: Self-evaluation bias causes agents to consistently overrate their own ou
 - **PASS (exit 0)**: Proceed to cross-review
 - **FAIL (exit 1)**: Feed verify output back to the agent as correction context
 
-**[3] Cross-Review**: Spawn QA agent to review the changes:
+**[3] Cross-Review**: Spawn review agent to review the changes:
 - Pass implementation `OUTPUT_FILE` (`.agents/results/result-{agent}-{taskSlug}-{sessionId}.md`) and diff references via **Zero-Context Relay**.
-- QA agent writes comprehensive audit to designated `OUTPUT_FILE` (`.agents/results/result-qa-{taskSlug}-{sessionId}.md`).
-- If `docs/CODE-REVIEW.md` exists, QA agent uses it as the review checklist.
-- QA agent outputs standardized 4-line chat completion summary with PASS / FAIL verdict and artifact link.
+- review agent writes comprehensive audit to designated `OUTPUT_FILE` (`.agents/results/result-qa-{taskSlug}-{sessionId}.md`).
+- If `docs/CODE-REVIEW.md` exists, review agent uses it as the review checklist.
+- review agent outputs standardized 4-line chat completion summary with PASS / FAIL verdict and artifact link.
 - On FAIL: issues and artifact path are fed back to the implementation agent for fixing.
 
 ### Loop Limits
@@ -287,7 +275,7 @@ Reason: Self-evaluation bias causes agents to consistently overrate their own ou
 When feeding review results back to the implementation agent:
 ```
 ## Review Feedback (iteration {n}/{max})
-**Reviewer**: {self / verify / review-agent}
+**Reviewer**: {self / verify / review agent}
 **Verdict**: FAIL
 **Issues File**: `.agents/results/result-qa-{taskSlug}-{sessionId}.md`
 **Issues**:
@@ -319,7 +307,7 @@ When user sends feedback during session:
 ### Threshold Actions
 | CD Score | Action |
 |----------|--------|
-| CD >= 50 | **RCA Required**: review-agent must save RCA to `.agents/results/bugs/` and extract 1-line rule to `docs/checklists/<domain>.md` |
+| CD >= 50 | **RCA Required**: review agent must save RCA to `.agents/results/bugs/` and extract 1-line rule to `docs/checklists/<domain>.md` |
 | CD >= 80 | **Session Pause**: Request user to re-specify requirements |
 | `redo` >= 2 | **Scope Lock**: Request explicit allowlist confirmation before continuing |
 
@@ -328,7 +316,7 @@ After each user correction event, append event to `.agents/results/session-metri
 
 At session end, if CD >= 50:
 1. Include CD summary in final report
-2. Trigger review-agent RCA generation in `.agents/results/bugs/`
+2. Trigger review agent RCA generation in `.agents/results/bugs/`
 3. Update `docs/checklists/<domain>.md` with prevention guardrail rules
 
 ---
@@ -363,7 +351,7 @@ All coordination is file-based in `.agents/results/`. See `.agents/skills/orches
 
 ## Guardrails
 
-1. Use the OpenCode `task` tool with subagent_type="general" for all agent spawning.
+1. Use the OpenCode `task` tool for all agent spawning; the routing policy selects the type.
 2. Never exceed the configured parallelism or retry limits.
 3. Keep session state, task-board state, progress files, and result files aligned throughout the run.
 4. Never reorder, skip, or combine the procedural Steps 0-7.

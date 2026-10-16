@@ -105,7 +105,7 @@ Provide a quick-reference listing of all available agent skills with description
 | **coordination** | Multi-agent coordination: step-by-step Plan/Frontend/Backend/Mobile/Review coordination |
 | **db** | SQL, NoSQL, vector DB: schema design, normalization, indexing, RAG retrieval, migration, capacity planning |
 | **debug** | Bug diagnosis & fix: reproduce, root cause, minimal fix, regression tests, pattern scan |
-| **deep-review** | Deterministic code review: correctness, regressions, system-level impact (analysis only, no QA checklist) |
+| **deep-review** | Deterministic code review: correctness, regressions, system-level impact (analysis only, no review checklist) |
 | **deepinit** | Initialize AI harness: AGENTS.md TOC, ARCHITECTURE.md domain map, docs/ knowledge base |
 | **deepsec** | Vercel deepsec vulnerability scanner: install, scan, triage, revalidate, CI gating |
 | **design** | AI design system: DESIGN.md, typography, color, motion, responsive layouts, WCAG 2.2 |
@@ -126,7 +126,7 @@ Provide a quick-reference listing of all available agent skills with description
 | **ralph** | Persistent execution loop: wraps ultrawork with independent verifier verification per iteration |
 | **ralphreview** | Iterative deep-review loop: runs deep-review until 3 consecutive clean passes |
 | **recap** | Session recap: analyze multi-tool conversation histories, generate themed summaries |
-| **review** | Full QA review pipeline: security (OWASP Top 10), performance, accessibility (WCAG 2.1 AA), code quality; ISO/IEC 25010 / 29119-aligned quality framing |
+| **review** | Full review pipeline: security (OWASP Top 10), performance, accessibility (WCAG 2.1 AA), code quality; ISO/IEC 25010 / 29119-aligned quality framing |
 | **scholar** | Academic research: Knows sidecar (.knows.yaml) generation, validation, paper authoring |
 | **scm** | Git/SCM: branching, merges, conflicts, worktrees, Conventional Commits, commit governance |
 | **search** | Intent-based search router: Context7 docs, web search, gh/glab code search, local file search |

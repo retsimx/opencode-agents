@@ -65,7 +65,7 @@ npm test 2>/dev/null || pytest 2>/dev/null || cargo test 2>/dev/null || go test 
 - **Pass (Exit Code 0)**: Proceed to Phase 4 Step 2 (Commit & PR generation).
 - **Fail (Exit Code != 0)**:
   1. If failures are trivial auto-formattable issues (e.g. `prettier`, `ruff format`), apply them safely.
-  2. For non-trivial errors or test failures, dispatch a Debug Subagent (`.agents/skills/issue-autopilot/resources/subagent-prompts.md#3-fast-fail-local-ci-remediation-debug-subagent-prompt`).
+  2. For non-trivial errors or test failures, dispatch a Debug Subagent (`.agents/skills/issue-autopilot/resources/subagent-prompts.md#3-fast-fail-local-ci-remediation-debug-subagent-prompt-phase-4-step-1-fallback`).
   3. Re-run sanity checks.
   4. If sanity checks still fail: Halt immediately, preserve worktree intact (Guardrail 4), and alert user in chat.
 

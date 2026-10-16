@@ -179,9 +179,9 @@ Status: blocked (awaiting clarification)
 
 ---
 
-## PM Agent Only: Requirements Specification Framework
+## plan agent Only: Requirements Specification Framework
 
-PM Agent uses the framework below to specify ambiguous requests:
+plan agent uses the framework below to specify ambiguous requests:
 
 ```
 === Requirements Specification ===

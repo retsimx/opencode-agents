@@ -191,7 +191,7 @@ const user = data?.user?.profile?.name ?? 'Unknown';
 **Unit Tests**: 15/15 passing
 **Integration Tests**: 8/8 passing
 **E2E Tests**: 3/3 passing
-**Manual QA**: Verified on Chrome, Firefox, Safari
+**Manual review**: Verified on Chrome, Firefox, Safari
 
 ---
 
@@ -265,7 +265,7 @@ const name = user.profile.name; // Crashes if profile undefined
 
 **Notified**:
 - [x] Product Manager - Impact assessment
-- [x] QA Team - Additional testing needed
+- [x] Review Team - Additional testing needed
 - [x] Users affected - Via email/announcement
 - [ ] Other teams - [Specify]
 
@@ -304,7 +304,7 @@ const name = user.profile.name; // Crashes if profile undefined
 ---
 
 **Sign-off**: [Your name/agent name]
-**Reviewed by**: [PM Agent | QA Agent | Frontend Agent]
+**Reviewed by**: [plan agent | review agent | Frontend Agent]
 **Approved for deploy**: [Yes/No]
 
 ---

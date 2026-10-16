@@ -3,7 +3,7 @@ name: deep-review
 description: >
   Deterministic, evidence-based deep review of code changes after implementation.
   Analyzes correctness, regressions, and system-level impact. Pure analysis
-  function over a defined scope — not a QA checklist or debugging assistant.
+  function over a defined scope — not a review checklist or debugging assistant.
 ---
 
 # /deep-review — Deep Post-Implementation Review Skill
@@ -31,7 +31,7 @@ It is designed to analyze correctness, regressions, and system-level impact of c
 
 It is NOT:
 - an autonomous agent
-- a QA checklist tool
+- a review checklist tool
 - a debugging assistant
 - a refactoring tool
 

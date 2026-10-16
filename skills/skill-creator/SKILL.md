@@ -30,7 +30,7 @@ Create, revise, and validate agent skills using the SSL-lite Markdown structure 
 ### When NOT to use
 - Installing third-party skills into `$CODEX_HOME/skills` -> use skill installer
 - Creating a Codex plugin bundle -> use plugin creator
-- Writing a general project plan unrelated to skill authoring -> use PM Agent
+- Writing a general project plan unrelated to skill authoring -> use plan agent
 - Editing product code, infrastructure, frontend, backend, or mobile implementation directly -> use the matching specialist skill
 
 ### Expected inputs

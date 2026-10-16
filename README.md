@@ -16,8 +16,7 @@ git clone https://github.com/retsimx/opencode-agents.git .agents
 #    (required for orchestration workflows that spawn sub-subagents)
 #    {
 #      "agent": {
-#        "general": { "permission": { "task": "allow" } },
-#        "explore": { "permission": { "task": "allow" } }
+#        "<your-subagent-type>": { "permission": { "task": "allow" } }
 #      }
 #    }
 
@@ -85,7 +84,7 @@ Load skills via the `skill` tool by name (e.g., `skill "brainstorm"`).
 | Skill | What it does |
 |-------|-------------|
 | `orchestrate` | Spawns parallel subagents, file-based progress tracking |
-| `work` | PM plan + parallel agents + QA review |
+| `work` | Plan + parallel agents + review |
 | `ultrawork` | 5-phase process with 11+ review steps |
 
 ### Review & Quality
@@ -93,7 +92,7 @@ Load skills via the `skill` tool by name (e.g., `skill "brainstorm"`).
 |-------|-------------|
 | `ralph` | Execution loop: ultrawork + independent verifier verification |
 | `ralphreview` | Iterative deep-review loop until 3 clean passes |
-| `review` | Full QA review pipeline: security (OWASP), performance, accessibility, code quality; ISO/IEC 25010 / 29119-aligned quality framing |
+| `review` | Full review pipeline: security (OWASP), performance, accessibility, code quality; ISO/IEC 25010 / 29119-aligned quality framing |
 
 ### Operations
 | Skill | What it does |
@@ -119,7 +118,7 @@ All 38 skills can be loaded via the `skill` tool. The main categories:
 
 ### Quality & Analysis
 - **debug** — Bug diagnosis, root cause analysis, regression tests
-- **review** — Full pre-ship QA pipeline: security, performance, accessibility, code quality
+- **review** — Full pre-ship review pipeline: security, performance, accessibility, code quality
 - **deep-review** — Deterministic code correctness analysis
 - **ralphreview** — Iterative review loop
 
@@ -143,7 +142,7 @@ All 38 skills can be loaded via the `skill` tool. The main categories:
 - **deepinit** — Project AI harness initialization
 - **dev-workflow** — Monorepo task automation, CI/CD, releases
 - **stack-set** — Tech stack detection and reference generation
-- **gh-autopilot** — GitHub issue → draft PR automation
+- **issue-autopilot** — GitHub issue → draft PR automation
 - **skill-creator** — Authoring new skills in SSL-lite format
 - **recap** — Conversation history analysis and summaries
 

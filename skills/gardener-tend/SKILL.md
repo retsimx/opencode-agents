@@ -252,3 +252,4 @@ On the first actionable item, perform that single action and exit.
 - Implement prompt: `.agents/skills/gardener-tend/resources/implement-prompt.md`
 - Revise prompt: `.agents/skills/gardener-tend/resources/revise-prompt.md`
 - Scenarios: `.agents/skills/gardener-tend/resources/scenarios.md`
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

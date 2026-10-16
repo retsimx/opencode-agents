@@ -6,7 +6,7 @@ Each phase must pass its gate before proceeding to the next.
 
 ## PLAN_GATE
 
-**Owner**: PM Agent
+**Owner**: plan agent
 **Trigger**: After Steps 1-4
 
 ### Criteria
@@ -50,7 +50,7 @@ Fix issues, re-run implementation
 
 ## VERIFY_GATE
 
-**Owner**: QA Agent
+**Owner**: review agent
 **Trigger**: After Steps 6-8
 
 ### Criteria
@@ -90,7 +90,7 @@ Address issues, re-verify
 
 ## SHIP_GATE
 
-**Owner**: QA Agent
+**Owner**: review agent
 **Trigger**: After Steps 14-17
 
 ### Criteria

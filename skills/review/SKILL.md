@@ -1,6 +1,6 @@
 ---
 name: review
-description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility checks (WCAG 2.1 AA), and code quality review. Use for pre-ship code review, PR review, branch review, security audit, accessibility audit, performance review, dependency CVE scan, lint-driven review, and ISO/IEC 25010 quality model / ISO/IEC 29119 test-process alignment.
+description: Full review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility checks (WCAG 2.1 AA), and code quality review. Use for pre-ship code review, PR review, branch review, security audit, accessibility audit, performance review, dependency CVE scan, lint-driven review, and ISO/IEC 25010 quality model / ISO/IEC 29119 test-process alignment.
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -104,7 +104,7 @@ Use `grep`/`glob` and `read` to check for:
 
 ---
 
-## Step 7: Generate QA Report
+## Step 7: Generate Review Report
 
 Compile all findings into a prioritized report:
 - **CRITICAL**: Security breaches, data loss risks
@@ -122,7 +122,7 @@ Include a **Grug Compliance** section in the report assessing: unnecessary vs. n
 2. **Return 4-Line Chat Summary**:
    Return strictly the standard 4-line chat summary to the orchestrator/user:
    ```markdown
-   ### Task Complete: QA Reviewer — {Task Name}
+   ### Task Complete: review agent — {Task Name}
    - **Status**: SUCCESS | BLOCKED | FAILED
    - **Summary**:
      - {Overall audit verdict: PASS / WARNING / FAIL}
@@ -136,7 +136,6 @@ Include a **Grug Compliance** section in the report assessing: unnecessary vs. n
 ## Agent Delegation: Spawn Review Agent
 
 For large review scopes, delegate Steps 2-7 to a review agent via the OpenCode `task` tool:
-- Use `subagent_type="general"`
 - Pass `SESSION_ID`, `TASK_SLUG`, and designated `OUTPUT_FILE` (`.agents/results/result-review-{taskSlug}-{sessionId}.md`)
 - Include the file list and review standards from the review skill in the prompt
 - Mandate writing the full report to `OUTPUT_FILE` and returning the 4-line chat summary
@@ -160,7 +159,7 @@ When user wants fixes too, execute review then fix then re-review loop:
 1. Spawn review agent (via OpenCode `task` tool) to write issue report to `.agents/results/result-review-{taskSlug}-{sessionId}.md` and return 4-line summary. Record the harness-returned `task_id` in `.agents/results/subagent-ledger-{sessionId}.json`.
 2. If CRITICAL/HIGH issues exist:
    - Spawn domain agent(s) to fix issues via OpenCode `task` tool:
-     - `subagent_type="general"` with fix instructions, upstream review artifact via `UPSTREAM_ARTIFACTS=".agents/results/result-review-{taskSlug}-{sessionId}.md"`, and designated output file
+     - Pass fix instructions, the upstream review artifact via `UPSTREAM_ARTIFACTS=".agents/results/result-review-{taskSlug}-{sessionId}.md"`, and a designated output file
      - For multi-domain fixes, spawn separate tasks per domain
    - Record the harness-returned `task_id` for each spawned fix agent in `.agents/results/subagent-ledger-{sessionId}.json`.
 
@@ -216,3 +215,4 @@ Before finalizing the report, walk `.agents/skills/review/resources/self-check.m
 - Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Clarification protocol: `.agents/skills/_shared/core/clarification-protocol.md`
 - Reasoning templates: `.agents/skills/_shared/core/reasoning-templates.md`
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

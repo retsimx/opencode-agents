@@ -287,3 +287,4 @@ Do **not** recognize `gardener/iter-` or other prior names.
 - `.agents/skills/gardener-harvest/resources/assessor-prompt.md`
 - `.agents/skills/gardener-harvest/resources/providers.md`
 - Sibling skills: `gardener-sow`, `gardener-tend`
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

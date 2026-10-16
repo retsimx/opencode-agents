@@ -15,7 +15,7 @@ description: Fetch a forge issue (GitHub or GitLab), brainstorm/plan with user i
 - **Strictly follow ALL rules in the project's `AGENTS.md` and `TESTING.md`** (if they exist).
 - **Phase ordering is inviolable.** Never reorder, skip, parallelize, or combine phases.
 - **MUST use the question tool to ask the user anything.** Never use plain text output for user gates or clarification questions.
-- **MUST use subagent tools for delegated subagents.** All Task subagent delegations (Phase 4 commit messages/PR descriptions, Phase 5 issue comment, and Phase 3 implementation/QA/debug agents) must be dispatched cleanly via subagent tools.
+- **MUST use subagent tools for delegated subagents.** All Task subagent delegations (Phase 4 commit messages/PR descriptions, Phase 5 issue comment, and Phase 3 implementation/review/debug agents) must be dispatched cleanly via subagent tools.
 - **Subagent Dispatch Gate (HARD INVARIANT)**: Every Task subagent spawn MUST record its harness-returned `task_id` in `${RESULTS_DIR}/subagent-ledger-${SESSION_ID}.json`. Before consuming any subagent's deliverable (Phase 4 Step 2, Phase 5), pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): non-empty `task_id`, `status == complete`, and a non-empty result file. On failure, dispatch the missing subagent — do NOT substitute inline work.
 - **No Inline Substitution (HARD INVARIANT)**: A subagent's deliverable is defined as a file written by a spawned subagent whose `task_id` is recorded in the ledger. Orchestrator-inline output does not count as a subagent's deliverable, regardless of quality.
 - **Rule loading (MANDATORY)**: instruct each spawned subagent to load before starting: `.agents/rules/grug-principles.md`, `.agents/rules/tool-compatibility.md`, and `.agents/skills/_shared/core/quality-principles.md`.
@@ -51,7 +51,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 1. **Guardrail 1: Plan-Ingestion Mode (Double-Planning Prevention)**
    - In Phase 3, `issue-autopilot` passes the approved `${RESULTS_DIR}/plan-{sessionId}.json` from Phase 2 directly into `ultrawork`.
-   - `ultrawork` ingests the pre-approved plan, skips its redundant internal Phase 1 PM re-planning (Steps 1–4) and duplicate human confirmation (`PLAN_GATE`), and immediately starts Phase 2 (IMPL: Step 5 parallel subagents).
+   - `ultrawork` ingests the pre-approved plan, skips its redundant internal Phase 1 re-planning (Steps 1–4) and duplicate human confirmation (`PLAN_GATE`), and immediately starts Phase 2 (IMPL: Step 5 parallel subagents).
 
 2. **Guardrail 2: Fast-Fail Local CI Sanity Gate (Refinement Drift & Quality Barrier)**
    - In Phase 4 (Step 1), before committing or opening a PR, the orchestrator discovers and executes local test, lint, and typecheck commands in `$WORKTREE`.
@@ -178,12 +178,12 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
      - `RESULTS_DIR="${RESULTS_DIR}"`
      - `PARENT_REPO="${PARENT_REPO}"`
      - `WORKTREE="${WORKTREE}"`
-   - `ultrawork` ingests `PLAN_FILE` directly, **skipping redundant Phase 1 PM re-planning (Steps 1–4)** and skipping duplicate human confirmation (`PLAN_GATE`).
+   - `ultrawork` ingests `PLAN_FILE` directly, **skipping redundant Phase 1 re-planning (Steps 1–4)** and skipping duplicate human confirmation (`PLAN_GATE`).
 4. `ultrawork` executes its child lifecycle in `$WORKTREE`:
    - **Phase 2: IMPL (Step 5)**: Dispatches parallel Implementation Agents (`backend`, `frontend`, etc.) using File-First State I/O and Zero-Context Relay.
-   - **Phase 3: VERIFY (Steps 6–8)**: Dispatches QA Agent for Alignment Review (Step 6), Security/Bug Review (Step 7), and Improvement/Regression Review (Step 8). Enforces root-cause-first remediation.
+   - **Phase 3: VERIFY (Steps 6–8)**: Dispatches review agent for Alignment Review (Step 6), Security/Bug Review (Step 7), and Improvement/Regression Review (Step 8). Enforces root-cause-first remediation.
    - **Phase 4: REFINE (Steps 9–13)**: Dispatches Debug Agent for splitting large files (>500 lines), reusability review, side-effect analysis, and dead code cleanup.
-   - **Phase 5: SHIP (Steps 14–17)**: Dispatches QA Agent for final code quality checks, UX flow verification, cascade impact review, and deployment readiness review.
+   - **Phase 5: SHIP (Steps 14–17)**: Dispatches review agent for final code quality checks, UX flow verification, cascade impact review, and deployment readiness review.
 5. All child output artifacts (`result-*-${SESSION_ID}*.md`, `session-ultrawork-${SESSION_ID}.md`, `experiment-ledger-${SESSION_ID}.md`) are persisted directly to `${RESULTS_DIR}` (session-unique; never the unsuffixed names).
 6. Await `ultrawork` completion return (`Status: SUCCESS`).
 7. After implementation completes, verify no application code files were modified outside `$WORKTREE`.
@@ -232,8 +232,8 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 **CRITICAL: Delegate commit message and PR description generation to a Task subagent. Do not write them inline.**
 
 1. `cd $WORKTREE`
-2. Spawn an SCM Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#1-scm-specialist-subagent-prompt):
-   - `Role`: `"SCM Specialist Agent"`
+2. Spawn an SCM Task subagent per [Subagent Prompts](resources/subagent-prompts.md#1-scm-subagent-prompt-phase-4-step-2):
+   - `Role`: `"scm agent"`
    - `Prompt`: Instruct agent to inspect `WORKTREE` diffs, adhere to `.agents/skills/scm/SKILL.md` Conventional Commits (`Closes #<number>`), write `$RUN_TMP/commit-msg.txt` and `$RUN_TMP/pr-body.txt`, and write execution technical summary to `${RESULTS_DIR}/result-scm-ship-${SESSION_ID}.md`.
 3. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${SESSION_ID}.json` (role `scm-ship`, `result_file` `${RESULTS_DIR}/result-scm-ship-${SESSION_ID}.md`).
 4. Pass the **Subagent Dispatch Gate** (`.agents/skills/_shared/runtime/subagent-dispatch-gate.md`): confirm non-empty `task_id`, `status == complete`, and `${RESULTS_DIR}/result-scm-ship-${SESSION_ID}.md` exists and is non-empty. Also confirm `$RUN_TMP/commit-msg.txt` and `$RUN_TMP/pr-body.txt` exist (session-unique; never global `/tmp`). On gate failure, re-dispatch the SCM subagent — do NOT write the commit message inline.
@@ -298,7 +298,7 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 
 **CRITICAL: Delegate this entire phase to a Task subagent. Do not write the comment inline.**
 
-1. Spawn a Task subagent per [Subagent Prompts](.agents/skills/issue-autopilot/resources/subagent-prompts.md#2-issue-communicator-subagent-prompt):
+1. Spawn a Task subagent per [Subagent Prompts](resources/subagent-prompts.md#2-issue-communicator-subagent-prompt-phase-5-step-1):
    - `Role`: `"Issue Communicator Agent"`
    - `Prompt`: Instruct agent to read `.agents/skills/_shared/runtime/providers.md`, inspect merged diff from `$PARENT_REPO`, write non-technical plain-English summary (no code references or technical jargon) to `$RUN_TMP/issue-comment.txt`, post using provider CLI command, and write technical summary to `${RESULTS_DIR}/result-issue-comment-${SESSION_ID}.md`.
 2. Record the harness-returned `task_id` for this subagent in `${RESULTS_DIR}/subagent-ledger-${SESSION_ID}.json` (role `issue-comment`, `result_file` `${RESULTS_DIR}/result-issue-comment-${SESSION_ID}.md`).
@@ -322,8 +322,8 @@ This workflow embeds 4 architectural guardrails to guarantee determinism, qualit
 | **0: Init** | Worktree directory collision | Check if stale worktree exists via `git worktree list`. | If stale, prompt user to prune or use alternative suffix. |
 | **1: Brainstorm** | User rejects proposed designs | Capture feedback and generate alternative approach. | If 3 consecutive rejections, cleanly abort and prune worktree. |
 | **2: Plan** | User rejects plan | Modify task breakdown or sizing per feedback. | Loop back to Phase 1 if architectural changes needed. |
-| **3: Implement** | Subagent build or test failure | `ultrawork` re-spawns Dev Agent with error logs (up to 3 retries). | Escalate to QA Review if unresolvable. |
-| **3: Implement** | VERIFY gate failure (Regression / Safety) | `ultrawork` activates root-cause remediation prompt to Dev Agent. | If 2nd failure on same issue, trigger Exploration Loop. |
+| **3: Implement** | Subagent build or test failure | `ultrawork` re-spawns implementation agent with error logs (up to 3 retries). | Escalate to review if unresolvable. |
+| **3: Implement** | VERIFY gate failure (Regression / Safety) | `ultrawork` activates root-cause remediation prompt to implementation agent. | If 2nd failure on same issue, trigger Exploration Loop. |
 | **3: Implement** | Review loop cap (5 cycles) or cost cap hit | `ultrawork` halts, writes diagnostics to `session-ultrawork-${SESSION_ID}.md`. | **Guardrail 4: Preserve worktree intact.** Report roadblock in chat. |
 | **4: Forge Ship** | Fast-Fail Local CI Gate fails | Spawn targeted Debug Agent to fix lint/type/test failures. | If fix fails, **DO NOT COMMIT**. Leave worktree intact and alert user. |
 | **4: Forge Ship** | Remote git push rejected | Fetch and rebase against latest `origin/main` in worktree. | If conflicts arise, spawn merge subagent or alert user. |
@@ -385,3 +385,4 @@ Workflow Complete
 - Brainstorming Skill: `.agents/skills/brainstorm/SKILL.md`
 - Planning Skill: `.agents/skills/plan/SKILL.md`
 - SCM & Conventional Commits: `.agents/skills/scm/SKILL.md`
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

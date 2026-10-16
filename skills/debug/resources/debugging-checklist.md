@@ -277,8 +277,8 @@ Use this checklist when investigating bugs to ensure thorough analysis.
 Escalate to other agents if:
 
 - [ ] Bug spans multiple domains → **coordination**
-- [ ] Requires architectural change → **PM Agent**
-- [ ] Need comprehensive security audit → **QA Agent**
+- [ ] Requires architectural change → **plan agent**
+- [ ] Need comprehensive security audit → **review agent**
 - [ ] Complex frontend refactoring needed → **Frontend Agent**
 - [ ] Database schema changes needed → **Backend Agent**
 - [ ] Platform-specific mobile issue → **Mobile Agent**

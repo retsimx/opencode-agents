@@ -34,7 +34,6 @@ Analyze, compare, and document software architecture decisions with explicit tra
 ### When NOT to use
 - Visual design, design systems, branding, or landing pages -> use design
 - Feature planning and task decomposition -> use plan
-- Infrastructure provisioning or Terraform implementation -> use tf-infra
 - Bug diagnosis and code fixes -> use debug
 - Security/performance/accessibility review -> use review
 
@@ -107,7 +106,7 @@ Analyze, compare, and document software architecture decisions with explicit tra
 ### Tools and instruments
 - Local file reading and search for codebase/docs
 - Architecture method references and output templates
-- Optional stakeholder-agent consultation only when cross-cutting enough to justify cost
+- Optional stakeholder consultation only when cross-cutting enough to justify cost
 
 ### Canonical workflow path
 ```bash

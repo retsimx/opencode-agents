@@ -97,7 +97,7 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 | Performance bug | common-patterns.md (Performance section) + debugging-checklist.md |
 | Security bug    | common-patterns.md (Security section)                             |
 
-### QA / Review Agent
+### review agent
 
 | Task Type            | Required Resources                                  |
 | -------------------- | --------------------------------------------------- |
@@ -137,14 +137,7 @@ Unless noted, filenames below are under that agent's `.agents/skills/<skill>/res
 | Release Coordination        | release-coordination.md                             |
 | Troubleshooting             | troubleshooting.md                                  |
 
-### TF Infra Agent
-
-| Task Type                   | Required Resources                                                       |
-| --------------------------- | ------------------------------------------------------------------------ |
-| Infrastructure Provisioning | multi-cloud-examples.md + policy-testing-examples.md |
-| Cost Analysis               | cost-optimization.md                                           |
-
-### PM Agent
+### plan agent
 
 | Task Type                 | Required Resources                                           |
 | ------------------------- | ------------------------------------------------------------ |
@@ -204,7 +197,7 @@ The following protocols are **NOT** loaded at Phase 0 / Step 0. They are loaded 
 
 | Protocol | Trigger | Loaded By |
 |----------|---------|-----------|
-| `.agents/skills/_shared/conditional/quality-score.md` | VERIFY or SHIP phase begins | Orchestrator (passes to QA agent prompt) |
+| `.agents/skills/_shared/conditional/quality-score.md` | VERIFY or SHIP phase begins | Orchestrator (passes to review agent prompt) |
 | `.agents/skills/_shared/conditional/experiment-ledger.md` | First experiment recorded | Orchestrator (inline, after IMPL baseline) |
 | `.agents/skills/_shared/conditional/exploration-loop.md` | Same gate fails twice on same issue | Orchestrator (inline, before spawning hypothesis agents) |
 

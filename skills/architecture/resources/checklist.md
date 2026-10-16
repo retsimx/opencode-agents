@@ -32,4 +32,4 @@
 ## Boundaries
 - [ ] Visual/UI design concerns were not conflated with software architecture
 - [ ] Terraform/IaC concerns were not allowed to take over system-design reasoning
-- [ ] PM planning work was not duplicated
+- [ ] plan work was not duplicated

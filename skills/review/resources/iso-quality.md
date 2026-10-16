@@ -1,13 +1,13 @@
-# QA Agent - ISO Quality Guide
+# review agent - ISO Quality Guide
 
-Use this file when the user asks for standards-based QA suggestions, enterprise audit readiness, or process-oriented quality improvements.
+Use this file when the user asks for standards-based review suggestions, enterprise audit readiness, or process-oriented quality improvements.
 
 ## Positioning
 
 - Use **ISO/IEC 25010** as the practical software quality model.
 - Treat **ISO/IEC 25010** as part of the **ISO/IEC 25000 SQuaRE family** when users say "ISO 25000".
 - Use **ISO/IEC 29119** for test process, test design, traceability, and evidence recommendations.
-- Do not force standards language into every QA review. Add it when it improves decision quality, auditability, or delivery discipline.
+- Do not force standards language into every review. Add it when it improves decision quality, auditability, or delivery discipline.
 
 ## 1. ISO/IEC 25010 Mapping
 

@@ -43,11 +43,11 @@ Hypothesis B: ...
 Execute each hypothesis **in isolation**.
 
 **In multi-agent mode** (`the orchestrate skill`, `/work`):
-- Spawn the **same agent type** (e.g., `backend-engineer`) multiple times with different prompts
+- Spawn the **same agent type** (e.g., `backend`) multiple times with different prompts
 - Each spawn includes the hypothesis context in the task description:
   ```
   Task: "Fix input validation using Hypothesis A: Zod schema at router level.
-         Context: Previous attempt (raw regex) failed QA twice."
+         Context: Previous attempt (raw regex) failed review twice."
   ```
 - Agents use existing IDs; no new agent definitions needed
 - Each agent works in a separate workspace (`-w ./hyp-a`, `-w ./hyp-b`)
@@ -147,7 +147,7 @@ Triggered when Issue Remediation Loop stalls (same issue persists after fix):
 Same CRITICAL/HIGH issue persists after fix attempt
   → Load exploration-loop.md
   → Re-spawn agent with alternative hypothesis prompts
-  → QA scores each result
+  → the review agent scores each result
   → Best result adopted
 ```
 

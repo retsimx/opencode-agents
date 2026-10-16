@@ -7,7 +7,7 @@ Choose the lightest method that fits the problem.
 Use when:
 - the complaint is vague
 - the user feels pain but cannot name the architecture issue
-- it is unclear whether the problem is architecture, planning, QA, or debugging
+- it is unclear whether the problem is architecture, planning, review, or debugging
 
 Output:
 - clarified problem statement

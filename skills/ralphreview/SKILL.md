@@ -6,7 +6,7 @@ description: >
   review or remediation directly.
 ---
 
-# Ralph Review — Iterative QA Loop
+# Ralph Review — Iterative Review Loop
 
 ## Rules to Load
 
@@ -25,10 +25,10 @@ Iteratively review and remediate the current implementation until review stabili
 ### Intent signature
 - User invokes `/ralph` to run the ralph review loop
 - User wants an automated review loop that drives toward clean reviews
-- QA gate before shipping
+- Review gate before shipping
 
 ### When to use
-- QA gate before shipping
+- Review gate before shipping
 - Automated review loop without manual re-invocation
 - Any scenario needing verified quality before merge
 
@@ -118,7 +118,7 @@ Iteratively review and remediate the current implementation until review stabili
 | Report result | `NOTIFY` | Final completion or escalation message |
 
 ### Tools and instruments
-- OpenCode `task` tool (`subagent_type="general"`) — for delegating review and remediation.
+- OpenCode `task` tool — for delegating review and remediation.
   **IMPORTANT: `task` is a built-in agent tool, NOT a shell command. Invoke it like `read`, `write`, or `grep` — through your tool-calling interface. Never run `$ task ...` in bash.**
 
 ### Canonical workflow path
@@ -145,7 +145,6 @@ while clean_review_streak < 3:
     # the built-in `task` tool.
 
     Call the `task` tool with these parameters:
-      subagent_type: "general"
       description: "review-coordinator"
       prompt:
         "You are the review coordinator. Your job is to run a deep code review
@@ -158,7 +157,6 @@ while clean_review_streak < 3:
             that loads the `deep-review` skill and reviews the scope (incl. Grug Compliance).
 
             Call `task` with:
-              subagent_type: "general"
               description: "deep-review-analysis"
               prompt:
                 "STATE_FILE: <STATE_FILE>
@@ -213,7 +211,6 @@ while clean_review_streak < 3:
     # via the built-in `task` tool.
 
     Call the `task` tool with these parameters:
-      subagent_type: "general"
       description: "remediation-coordinator"
       prompt:
         "You are the remediation coordinator. Your job is to triage and fix
@@ -229,7 +226,6 @@ while clean_review_streak < 3:
             each other. Use multiple `task` tool calls in a single message.
 
             For each NEW entry (file:line, severity, description), call `task` with:
-                subagent_type: \"general\"
                 description: \"fix-single-<file:line>\"
                 prompt:
                   \"WORKTREE: <path from STATE_FILE line 1>
@@ -328,3 +324,4 @@ exit  # clean_review_streak == 3
 - Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 
 - Deep-review skill: `.agents/skills/deep-review/SKILL.md`
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

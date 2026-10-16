@@ -1,10 +1,10 @@
 # API Contracts
 
-This directory contains API contracts created by PM Agent and referenced by backend/frontend/mobile agents.
+This directory contains API contracts created by plan agent and referenced by backend/frontend/mobile agents.
 
 ## Usage
 
-### PM Agent (Author)
+### plan agent (Author)
 Create API contracts in this directory during the planning phase using the built-in `write` tool:
 ```
 write → api-contracts/{domain}.md
@@ -47,7 +47,7 @@ Use the built-in `read` and `write` tools for contract files under this director
 
 ## When to Create
 
-- **New API endpoint**: PM Agent creates contract before implementation tasks are assigned
+- **New API endpoint**: plan agent creates contract before implementation tasks are assigned
 - **Existing API schema change**: Update contract first, then notify affected agents
 - **Cross-platform feature**: Contract must exist before backend/frontend/mobile tasks start
 
@@ -63,7 +63,7 @@ Use the built-in `read` and `write` tools for contract files under this director
 
 ## Rules
 
-1. PM Agent must create during planning
+1. plan agent must create during planning
 2. Backend Agent must not implement differently from contract
 3. Frontend/Mobile Agent defines types based on contract
-4. If changes are needed, request re-planning from PM Agent
+4. If changes are needed, request re-planning from plan agent

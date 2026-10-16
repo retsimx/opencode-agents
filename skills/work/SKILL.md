@@ -1,6 +1,6 @@
 ---
 name: work
-description: Coordinate multiple agents for a complex multi-domain project using PM planning, parallel agent spawning, and QA review. Use for multi-domain features needing backend + frontend + mobile + QA, or any task that requires PM decomposition followed by parallel implementation and review.
+description: Coordinate multiple agents for a complex multi-domain project using plan, parallel agent spawning, and review. Use for multi-domain features needing backend + frontend + mobile + review, or any task that requires plan decomposition followed by parallel implementation and review.
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -40,7 +40,7 @@ Before starting, load and follow:
 
 ## Step 1: Analyze Requirements
 
-Analyze the user's request and identify involved domains (frontend, backend, mobile, QA).
+Analyze the user's request and identify involved domains (frontend, backend, mobile, review).
 
 - Single domain: suggest using the specific agent directly.
 - Multiple domains: proceed to Step 2.
@@ -49,10 +49,10 @@ Analyze the user's request and identify involved domains (frontend, backend, mob
 
 ---
 
-## Step 2: Run PM Agent for Task Decomposition
+## Step 2: Run plan agent for Task Decomposition
 
 // turbo
-Activate PM Agent to:
+Activate plan agent to:
 
 1. Analyze requirements.
 2. Define API contracts.
@@ -65,7 +65,7 @@ Activate PM Agent to:
 
 ## Step 3: Review Plan with User
 
-Present the PM Agent's task breakdown to the user:
+Present the plan agent's task breakdown to the user:
 
 - Priorities (P0, P1, P2)
 - Agent assignments
@@ -83,8 +83,7 @@ Spawn all same-priority tasks in parallel. Assign separate workspaces to avoid f
 ### Dispatch via OpenCode `task` tool
 
 Spawn agents using the OpenCode `task` tool:
-- Use `subagent_type="general"` for implementation agents
-- Use `subagent_type="explore"` for research/analysis agents
+- Route implementation and research/analysis tasks by the orchestrator's routing policy — do not hard-code a subagent type
 - Spawn all same-priority tasks in parallel (multiple `task` tool calls in one message)
 - **Record `task_id` for every spawned agent**: after each `task` tool call, record the harness-returned `task_id` (with role and `OUTPUT_FILE`) in `.agents/results/subagent-ledger-{sessionId}.json` (see `.agents/skills/_shared/runtime/subagent-dispatch-gate.md`).
 - Inject context variables into each subagent prompt:
@@ -120,17 +119,17 @@ Spawn agents using the OpenCode `task` tool:
 
 ---
 
-## Step 6: Run QA Agent Review
+## Step 6: Run review agent
 
-After all implementation agents complete, use the OpenCode `task` tool to spawn a QA agent to review all deliverables:
+After all implementation agents complete, use the OpenCode `task` tool to spawn a review agent to review all deliverables:
 - Inject `SESSION_ID`, `TASK_SLUG="qa-review"`, and `OUTPUT_FILE` (`.agents/results/result-qa-review-{sessionId}.md`).
 - Pass implementation `OUTPUT_FILE` paths and plan file by reference (**Zero-Context Relay**).
-- QA Agent audits deliverables directly from disk:
+- review agent audits deliverables directly from disk:
   - Security (OWASP Top 10)
   - Performance
   - Accessibility (WCAG 2.1 AA)
   - Code quality (with explicit file:line checklist citations)
-- QA Agent writes full audit report to `.agents/results/result-qa-review-{sessionId}.md`, verifies disk write, and returns the standard 4-line chat summary.
+- review agent writes full audit report to `.agents/results/result-qa-review-{sessionId}.md`, verifies disk write, and returns the standard 4-line chat summary.
 
 ---
 
@@ -138,23 +137,23 @@ After all implementation agents complete, use the OpenCode `task` tool to spawn 
 
 If automated measurement is available:
 1. Read `.agents/skills/_shared/conditional/quality-score.md` (conditional, per context-loading guide)
-2. Measure Quality Score based on QA findings
+2. Measure Quality Score based on review findings
 3. Record as baseline in `.agents/results/experiment-ledger-{sessionId}.md` (see `.agents/skills/_shared/conditional/experiment-ledger.md`)
 
 ---
 
 ## Step 7: Address Issues and Iterate
 
-If QA finds CRITICAL or HIGH issues:
+If review finds CRITICAL or HIGH issues:
 
-1. Re-spawn the responsible agent with QA findings passed by reference (`.agents/results/result-qa-review-{sessionId}.md`). **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
+1. Re-spawn the responsible agent with review findings passed by reference (`.agents/results/result-qa-review-{sessionId}.md`). **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
 2. Fix agent writes update to designated `OUTPUT_FILE` and returns 4-line chat summary.
 3. If Quality Score is active: measure after fix, apply Keep/Discard rule, record in Experiment Ledger.
 4. Repeat Steps 5-7.
 5. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (read `.agents/skills/_shared/conditional/exploration-loop.md` per context-loading guide):
    - Generate 2-3 alternative approaches via Exploration Decision template
    - Re-spawn the same agent type with different hypothesis prompts (separate workspaces)
-   - QA scores each result
+   - the review agent scores each result
    - Best result adopted, others discarded
    - All experiments recorded in Experiment Ledger
 6. Continue until all critical issues are resolved.
@@ -167,3 +166,5 @@ If QA finds CRITICAL or HIGH issues:
 
 To run docs verification after changes, load the docs skill and use docs-verify.
 This hook is opt-in; skip by default.
+
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

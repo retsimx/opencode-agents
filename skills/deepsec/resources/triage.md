@@ -97,7 +97,6 @@ Route by **the layer of the vulnerable file**, judged from each finding's `fileP
 | Backend / server / API | `backend` |
 | Frontend / web client | `frontend` |
 | Mobile / native client | `mobile` |
-| IaC / cloud / network | `tf-infra` |
 | Database / data model | `db` |
 | CI / workflow / supply chain | `dev-workflow` |
 | Documentation drift surfaced by the run | `docs` |

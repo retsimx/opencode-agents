@@ -12,12 +12,12 @@ everything inline. Each subagent gets a focused context, reducing dilution and
 preventing scope creep. Subagents are cheap — use them liberally.
 
 **Note:** The `task` tool must be explicitly allowed in your OpenCode
-configuration for subagents. Add to `opencode.json`:
+configuration for subagents. Grant the `task` permission to whichever
+subagent types your routing policy uses. Add to `opencode.json`:
 ```json
 {
   "agent": {
-    "general": { "permission": { "task": "allow" } },
-    "explore": { "permission": { "task": "allow" } }
+    "<your-subagent-type>": { "permission": { "task": "allow" } }
   }
 }
 ```
@@ -41,7 +41,7 @@ All subagent task deliverables follow the 4-part formula:
 .agents/results/{type}-{role}-{taskSlug}-{sessionId}[-{index}].md
 ```
 - `{type}`: Artifact type (`result`, `progress`, `review`, `adr`, `test`, `benchmark`).
-- `{role}`: Subagent role (`backend`, `frontend`, `qa`, `reviewer`, `pm`, `designer`, etc.).
+- `{role}`: Subagent role (`backend`, `frontend`, `review`, `plan`, `design`, etc.).
 - `{taskSlug}`: Task slug (e.g., `auth-jwt`, `cart-api`, `checkout-flow`).
 - `{sessionId}`: Session identifier (resolved via priority below).
 - `[-{index}]`: Optional numeric sequence suffix for multi-part deliverables.
@@ -68,7 +68,7 @@ Then ALWAYS append a run suffix: `SESSION_ID = <slug>-<YYYYMMDD-HHMMSS>-<rand4he
 
 To prevent orchestrator context degradation, orchestrators MUST operate on a **pass-by-reference** model:
 1. **Never Ingest Full Artifacts**: The orchestrator must NOT read full subagent result files into its context window.
-2. **Downstream Injection**: When a downstream subagent (e.g. QA, Reviewer, dependent Implementation agent) requires outputs from an upstream task, the orchestrator passes the upstream artifact file path (`file:///.../.agents/results/{type}-{role}-{taskSlug}-{sessionId}.md`) as a reference in `UPSTREAM_ARTIFACTS`.
+2. **Downstream Injection**: When a downstream subagent (e.g. Reviewer, dependent Implementation agent) requires outputs from an upstream task, the orchestrator passes the upstream artifact file path (`file:///.../.agents/results/{type}-{role}-{taskSlug}-{sessionId}.md`) as a reference in `UPSTREAM_ARTIFACTS`.
 3. **Direct Subagent Ingestion**: Downstream subagents view and parse upstream deliverable files directly in their isolated contexts.
 4. **4-Line Ingestion Only**: The orchestrator context receives ONLY the concise 4-line chat completion summary from each subagent.
 

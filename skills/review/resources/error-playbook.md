@@ -1,4 +1,4 @@
-# QA Agent - Error Recovery Playbook
+# review agent - Error Recovery Playbook
 
 When you encounter a failure during review, follow these recovery steps.
 Do NOT stop or ask for help until you have exhausted the playbook.
@@ -92,4 +92,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **False positive prevention**: If finding is uncertain, lower severity and mark "verify manually"
 - **Blocked**: If no progress after 5 turns, save current state, `Status: blocked`
-- **No code modification**: QA only reports; delegate code changes to the appropriate agent
+- **No code modification**: the review agent only reports; delegate code changes to the appropriate agent

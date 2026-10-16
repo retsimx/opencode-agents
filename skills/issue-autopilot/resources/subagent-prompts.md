@@ -6,12 +6,12 @@ This resource provides standardized prompt templates for Task subagents dispatch
 
 ---
 
-## 1. SCM Specialist Subagent Prompt (Phase 4 Step 2)
+## 1. SCM Subagent Prompt (Phase 4 Step 2)
 
 Dispatched via the subagent tool to generate Conventional Commit messages and draft PR descriptions based on worktree diffs.
 
 ```markdown
-Role: "SCM Specialist Agent"
+Role: "scm agent"
 Prompt:
 Load the scm skill (.agents/skills/scm/SKILL.md) and read the Conventional Commits section.
 WORKTREE: <$WORKTREE>
@@ -34,7 +34,7 @@ OUTPUT_FILE: <$RESULTS_DIR>/result-scm-ship-<$SESSION_ID>.md
 6. Write technical summary to OUTPUT_FILE and verify it exists on disk.
 
 Return ONLY the standard 4-line chat completion summary:
-### Task Complete: SCM Specialist Agent — Commit & PR Preparation
+### Task Complete: scm agent — Commit & PR Preparation
 - **Status**: SUCCESS | BLOCKED | FAILED
 - **Summary**:
   - Title: <commit title>

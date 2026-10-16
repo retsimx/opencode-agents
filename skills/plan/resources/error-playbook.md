@@ -1,4 +1,4 @@
-# PM Agent - Error Recovery Playbook
+# plan agent - Error Recovery Playbook
 
 When you encounter a failure during planning, follow these recovery steps.
 
@@ -64,7 +64,7 @@ When you encounter a failure during planning, follow these recovery steps.
 
 ## Memory / Quota Issues
 
-Same as backend-agent playbook: See relevant sections.
+Same as the backend agent playbook: See relevant sections.
 
 ---
 
@@ -72,4 +72,4 @@ Same as backend-agent playbook: See relevant sections.
 
 - **Plans are not code**: They don't need to be perfect. Agents can adjust during execution
 - **Blocked**: If no progress after 5 turns, save current state, `Status: blocked`
-- **No code writing**: PM only plans; delegate implementation to other agents
+- **No code writing**: the plan agent only plans; delegate implementation to other agents

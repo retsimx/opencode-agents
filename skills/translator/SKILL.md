@@ -485,3 +485,4 @@ rg "<source-key-or-term>" .
 - Context loading: `.agents/skills/_shared/core/context-loading.md`
 - Tool compatibility (cross-harness tool names): `.agents/rules/tool-compatibility.md`
 - Quality principles: `.agents/skills/_shared/core/quality-principles.md`
+- Routing: `.agents/skills/_shared/core/skill-routing.md`

@@ -1,4 +1,4 @@
-# PM Agent - Examples
+# plan agent - Examples
 
 ## Example 1: Simple TODO App
 

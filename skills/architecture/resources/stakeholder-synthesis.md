@@ -22,7 +22,6 @@ Typical pairings:
 - plan: business constraints, scope, product priorities
 - backend: service/API/domain concerns
 - db: data ownership, schema, consistency
-- tf-infra: deployment and operational architecture
 - review: risk, performance, security, testability
 - frontend / mobile: client integration and complexity costs
 
@@ -50,7 +49,7 @@ Include a section like:
 
 ```md
 ## Stakeholder Perspectives
-- PM: ...
+- Plan: ...
 - Backend: ...
 - DB: ...
 

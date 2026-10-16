@@ -10,8 +10,8 @@ Inspired by autoresearch's val_bpb metric: objective, comparable, and trackable 
 | Dimension | Weight | Measurement Method | Measurer |
 |-----------|--------|--------------------|----------|
 | **Correctness** | 0.30 | Test pass rate (passed / total) | Agent runs `test` via Bash |
-| **Security** | 0.25 | OWASP checklist completion rate | QA Agent review |
-| **Performance** | 0.15 | No regression vs baseline (estimate) | Agent or QA estimate |
+| **Security** | 0.25 | OWASP checklist completion rate | review agent |
+| **Performance** | 0.15 | No regression vs baseline (estimate) | Agent or review estimate |
 | **Coverage** | 0.15 | Test coverage % from tool output | Agent runs coverage via Bash |
 | **Consistency** | 0.15 | Lint + type errors (100 - error_count, min 0) | Agent runs lint/type-check via Bash |
 
@@ -57,9 +57,9 @@ Quality Score is measured **on demand**, not at every step. Load `.agents/skills
 | Checkpoint | Trigger | Measurer |
 |-----------|---------|----------|
 | IMPL baseline | After implementation complete, before VERIFY | Orchestrator (inline) or impl agent |
-| Post-VERIFY | After QA verification complete | QA Agent |
+| Post-VERIFY | After review verification complete | review agent |
 | Post-REFINE | After refinement complete | Debug Agent or Orchestrator |
-| Final | Before SHIP_GATE | QA Agent |
+| Final | Before SHIP_GATE | review agent |
 
 ---
 

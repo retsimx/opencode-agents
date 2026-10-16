@@ -36,8 +36,7 @@ Design, review, optimize, and document SQL, NoSQL, vector, and retrieval-oriente
 
 ### When NOT to use
 - API-only implementation without schema impact -> use Backend Agent
-- Infra provisioning only -> use TF Infra Agent
-- Final quality/security audit -> use QA Agent
+- Final quality/security audit -> use review agent
 
 ### Expected inputs
 - Business entities, events, access patterns, volume, latency, retention, and recovery targets

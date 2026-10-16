@@ -152,7 +152,7 @@ Secondary considerations:
   - resources/anti-patterns.md §Section C — avoid sidecar as default on k8s; use DaemonSet
 
 Delegation target:
-  - No single vendor skill (OSS self-host); use tf-infra for Terraform + /search for component docs
+  - No single vendor skill (OSS self-host); use /search for component docs
 
 Checklist items to verify:
   - [ ] memory_limiter processor placed before batch processor in pipeline

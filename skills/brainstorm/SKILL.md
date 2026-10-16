@@ -30,10 +30,10 @@ Explore user intent, constraints, and alternative approaches before planning or 
 - Before invoking `/plan` for complex or ambiguous requests
 
 ### When NOT to use
-- Requirements are already clear and well-defined -> use plan-agent directly
+- Requirements are already clear and well-defined -> use the plan agent directly
 - Implementing actual code -> delegate to specialized agents
-- Performing code reviews -> use QA Agent
-- Debugging existing issues -> use debug-agent
+- Performing code reviews -> use review agent
+- Debugging existing issues -> use the debug agent
 
 ### Expected inputs
 - Early idea, ambiguous goal, product concept, design question, or set of constraints
@@ -49,7 +49,7 @@ Explore user intent, constraints, and alternative approaches before planning or 
 
 ### Dependencies
 - Shared context loading, reasoning templates, clarification protocol, quality principles, and skill routing
-- Downstream PM workflow for task decomposition after design approval
+- Downstream plan workflow for task decomposition after design approval
 
 ### Control-flow features
 - Branches by ambiguity, user answers, approach comparison, and approval gates
@@ -71,7 +71,7 @@ Explore user intent, constraints, and alternative approaches before planning or 
 5. **FINALIZE**: Save design and transition to planning when appropriate.
 
 ### Transitions
-- If requirements become clear and implementation-ready, transition to PM planning.
+- If requirements become clear and implementation-ready, transition to planning (the `plan` skill).
 - If user rejects an approach, revise before moving to detailed design.
 - If implementation pressure appears early, defer it until design approval.
 

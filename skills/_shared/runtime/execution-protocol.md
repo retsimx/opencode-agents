@@ -45,7 +45,7 @@ When spawned via the OpenCode `task` tool or subagent delegation, follow this pr
 
 ## Bug Closure Gate
 
-Whenever `debug-agent` or any agent finishes investigating and resolving a bug:
+Whenever the debug agent or any agent finishes investigating and resolving a bug:
 1. **Save Post-Mortem**: Document root cause, reproduction, and fix in `.agents/results/bugs/` (using bug report template).
 2. **Extract 1-Line Guardrail**: Extract a concise 1-line operational rule into the relevant domain checklist (`docs/checklists/<domain>.md`).
    - The rule must strictly conform to the standardized regex pattern:
@@ -102,7 +102,7 @@ All subagent coordination, deliverables, reviews, and progress tracking MUST fol
    - Every subagent task MUST write its full, detailed deliverables (code analysis, test evidence, architecture decisions, review matrices, checklists with line citations) to an explicit markdown file at:
      `.agents/results/{type}-{role}-{taskSlug}-{sessionId}[-{index}].md`
      - `{type}`: Artifact type (e.g., `result`, `progress`, `review`, `adr`, `test`, `benchmark`).
-     - `{role}`: Agent role identifier (e.g., `backend`, `frontend`, `qa`, `reviewer`, `pm`, `designer`).
+     - `{role}`: Agent role identifier (e.g., `backend`, `frontend`, `review`, `plan`, `design`).
      - `{taskSlug}`: Concise kebab-case task identifier (e.g., `auth-jwt`, `cart-api`, `perf-audit`).
      - `{sessionId}`: Session identifier (e.g., `issue-104-20260828-160543-a3f9`, `conv-97e0b488-20260828-160543-a3f9`, `session-20260828-160543-a3f9`) — always `<slug>-<YYYYMMDD-HHMMSS>-<rand4hex>`.
      - `[-{index}]`: Optional numeric index when multiple artifacts or turns are produced.

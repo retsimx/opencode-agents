@@ -23,9 +23,9 @@ designated `result_file`.
 
 ```json
 {
-  "role": "qa-agent",
+  "role": "review",
   "task_id": "ses_<harness-returned-id>",
-  "result_file": ".agents/results/result-qa-<taskSlug>-<sessionId>.md",
+  "result_file": ".agents/results/result-review-<taskSlug>-<sessionId>.md",
   "status": "complete"
 }
 ```
@@ -44,7 +44,7 @@ subagent:
 - [ ] The subagent's `status` is `complete` (not `pending`/`running`/`failed`).
 - [ ] The subagent's `result_file` exists on disk and is non-empty.
 - [ ] The `result_file` contains the required section marker for that role
-      (e.g. `# Section 1` for qa-agent, `# Section 3` for deep-reviewer).
+      (e.g. `# Section 1` for the review agent, `# Section 3` for the deep-review subagent).
 
 Mechanical check (run from the repo root; substitute your state file path):
 

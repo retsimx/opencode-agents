@@ -1,6 +1,6 @@
 # Evaluator Tuning Protocol
 
-QA prompts do not work well out of the box. Reliable evaluation requires
+Review prompts do not work well out of the box. Reliable evaluation requires
 iterative refinement based on observed judgment errors.
 (ref: Anthropic harness design, "several rounds of development loop necessary")
 
@@ -22,7 +22,7 @@ Sessions accumulate EA events in `session-metrics-{sessionId}.md` (glob `.agents
     ↓
 [4] User reviews and approves patches
     ↓
-[5] Patches applied to QA checklist.md / execution-protocol.md
+[5] Patches applied to review checklist.md / execution-protocol.md
     ↓
 [6] Validation: Next 3 sessions, check if same error type recurs
     ↓ Recurs → re-enter at [2] with stronger fix
@@ -49,7 +49,7 @@ Maintained in this file. Record each tuning action:
 
 ```markdown
 ### {YYYY-MM-DD}: {one-line summary}
-- **Error observed**: {what QA got wrong, with EA event type}
+- **Error observed**: {what the review agent got wrong, with EA event type}
 - **Root cause**: {why the prompt allowed this}
 - **Patch applied**: {file + change description}
 - **Validation**: {pending | confirmed in session {id} | failed — re-tuned}
@@ -61,12 +61,12 @@ Maintained in this file. Record each tuning action:
 
 When `good_catch` events accumulate (>= 5 in rolling window):
 
-1. Identify which QA instruction or checklist item led to the catch
+1. Identify which review instruction or checklist item led to the catch
 2. Generalize: Can this pattern apply to other domains?
 3. If yes: Propose addition to `.agents/skills/_shared/core/common-checklist.md`
 4. Record in tuning log as positive reinforcement
 
-This prevents tuning drift toward pure skepticism; QA must also know what it does well.
+This prevents tuning drift toward pure skepticism; the review agent must also know what it does well.
 
 ---
 
@@ -76,7 +76,7 @@ This prevents tuning drift toward pure skepticism; QA must also know what it doe
 |--------|------|
 | `.agents/skills/_shared/core/session-metrics.md` (this directory) | EA event source (automatic collection) |
 | `retro` | Aggregation + tuning report generation (semi-automated) |
-| `docs/checklists/qa.md` & `.agents/results/bugs/` | QA Evaluation guardrails and post-mortems for persistent patterns |
+| `docs/checklists/qa.md` & `.agents/results/bugs/` | Review-evaluation guardrails and post-mortems for persistent patterns |
 | `.agents/skills/review/resources/checklist.md` | Primary patch target for missed checks |
 | `.agents/skills/review/resources/execution-protocol.md` | Patch target for process/severity issues |
 | `.agents/skills/_shared/core/common-checklist.md` (this directory) | Propagation target for generalized good patterns |

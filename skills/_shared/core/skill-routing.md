@@ -91,7 +91,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
    - Orchestrates the full lifecycle inside an isolated worktree:
      - Invokes `brainstorm` (Phase 1) for architecture discovery and design.
      - Invokes `plan` (Phase 2) for task decomposition and contract specification.
-     - Invokes `ultrawork` in **Plan-Ingestion Mode** (Phase 3), bypassing redundant PM re-planning and directly executing IMPL -> VERIFY -> REFINE.
+     - Invokes `ultrawork` in **Plan-Ingestion Mode** (Phase 3), bypassing redundant Phase 1 re-planning and directly executing IMPL -> VERIFY -> REFINE.
      - Enforces a mandatory **Fast-Fail Local CI Sanity Gate** (Phase 4) before creating commits or pushing.
      - Leverages `scm` conventions (Phase 4) for atomic Conventional Commits and draft PR/MR generation.
      - Generates and posts a plain-English issue comment (Phase 5).
@@ -105,11 +105,11 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 
 ---
 
-## Review & QA Domain Boundaries & Cross-Routing
+## Review Domain Boundaries & Cross-Routing
 
 | Skill | Primary Purpose | Scope & Input Mode | Output / Deliverables | Mutates PR? |
 |-------|-----------------|--------------------|-----------------------|-------------|
-| **`review`** | Broad QA, OWASP Top 10 security, performance, accessibility (WCAG 2.1 AA), code quality, ISO/IEC 25010 framing | Local repo, staging diff, or full workspace | Full QA report (`result-review-*.md`), optional fix-verify loop | No |
+| **`review`** | Broad review, OWASP Top 10 security, performance, accessibility (WCAG 2.1 AA), code quality, ISO/IEC 25010 framing | Local repo, staging diff, or full workspace | Full review report (`result-review-*.md`), optional fix-verify loop | No |
 | **`deep-review`** | Deterministic 9-dimension post-implementation analysis (correctness, regressions, state/data, UI, tests, dead code, security, perf, DRY) | Bounded diff, commit SHA, file list | Structured 9-dimension report (`result-deep-review-*.md`) | No |
 | **`forge-review`** | End-to-end Forge PR/MR audit against issue requirements with provider (`gh`/`glab`) integration | Remote PR/MR number, URL, or branch | PR Scorecard, inline suggestion comments, review deliverable | No (read + comment only) |
 | **`gardener-sow`** | Open one evidence-backed draft micro-improvement | Target repo + gardener contract | Draft `chore(gardener):` PR on `gardener/run-*` | Yes (worktree + draft PR) |
@@ -120,7 +120,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 1. **Forge PR/MR Context & Comments (`forge-review`)**:
    - Route when the user specifies a PR/MR number (e.g. `forge-review #154`, `review PR #42`, `audit MR !10`), asks to review a PR against an issue, or wants inline review comments generated for GitHub/GitLab.
    - Delegates diff inspection and deep regression analysis to `deep-review` subagents while orchestrating provider interactions (`gh`/`glab`), scorecard generation, and comment formatting.
-2. **Local Codebase & Pre-Ship QA (`review`)**:
+2. **Local Codebase & Pre-Ship Review (`review`)**:
    - Route for general pre-commit or pre-ship checks across the local workspace, security audits, accessibility audits, or fix-verify loops with domain agents.
 3. **Pure Bounded Scope Analysis (`deep-review`)**:
    - Route when analyzing a strict, explicit diff/commit/patch without forge provider interactions, or when invoked as an analysis subagent by `forge-review` or implementation workflows.
@@ -161,21 +161,3 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | Architecture change needed | architecture → plan |
 | Performance issue found (during implementation) | Current agent fixes, debug if severe |
 | API contract mismatch | orchestrate re-runs backend |
-
----
-
-## Turn Limit Guide by Agent
-
-| Agent | Default Turns | Max Turns (including retries) |
-|-------|--------------|------------------------------|
-| plan | 10 | 15 |
-| backend | 20 | 30 |
-| frontend | 20 | 30 |
-| mobile | 20 | 30 |
-| architecture | 12 | 18 |
-| debug | 15 | 25 |
-| review | 15 | 20 |
-| forge-review | 15 | 25 |
-| deep-review | 10 | 15 |
-| ultrawork | 25 | 40 |
-| issue-autopilot | 30 | 50 |

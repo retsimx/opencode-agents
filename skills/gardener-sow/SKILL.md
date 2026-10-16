@@ -201,3 +201,5 @@ Sections: **Improvement**, **Safety**, **Verification**, **Grug**, optional
 | `resources/pr-body-template.md` | Public PR body |
 | `resources/acme-examples.md` | Good/bad proposal examples |
 | `resources/exclusions.md` | Generic path exclusions |
+
+- Routing: `.agents/skills/_shared/core/skill-routing.md`
