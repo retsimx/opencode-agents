@@ -82,7 +82,7 @@ Lightweight expected behaviors for validation. Not executable tests.
 ## S14 — All clear
 
 - Setup: all in-scope PRs healthy (or only pending CI / no actions)
-- Expect: report `all_clear`; **`sleep 1800`**; then exit
+- Expect: report `all_clear`; **`sleep 3600`**; then exit
 - Must not: sleep after a successful tend action (that would throttle a backlog)
 
 ## S15 — Assessment second failure

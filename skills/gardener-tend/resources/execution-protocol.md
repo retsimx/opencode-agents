@@ -294,7 +294,7 @@ asks to reject or close.
 If no PR needs action:
 
 1. Report `all_clear`.
-2. **`sleep 1800`** (thirty minutes) so continuous outer loops do not burn turns
+2. **`sleep 3600`** (one hour) so continuous outer loops do not burn turns
    while the queue is empty.
 3. Exit.
 
