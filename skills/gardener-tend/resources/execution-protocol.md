@@ -294,8 +294,10 @@ asks to reject or close.
 If no PR needs action:
 
 1. Report `all_clear`.
-2. **`sleep 3600`** (one hour) so continuous outer loops do not burn turns
-   while the queue is empty.
+2. **`sleep 3600`** (one hour), unconditionally. You cannot tell whether this
+   run came from an outer loop, a scheduler, or a human shell; skipping the
+   sleep makes an outer loop re-invoke you immediately (a hot loop) and burns
+   tokens for nothing.
 3. Exit.
 
 If this invocation **did** perform a tend action, exit immediately with **no**

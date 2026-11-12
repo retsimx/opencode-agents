@@ -84,6 +84,8 @@ Lightweight expected behaviors for validation. Not executable tests.
 - Setup: all in-scope PRs healthy (or only pending CI / no actions)
 - Expect: report `all_clear`; **`sleep 3600`**; then exit
 - Must not: sleep after a successful tend action (that would throttle a backlog)
+- Must not: skip or shorten the sleep based on assumptions about the invocation
+  (there is no "interactive" mode to detect; skipping creates a hot loop)
 
 ## S15 — Assessment second failure
 

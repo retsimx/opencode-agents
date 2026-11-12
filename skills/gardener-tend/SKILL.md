@@ -15,8 +15,9 @@ description: >
 
 Perform **at most one** maintenance action on the oldest open gardener PR that
 needs work, then exit. If there is a backlog, exit **without** sleeping so the
-outer loop can start the next shot immediately. Sleep **only** on `all_clear`
-(nothing to tend) so idle polling does not burn continuous agent turns.
+caller can start the next shot immediately. Sleep **always** on `all_clear`
+(nothing to tend) so idle polling does not burn turns. The sleep is
+unconditional: you cannot detect how this run was started.
 
 Load before acting:
 
@@ -123,9 +124,12 @@ On the first actionable item, perform that single action and exit.
    Vague comments → reply asking clarification (still one action), exit.
 5. **PROMOTE** — draft, mergeable, CI complete+green, no actionable unresolved
    comments, fresh assessment of exact head passes → `tend_promote`.
-6. **ALL_CLEAR** — no PR needed action → report `all_clear`, **`sleep 3600`**,
-   then exit. Do **not** sleep after a real tend action (close / rebase / CI /
-   comment / promote) — exit immediately so a queue drains fast.
+6. **ALL_CLEAR** — no PR needed action → report `all_clear`, run **`sleep
+   3600`**, then exit. The sleep is unconditional: you cannot tell whether this
+   run came from a loop, a scheduler, or a human, and skipping it makes the
+   caller re-invoke you immediately (a hot loop). Do **not** sleep after a real
+   tend action (close / rebase / CI / comment / promote) — exit immediately so
+   a queue drains fast.
 
 ### Transitions
 
@@ -231,8 +235,9 @@ On the first actionable item, perform that single action and exit.
 8. **Capture head SHA** before content work; push `--force-with-lease`; abort on unexpected remote head.
 9. **Non-interactive git only** — `GIT_EDITOR=true` / `GIT_SEQUENCE_EDITOR=true` (or equivalent).
 10. **Local checks** via discovery procedure only — no Poetry/Ruff/coverage hardcoding.
-11. **Idle sleep only** — `sleep 3600` solely on `all_clear`. Never sleep after
-    a completed tend action.
+11. **Idle sleep is mandatory** — `sleep 3600` on every `all_clear`, never
+    skipped or shortened for any reason (no assumptions about how you were
+    invoked). Never sleep after a completed tend action.
 12. **Verification can fail** — stop without push; never claim verification cannot fail.
 13. **Dispatch gate** — delegated implement/verify/revise/assess outputs must pass
     `.agents/skills/_shared/runtime/subagent-dispatch-gate.md` before consumption.
