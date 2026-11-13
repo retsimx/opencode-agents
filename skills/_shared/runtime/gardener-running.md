@@ -34,8 +34,9 @@ done
 
 One maintenance action on the oldest gardener PR that needs work, then exit.
 When there is a backlog, each shot exits immediately so the next starts with
-no delay. When there is nothing to tend, the skill itself `sleep 300`s before
-exit (idle backoff only — do not add a blanket sleep in this wrapper).
+no delay. When there is nothing to tend, the skill itself sleeps for one hour
+(`sleep 3600` with the shell tool's timeout raised — idle backoff only; do not
+add a blanket sleep in this wrapper).
 
 ```bash
 while :; do
