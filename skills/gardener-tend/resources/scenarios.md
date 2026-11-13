@@ -82,8 +82,11 @@ Lightweight expected behaviors for validation. Not executable tests.
 ## S14 — All clear
 
 - Setup: all in-scope PRs healthy (or only pending CI / no actions)
-- Expect: report `all_clear`; **`sleep 3600`**; then exit
+- Expect: report `all_clear`; **`sleep 3600`** with shell `timeout: 3900000`;
+  then exit
 - Must not: sleep after a successful tend action (that would throttle a backlog)
+- Must not: skip or shorten the sleep, or run it with the default 120000 ms
+  shell timeout — a truncated sleep is indistinguishable from a finished one
 - Must not: skip or shorten the sleep based on assumptions about the invocation
   (there is no "interactive" mode to detect; skipping creates a hot loop)
 

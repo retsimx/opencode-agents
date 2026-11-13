@@ -125,11 +125,15 @@ On the first actionable item, perform that single action and exit.
 5. **PROMOTE** — draft, mergeable, CI complete+green, no actionable unresolved
    comments, fresh assessment of exact head passes → `tend_promote`.
 6. **ALL_CLEAR** — no PR needed action → report `all_clear`, run **`sleep
-   3600`**, then exit. The sleep is unconditional: you cannot tell whether this
-   run came from a loop, a scheduler, or a human, and skipping it makes the
-   caller re-invoke you immediately (a hot loop). Do **not** sleep after a real
-   tend action (close / rebase / CI / comment / promote) — exit immediately so
-   a queue drains fast.
+   3600`** with the shell tool's `timeout` set to at least **`3900000` ms**
+   (the 120000 ms foreground default would kill it after two minutes and you
+   would exit thinking it finished), then exit. The sleep is unconditional:
+   you cannot tell whether this run came from a loop, a scheduler, or a human,
+   and skipping it makes the caller re-invoke you immediately (a hot loop). If
+   the timeout value is rejected or truncated, sleep in 600-second chunks
+   (`timeout: 660000`) until a full hour has passed. Do **not** sleep after a
+   real tend action (close / rebase / CI / comment / promote) — exit
+   immediately so a queue drains fast.
 
 ### Transitions
 
@@ -235,9 +239,11 @@ On the first actionable item, perform that single action and exit.
 8. **Capture head SHA** before content work; push `--force-with-lease`; abort on unexpected remote head.
 9. **Non-interactive git only** — `GIT_EDITOR=true` / `GIT_SEQUENCE_EDITOR=true` (or equivalent).
 10. **Local checks** via discovery procedure only — no Poetry/Ruff/coverage hardcoding.
-11. **Idle sleep is mandatory** — `sleep 3600` on every `all_clear`, never
-    skipped or shortened for any reason (no assumptions about how you were
-    invoked). Never sleep after a completed tend action.
+11. **Idle sleep is mandatory** — `sleep 3600` on every `all_clear` with the
+    shell `timeout` set to ≥ `3900000` ms, never skipped, shortened, or run
+    with the 120000 ms default for any reason (no assumptions about how you
+    were invoked; a truncated sleep looks identical to a finished one). Never
+    sleep after a completed tend action.
 12. **Verification can fail** — stop without push; never claim verification cannot fail.
 13. **Dispatch gate** — delegated implement/verify/revise/assess outputs must pass
     `.agents/skills/_shared/runtime/subagent-dispatch-gate.md` before consumption.

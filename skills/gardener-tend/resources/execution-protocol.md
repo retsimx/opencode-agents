@@ -294,10 +294,13 @@ asks to reject or close.
 If no PR needs action:
 
 1. Report `all_clear`.
-2. **`sleep 3600`** (one hour), unconditionally. You cannot tell whether this
-   run came from an outer loop, a scheduler, or a human shell; skipping the
-   sleep makes an outer loop re-invoke you immediately (a hot loop) and burns
-   tokens for nothing.
+2. **`sleep 3600`** (one hour), unconditionally, **with the shell tool's
+   `timeout` set to at least `3900000` ms**. The foreground default is 120000 ms
+   (two minutes): without an explicit timeout the call is killed after two
+   minutes and you will wrongly believe the sleep finished and exit, causing a
+   hot loop. If this build rejects or truncates that value, sleep in
+   600-second chunks (`sleep 600`, `timeout: 660000`) until a full hour has
+   passed, checking each result before exiting.
 3. Exit.
 
 If this invocation **did** perform a tend action, exit immediately with **no**
